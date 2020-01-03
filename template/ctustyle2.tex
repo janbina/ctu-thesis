@@ -2,6 +2,9 @@
 % ---------------------------------------------------------------------
 % Petr Olsak  Feb. 2018,  (derived from ctustyle.tex, Jan. 2015) 
 
+\def\imgdir{template/img/}
+\def\fontdir{template/font/}
+
 \def\ctustyleversion{beta(g) Jul.2019}
 
 \message{CTUstyle2: Thesis at Czech Technical University in Prague, 
@@ -194,30 +197,32 @@
 
 \ifx\font\unicoded  % XeTeX or LuaTex is used
 
-   \font\tenbf  = "[Technika-Bold]:\fontfeatures"   
-   \font\tenbi  = "[Technika-BoldItalic]:\fontfeatures"      
-   \font\tenss  = "[Technika-Book]:\fontfeatures"     
-   \font\tenssi = "[Technika-BookItalic]:\fontfeatures" 
-   \font\tensbf = "[Technika-Regular]:\fontfeatures" 
-   \font\tensbi = "[Technika-Italic]:\fontfeatures" 
+   \font\tenbf  = "[\fontdir Technika-Bold]:\fontfeatures"   
+   \font\tenbi  = "[\fontdir Technika-BoldItalic]:\fontfeatures"      
+   \font\tenss  = "[\fontdir Technika-Book]:\fontfeatures"     
+   \font\tenssi = "[\fontdir Technika-BookItalic]:\fontfeatures" 
+   \font\tensbf = "[\fontdir Technika-Regular]:\fontfeatures" 
+   \font\tensbi = "[\fontdir Technika-Italic]:\fontfeatures" 
 
    \let\ffnamegen=\undefined
 
 \else  % pdfTeX us used
 
-   \pdfmapline{=technika Technika-Regular "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-Regular.pfb}
-   \pdfmapline{=technika-it Technika-Italic "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-Italic.pfb}
-   \pdfmapline{=technika-bk Technika-Book "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-Book.pfb}
-   \pdfmapline{=technika-bkit Technika-BookItalic "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-BookItalic.pfb}
-   \pdfmapline{=technika-bf Technika-Bold "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-Bold.pfb}
-   \pdfmapline{=technika-bi Technika-BoldItalic "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-BoldItalic.pfb}
+   \ctustyleERR {Use luatex, i dont know how to configure those fonts in different directory}
 
-   \font\tenbf=technika-bf     
-   \font\tenbi=technika-bi     
-   \font\tenss=technika-bk     
-   \font\tenssi=technika-bkit  
-   \font\tensbf=technika       
-   \font\tensbi=technika-it    
+   % \pdfmapline{=technika Technika-Regular "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-Regular.pfb}
+   % \pdfmapline{=technika-it Technika-Italic "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-Italic.pfb}
+   % \pdfmapline{=technika-bk Technika-Book "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-Book.pfb}
+   % \pdfmapline{=technika-bkit Technika-BookItalic "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-BookItalic.pfb}
+   % \pdfmapline{=technika-bf Technika-Bold "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-Bold.pfb}
+   % \pdfmapline{=technika-bi Technika-BoldItalic "XL2techencoding ReEncodeFont" <xl2tech.enc <Technika-BoldItalic.pfb}
+
+   % \font\tenbf=technika-bf     
+   % \font\tenbi=technika-bi     
+   % \font\tenss=technika-bk     
+   % \font\tenssi=technika-bkit  
+   % \font\tensbf=technika       
+   % \font\tensbi=technika-it    
 
 \fi
 
@@ -367,7 +372,7 @@
       \Blue \vrule height 230mm width 4mm \Black \hss 
       \vbox to230mm{\advance\hsize by-8mm \parindent=0pt
          \picw=3cm \def\picdir{}\titbf
-         \line{\inspic{ctulogo-\ifx\Blue\Grey bw-\fi new.pdf} \hss
+         \line{\inspic{\imgdir ctulogo-\ifx\Blue\Grey bw-\fi new.pdf} \hss
             \vbox{\advance\hsize by-34mm
                \baselineskip=17pt\tenbf\thefontsize[15] 
                \Blue \mtext{ctu}\par
