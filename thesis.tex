@@ -1,3 +1,4 @@
+%! Suppress = DiscouragedUseOfDef
 \input template/ctustyle2
 \worktype [M/EN]
 \faculty {F8}
@@ -21,6 +22,19 @@
 
 \draft
 \parskip=\medskipamount \parindent=0pt
+
+% numbered listings
+\sdef{mt:l:en}{Listing}
+\newcount\lnum
+\def\thelnum{\thechapnum.\the\lnum}
+\def\athelnum{.}
+
+% codeblock from file with caption and label
+\def\codeblock#1#2#3 {
+    \verbinput (-) listings/#3
+    \clabel[#1]{#2}
+    \caption/l #2
+}
 
 \makefront
 
