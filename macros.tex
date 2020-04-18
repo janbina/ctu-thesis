@@ -20,3 +20,8 @@
 \font\ectenrm=ecrm1000 % this has the underscore that's mapped to its usual meaning
 %\catcode`_=\active
 %\let_\activeunderscore
+
+% heading, just finish par, make it semibold and print newline - maybe add some spacing as well?
+\def\heading #1 {
+    \par{\sbf #1} \nl
+}
