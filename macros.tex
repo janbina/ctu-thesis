@@ -12,3 +12,11 @@
     \clabel[#1]{#2}
     \caption/l #2
 }
+
+% active underscore
+% https://tex.stackexchange.com/a/199462
+\def\uns{\relax\ifmmode\sb\else\expandafter\copyableunderscore\fi}
+\def\copyableunderscore{{\ectenrm\char`\_}}
+\font\ectenrm=ecrm1000 % this has the underscore that's mapped to its usual meaning
+%\catcode`_=\active
+%\let_\activeunderscore
