@@ -1,0 +1,197 @@
+\label[chap:xsystem]
+\chap The X Window system
+The X Window System is a network transparent window system which runs on a wide range of computing and graphics machines.
+It should be relatively straightforward to build the X.Org Foundation software distribution on most ANSI C and POSIX compliant systems.
+Commercial implementations are also available for a wide range of platforms.~\cite[xman]
+
+In this chapter, we will cover how X server works, with focus on the communication with its clients.
+We will not cover how the X server handles resources, color, graphics, text or input as it is not
+that important for window management.
+
+\sec History
+The X Window System was created in the mid-1980s at the Massachusetts Institute of Technology.
+In 1988, MIT formed a member-funded consortium to provide the technical and administrative leadership necessary
+to support further development of the X Window System.
+In 1992, MIT and the membership decided it was in their best interests to move the consortium out of MIT and create an independent, stand-alone organization.
+All rights to the X Window System were assigned by MIT to X Consortium, Inc. on January 1, 1994.
+On December 31, 1996 the X Consortium, Inc. closed its doors and all rights to the X Window System were assigned to The Open Group (then known as the Open Software Foundation).
+The X.Org Foundation was formed in 2004 as the successor to the X.Org Group at The Open Group.
+The purpose of the X.Org Foundation is to foster the development, evolution, and maintenance of the X Window System,
+a comprehensive set of vendor-neutral, system-architecture neutral, network-transparent windowing and user interface standards.
+Membership in the X.Org Foundation is free and open to anyone.
+The X.Org Foundation hosts a public git repository of the source code on \url{freedesktop.org}.~\cite[xman2]
+
+The X protocol has been at version 11 since September 1987.
+Many revisions has been released since then, the latest one being X11R7.7 released in June 2012.~\cite[xreleases]
+
+Version 11 is a complete window programming package.
+It offers much more flexibility in the areas of supported display
+features, window manager styles, and support for multiple screens and provides better performance than X Version 10.~\cite[xguide1]
+
+\sec Architecture
+X uses a client-server model.
+The server is the software that manages one display, keyboard, and mouse.
+The client is a program displaying on the screen and taking input from that keyboard and mouse.
+A client sends drawing drawing requests and information requests to the server, and the server sends back to the client user input,
+replies to information requests, and error reports.
+The client may be running on the same machine as the server or on a different machine over the network.~\cite[xguide0]
+
+The X Window System is not limited to a single client interacting with a single server.
+The most common scenario is that many clients are interacting with a single server, which is the case
+when several applications are displaying on a single display.
+Also, a single client can communicate with several servers.~\cite[xguide0]
+
+The server acts as an intermediary between user programs (called clients or applications) running on either the local or
+remote systems and the resources of the local system.
+The server performs the following tasks:~\cite[xguide1]
+\begitems
+* Allows access to the display by multiple clients.
+* Interprets network messages from clients.
+* Passes user input to the clients by sending network messages.
+* Does two−dimensional drawing -- graphics are performed by the display server rather than by the client.
+* Maintains complex data structures, including windows, cursors, fonts as resources that can
+be shared between clients and referred to simply by resource IDs. Server−maintained resources reduce the amount of
+data that has to be maintained by each client and the amount of data that has to be transferred over the network.
+\enditems
+
+The window manager is a client that has authority over the layout of windows on the screen.
+Certain X protocol features are used only by the window manager to enforce this authority.
+Otherwise, the window manager is just like any other client.~\cite[xguide0]
+
+\sec The X Protocol
+The X protocol is the true definition of the X Window System, and any code in any language that implements it is a true implementation of X.
+It is designed to communicate all the information necessary to operate a window system over a single asynchronous bidirectional stream of bytes.~\cite[xguide0]
+
+Below the X protocol, any lower layer of network can be used, as long as it is bidirectional
+and delivers bytes in sequence and unduplicated between a server process and a client process.
+When the client and server are on the same machine, the connection is based on local interprocess communication (IPC) channels,
+shared memory, or UNIX domain sockets.
+However, even local connections use the X protocol.~\cite[xguide0]
+
+\secc Message types
+The X protocol specifies four types of messages -- requests, replies, events and errors.
+While requests are sent from the client to the server, replies, events and errors are sent from the server to the client.
+\begitems
+* {\sbf Request} is generated by the client and sent to the server.
+It can carry wide variety of information, such as an inquiry about the current size of the window
+* {\sbf Reply} is sent from the server to the client in response to certain requests.
+Not all requests are answered by replies though -- only the ones that ask for information.
+* {\sbf Event} is sent from the server to the client.
+Contains information about a device action or about a side effect of a previous request.
+* {\sbf Error} is like an event, but it is handled differently by clients.
+\enditems
+There are two types of requests, depending whether it requires reply or not.
+Request that requires a reply is called a round-trip request.
+Round-trip requests should be minimized in client programs, because they lower performance in case of network delays.~\cite[xguide0]
+
+\sec Properties and atoms
+The developers of X needed a way to allow clients to communicate arbitrary data with each other, and they came up with properties.
+A property is a packet of information associated with a window, made available to all the clients running under a server.
+Properties are used by clients to store information that other clients might need or want to know and to read that information when set by other clients.~\cite[xguide1]
+
+Each property has a unique integer ID, called an atom, and name, which is an ASCII string.
+An atom is just a nickname for a property, so that arbitrary length property name strings
+do not have to be transferred back and forth between the client and the server.
+The atom is assigned by the server and will remain defined in the server even after the client that defined it terminates.
+A property is uniquely identified by an atom and a window.
+Each property has a type, which itself is a property.~\cite[xguide1]
+
+The data associated with a property can be stored as an array of 8−bit quantities, 16−bit quantities, or 32−bit quantities only.
+Properties can contain structures or raw data, but if one is to contain a structure of complex type, it must be encoded
+into one of the three byte formats by the program before being sent to the server and decoded when read from the server.~\cite[xguide1]
+
+Properties might be set even on the root window.
+Those properties remain defined even after the client that set them has exited.~\cite[xguide1]
+
+One of the most important uses of properties is to communicate information from applications to the window manager and vice versa.
+The application sets properties on its top−level window to specify for example the range of sizes it prefers for
+its top−level window and other information.
+Properties also communicate the other way; for example, the window manager specifies what sizes of icon pixmaps it prefers.~\cite[xguide1]
+
+In the figure~\ref[code:properties], you can see some of the properties retrieved from top-level window of an application.
+While properties like "WM_CLASS" and "WM_NAME" were set by the application itself,
+property "_NET_WM_ALLOWED_ACTIONS" is set exclusively by the window manager and
+property "_NET_WM_DESKTOP" could be set by both of them.
+We will talk discuss the meaning of some significant properties later on.
+
+\codeblock{code:properties}{Window properties.}{properties.txt}
+
+\sec Events
+An event is a packet of information that is generated by the server when certain actions occur.
+For example, moving the pointer or pressing the key is an event.
+Here are some other examples of events:~\cite[xguide1]
+\begitems
+* Mouse button pressed or released -- "ButtonPress", "ButtonRelease".
+* Window mapped or unmapped -- "MapNotify", "UnmapNotify".
+* Mouse crossing a window boundary -- "EnterNotify", "LeaveNotify".
+\enditems
+A client must select the event types that it wants the server to send for each window.
+For example, a scrollbar may require mouse button events but not keyboard events, while the main window of an
+application may require keyboard but not mouse events.
+One would select different event types on each of these windows.~\cite[xguide1]
+
+Every event contains the "type" field, which specifies the type of the event, "window" field, which
+is ID of the window to which the event was sent, and other information specific to the event type.~\cite[xguide1]
+
+Because events can arrive in any order, the structure of code to handle them is predetermined.
+Every program contains an event loop in which each event is received and processed.
+Normally this loop is implemented as an infinite while loop,
+beginning with an event−getting routine and followed by a switch statement that branches according to the event type.
+Within each branch for an event type, there may be additional branches corresponding to the window in which the event
+occurred or other fields in the event structure.~\cite[xguide1]
+
+\sec The Window Manager
+The window manager is just another client of X server, but by convention, it is given special responsibilities.
+Much of the communication between clients and the window manager and vice versa occurs through properties, the rest is
+occurring through events.
+Many of the properties are known as hints because they may not necessarily be honored by the
+window manager, even if one is running.
+An application must be prepared for the window manager to ignore, modify, or
+honor the preferences it indicates through the window manager hints.~\cite[xguide1]
+
+\sec X Client libraries
+Two official helper libraries that provide API for talking to the X Server exist, xlib and XCB.
+
+\secc Xlib
+Xlib, also known as libX11, is the original C language X11 API, released in 1985.
+It was designed to look like a traditional library API, hiding the fact that calls result
+in protocol requests to a server.
+Calls that don't require a response from the X server are queued in a buffer
+to be sent as a batch of requests to the server.
+Those that require a response flush all the buffered requests and then
+block until the response is received.
+This mix of synchronous and asynchronous behavior causes some problems,
+because it is not obvious which calls implicitly flush the buffer and which do not.\cite[XlibXCB]
+
+\secc XCB
+XCB is a second attempt at defining a C language binding for X11.
+It was first released in 2001, after many years of experience with Xlib,
+learning from it and other protocol interface libraries.
+XCB makes the client-server nature of the protocol explicit in its design.
+The client is in charge of deciding when to flush the request buffer,
+when to read results and when to wait for the server to respond.\cite[XlibXCB]
+
+\secc Comparison
+In the code listings~\ref[code:xlib] and~\ref[code:xcb], we can see comparison of those two libraries on the task of looking up window property.
+Xlib generates the request to the X server to retrieve the property and appends it to its buffer of requests.
+Since this is a request that requires a response, Xlib then flushes the buffer, sending the contents to the X server.
+Next, Xlib waits until the X server processes all the requests preceding the property retrieve request, and sends the property retrieve reply.
+Xlib then returns the reply to the client.
+XCB, on the other hand, provides functions generated directly from the protocol descriptions in an obvious mechanistic way.
+XCB functions map directly onto the protocol, with separate functions to put requests into the outgoing buffer and to read results back from the X server asynchronously later.
+The power of XCB is in allowing those two steps to have as much code as you want between them.
+The programmer decides when to wait for data, instead of being forced to wait for the data returned by a request at the time the request is issued.\cite[XlibXCB]
+
+\codeblock{code:xlib}{Window property lookup using Xlib}{winproperty_xlib.c}
+\codeblock{code:xcb}{Window property lookup using XCB}{winproperty_xcb.c}
+
+Xlib and XCB are compatible, meaning that one can mix calls to the first with calls to the other.
+This compatibility was achieved by rebuilding libX11 as a layer on top of libxcb.
+Xlib and XCB share the same X server connection and pass control of it back and forth.
+That option was introduced in libX11 version 1.2, and since version 1.4, released in 2010, it is always present.\cite[XlibXCB]
+
+Most applications should call Xlib and XCB sparingly.
+Higher level toolkits provide more efficient programming models, and support features expected in modern applications,
+including support for complex internationalized input and output, accessibility, and integration with desktop environments.
+However, sometimes applications will find themselves needing to make calls to the raw underlying X11 libraries for operations not supported by toolkits.
+For example, an application might need to make calls to X extension API's not covered in the current version of the toolkit's programming model.\cite[XlibXCB]

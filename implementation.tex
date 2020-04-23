@@ -5,49 +5,49 @@
 \sec Xlib and XCB % ====================================================================================================
 % ======================================================================================================================
 
-Xlib and XCB are two helper libraries that provide API for talking to the X server.
-
-Xlib, also known as libX11, is the original C language X11 \glref{API}, released in 1985.
-It was designed to look like a traditional library API, hiding the fact that calls result
-in protocol requests to a server.
-Calls that don't require a response from the X server are queued in a buffer
-to be sent as a batch of requests to the server.
-Those that require a response flush all the buffered requests and then
-block until the response is received.
-This mix of synchronous and asynchronous behavior causes some problems,
-because it is not obvious which calls implicitly flush the buffer and which
-do not.\cite[XlibXCB]
-
-XCB is a second attempt at defining a C language binding for X11.
-It was first released in 2001, after many years of experience with Xlib,
-learning from it and other protocol interface libraries.
-XCB makes the client-server nature of the protocol explicit in its design.
-The client is in charge of deciding when to flush the request buffer,
-when to read results and when to wait for the server to respond.\cite[XlibXCB]
-
-In the code listings~\ref[code:xlib] and~\ref[code:xcb], we can see comparison of those two libraries on the task of looking up window property.
-Xlib generates the request to the X server to retrieve the property and appends it to its buffer of requests.
-Since this is a request that requires a response, Xlib then flushes the buffer, sending the contents to the X server.
-Next, Xlib waits until the X server processes all the requests preceding the property retrieve request, and sends the property retrieve reply.
-Xlib then returns the reply to the client.
-XCB on the other hand, provides functions generated directly from the protocol descriptions in an "obvious" mechanistic way.
-XCB functions map directly onto the protocol, with separate functions to put requests into the outgoing buffer and to read results back from the X server asynchronously later.
-The power of XCB is in allowing those two steps to have as much code as you want between them.
-The programmer decides when to wait for data, instead of being forced to wait for the data returned by a request at the time the request is issued.\cite[XlibXCB]
-
-\codeblock{code:xlib}{Window property lookup using Xlib}{winproperty_xlib.c}
-\codeblock{code:xcb}{Window property lookup using XCB}{winproperty_xcb.c}
-
-Xlib and XCB are compatible, meaning that one can mix calls to the first with calls to the other.
-This compatibility was achieved by rebuilding libX11 as a layer on top of libxcb.
-Xlib and XCB share the same X server connection and pass control of it back and forth.
-That option was introduced in libX11 version 1.2, and since version 1.4, released in 2010, it is always present.\cite[XlibXCB]
-
-Most applications should call Xlib and XCB sparingly.
-Higher level toolkits provide more efficient programming models, and support features expected in modern applications,
-including support for complex internationalized input and output, accessibility, and integration with desktop environments.
-However, sometimes applications will find themselves needing to make calls to the raw underlying X11 libraries for operations not supported by toolkits.
-For example, an application might need to make calls to X extension API's not covered in the current version of the toolkit's programming model.\cite[XlibXCB]
+%Xlib and XCB are two helper libraries that provide API for talking to the X server.
+%
+%Xlib, also known as libX11, is the original C language X11 API, released in 1985.
+%It was designed to look like a traditional library API, hiding the fact that calls result
+%in protocol requests to a server.
+%Calls that don't require a response from the X server are queued in a buffer
+%to be sent as a batch of requests to the server.
+%Those that require a response flush all the buffered requests and then
+%block until the response is received.
+%This mix of synchronous and asynchronous behavior causes some problems,
+%because it is not obvious which calls implicitly flush the buffer and which
+%do not.\cite[XlibXCB]
+%
+%XCB is a second attempt at defining a C language binding for X11.
+%It was first released in 2001, after many years of experience with Xlib,
+%learning from it and other protocol interface libraries.
+%XCB makes the client-server nature of the protocol explicit in its design.
+%The client is in charge of deciding when to flush the request buffer,
+%when to read results and when to wait for the server to respond.\cite[XlibXCB]
+%
+%In the code listings~\ref[code:xlib] and~\ref[code:xcb], we can see comparison of those two libraries on the task of looking up window property.
+%Xlib generates the request to the X server to retrieve the property and appends it to its buffer of requests.
+%Since this is a request that requires a response, Xlib then flushes the buffer, sending the contents to the X server.
+%Next, Xlib waits until the X server processes all the requests preceding the property retrieve request, and sends the property retrieve reply.
+%Xlib then returns the reply to the client.
+%XCB on the other hand, provides functions generated directly from the protocol descriptions in an "obvious" mechanistic way.
+%XCB functions map directly onto the protocol, with separate functions to put requests into the outgoing buffer and to read results back from the X server asynchronously later.
+%The power of XCB is in allowing those two steps to have as much code as you want between them.
+%The programmer decides when to wait for data, instead of being forced to wait for the data returned by a request at the time the request is issued.\cite[XlibXCB]
+%
+%\codeblock{code:xlib}{Window property lookup using Xlib}{winproperty_xlib.c}
+%\codeblock{code:xcb}{Window property lookup using XCB}{winproperty_xcb.c}
+%
+%Xlib and XCB are compatible, meaning that one can mix calls to the first with calls to the other.
+%This compatibility was achieved by rebuilding libX11 as a layer on top of libxcb.
+%Xlib and XCB share the same X server connection and pass control of it back and forth.
+%That option was introduced in libX11 version 1.2, and since version 1.4, released in 2010, it is always present.\cite[XlibXCB]
+%
+%Most applications should call Xlib and XCB sparingly.
+%Higher level toolkits provide more efficient programming models, and support features expected in modern applications,
+%including support for complex internationalized input and output, accessibility, and integration with desktop environments.
+%However, sometimes applications will find themselves needing to make calls to the raw underlying X11 libraries for operations not supported by toolkits.
+%For example, an application might need to make calls to X extension API's not covered in the current version of the toolkit's programming model.\cite[XlibXCB]
 
 % ======================================================================================================================
 \sec Go % ==============================================================================================================
