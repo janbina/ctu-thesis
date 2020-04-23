@@ -22,6 +22,12 @@
 %\let_\activeunderscore
 
 % heading, just finish par, make it semibold and print newline - maybe add some spacing as well?
-\def\heading #1 {
-    \par{\Blue\sbf #1 \Black} \nl
+%\def\heading #1 {
+%    \par{\Blue\sbf #1 \Black} \nl
+%}
+\def\heading #1 {\par
+    \norempenalty-500
+    \vskip 12pt plus 2pt
+    {\noindent \Blue \sbf #1\nbpar \Black}%
+    \nobreak \remskip 4pt
 }
