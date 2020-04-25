@@ -1,0 +1,320 @@
+\sec EWMH
+
+Extended Window Manager Hints defines interactions between window managers and applications,
+as well as other utilities that form part of desktop environment.
+It builds on the ICCCM, providing ways to implement many features that modern desktop users expect.
+It originated as a sets of extensions to the ICCCM developed by the GNOME and KDE desktop projects.
+Those were eventually unified into a standardized set of ICCCM additions that any desktop environment can adopt.
+Its latest version 1.5 was released in 2011.\cite[ewmh]
+
+In this section, we will cover parts of EWMH which are related to window managers and therefore important for us.
+EWMH specification~\cite[ewmh] will be constantly referenced here, so we will explicitly refer only other sources if they are used.
+
+\secc Pagers and taskbars
+Throughout this section, we will talk about special X Server Clients.
+We already know what window manager is, now we will also use term {\em pager} to refer to desktop utility applications, such as pagers and taskbars.
+
+Pager shows a miniature view of the desktops, representing managed windows by small rectangles
+and allows the user to initiate various window manager actions by manipulating these representations.
+Typically offered actions are activation, moving, iconification, maximization and closing.
+On virtual desktops, the pager may offer ways to move windows between desktops and to change the current desktop.
+
+Taskbar typically represents client windows as a list of buttons labelled with the window titles and possibly icons.
+Pressing a button initiates a window manager action on the represented window, typical actions being activation and iconification.
+
+\midinsert
+\picw=5cm \cinspic img/pager.pdf
+\caption/f Pager displaying four desktops with some windows on each of them.
+\endinsert
+
+\midinsert
+\picw=5cm \cinspic img/toolbar.pdf
+\caption/f Taskbar displaying two windows
+\endinsert
+
+\secc Scope of ewmh
+EWMH tries to address the following issues:
+\begitems
+* Allow clients to influence their initial state with respect to maximization, shading, stickiness, desktop, stacking order.
+* Improve the window manager's ability to vary window decorations and maintain the stacking order by allowing clients to hint the window manager about the type of their windows.
+* Improve the compositing manager's ability to apply decorations and effects to override-redirect windows.
+* Enable pagers and taskbars to be implemented as separate clients and allow them to work with any compliant window manager.
+\enditems
+
+\secc Additional states
+The ICCCM allows window managers to implement additional window states, which will appear to clients as substates of "NormalState" and "IconicState".
+As a two common examples, we can name {\em maximized} and {\em shaded} states.
+A window manager may implement these additional states as proper substates of "NormalState" and "IconicState",
+or it may treat them as independent flags, allowing for example a maximized window to be iconified and to re-appear as maximized upon de-iconification.
+\begitems
+* {\sbf Maximization} -- maximizing should give window as much of the screen area as possible.
+This may not be the full screen area, but only a smaller work area, because window manager may
+reserve some space for other windows, such as taskbars.
+A window manager is expected to remember the geometry of a maximized window and restore it upon demaximization.
+Modern window managers typically allow separate horizontal and vertical maximization.
+* {\sbf Shading} -- an alternative to iconification.
+A shaded window typically shows only the titlebar, the client window is hidden, thus shading is not useful for windows which are not decorated with a titlebar.
+\enditems
+
+\secc Large desktops
+The window manager may offer to arrange the managed windows on a desktop that is larger than the root window.
+The screen functions as a viewport on this large desktop.
+Different policies regarding the positioning of the viewport on the desktop can be implemented: The window manager may only allow the viewport position to change in increments of
+the screen size (paging) or it may allow arbitrary positions (scrolling).
+
+To fulfill the ICCCM principle that clients should behave the same regardless whether a window manager is running or not,
+window managers which implement large desktops must interpret all client-provided geometries with respect to the current viewport.
+
+\secc Virtual desktops
+Most X servers have only a single screen.
+The window manager may virtualize this resource and offer multiple so-called 'virtual desktops', of which only one can be shown on the screen at a time.
+There is some variation among the features of virtual desktop implementations.
+There may be a fixed number of desktops, or new ones may be created dynamically.
+The size of the desktops may be fixed or variable.
+
+A window manager which implements virtual desktops generally offers a way for the user to move clients between desktops.
+Clients may be allowed to occupy more than one desktop simultaneously.
+
+\secc Sticky windows
+A window manager which implements a large or virtual desktops typically offers a way for the user to make certain windows {\em sticky}.
+That means that these windows will stay at the same position on the screen when the viewport is moved on large desktop,
+and for virtual desktops, they will be visible on all desktops.
+
+\secc Activation
+In the X world, activating a window means to give it the input focus.
+This may not be possible if the window is unmapped, because it is on a different desktop.
+Thus, activating a window may involve additional steps like moving it to the current desktop (or changing to the desktop the window is on), deiconifying it or raising it.
+
+\secc Root window properties
+As stated in section~\ref[sec:propertiesatoms], clients of X Server are communicating with each other using properties.
+EWMH defines many new properties and in this section, we will take a look at those which are set on root window.
+Root window properties are useful for communication between window manager and pagers.
+
+We will skip "NET_VIRTUAL_ROOTS" and "NET_DESKTOP_LAYOUT". %TODO
+
+\heading \uns NET\uns SUPPORTED
+This property must by set by the window manager to indicate which hints it supports.
+If the hint has some states, both the hint and all its supported states must be set -- for example
+"_NET_WM_STATE" and its states, "_NET_WM_STATE_MODAL" and "_NET_WM_STATE_STICKY".
+
+\heading{\uns NET\uns CLIENT\uns LIST, \uns NET\uns CLIENT\uns LIST\uns STACKING}
+These properties contain list of all windows managed by the window manager.
+While "_NET_CLIENT_LIST" is ordered by initial mapping time, starting with the oldest window,
+"_NET_CLIENT_LIST_STACKING" has bottom-to-top stacking order.
+These properties should be set and updated by the window manager.
+
+\heading \uns NET\uns NUMBER\uns OF\uns DESKTOPS
+This property should be set and updated by the window manager to indicate the number of virtual desktops.
+A pager can request a change in the number of desktops by sending a message to the root window.
+The window manager is free to honor or reject this request.
+If the request is honored "_NET_NUMBER_OF_DESKTOPS" must be set to the new number of desktops
+and other related properties also must be updated.
+If the number of desktops is shrinking, clients that are still present on desktops that are out of the new range
+must be moved to the very last desktop from the new set and their "_NET_WM_DESKTOP" property must be updated.
+If the "_NET_CURRENT_DESKTOP" is out of the new range of available desktops, it must be set to the last available desktop from the new set.
+
+\heading \uns NET\uns DESKTOP\uns GEOMETRY
+This property contains "width" and "height" common for all the desktops.
+This is equal to the screen size if the window manager doesn't support large desktops, otherwise it's equal to the virtual size of the desktop.
+A pager can request a change in the desktop geometry by sending a message to the root window.
+The window manager is free to honor or reject this request.
+
+\heading \uns NET\uns DESKTOP\uns VIEWPORT
+Array of "x" and "y" coordinates that define the top left corner of each desktop's viewport.
+For window managers that don't support large desktops, this must always be set to $(0,0)$.
+A pager can request to change the viewport for the current desktop by sending a message to the root window.
+The window manager is free to honor or reject this request.
+
+\heading \uns NET\uns CURRENT\uns DESKTOP
+The index of the current desktop, which must be an integer from interval $[0,"_NET_NUMBER_OF_DESKTOPS")$.
+It must be set and updated by the window manager.
+A pager can request to switch to another virtual desktop by sending a message to the root window.
+
+\heading \uns NET\uns DESKTOP\uns NAMES
+The names of all virtual desktops.
+This is a list of "NULL"-terminated strings in UTF-8 encoding.
+It might be changed by a pager or the window manager at any time.
+Number of names could be different from number of desktops:
+\begitems
+* If there is less names than desktops, desktops with high numbers are unnamed.
+* If there is more names than desktops, excess names are reserved in case the number of desktops is increased.
+\enditems
+
+\heading \uns NET\uns ACTIVE\uns WINDOW
+The window ID of the currently active window or None if no window has the focus.
+This is a read-only property set by the window manager.
+Client may request to activate another window by sending a message to the root window.
+The window manager may decide to refuse the request.
+
+\heading \uns NET\uns WORKAREA
+This property contains a geometry ("x", "y", "width", "height") for each desktop.
+It must be set by window manager upon calculating the work area.
+It should be calculated by taking desktop's viewport and subtracting space occupied by dock and panel windows,
+as indicated by the "_NET_WM_STRUT" or "_NET_WM_STRUT_PARTIAL" properties set on client windows.
+
+\heading \uns NET\uns SUPPORTING\uns WM\uns CHECK
+This property must be set by the window manager on the root window to be the ID of a child window created
+by himself, to indicate that a compliant window manager is active.
+That child window must also have this property set to the ID of child window.
+The child window must also have the "_NET_WM_NAME" property set to the name of the window manager.
+
+\heading \uns NET\uns SHOWING\uns DESKTOP
+Some window managers have a ``showing the desktop'' mode in which windows are hidden, and the desktop background is displayed and focused.
+If a window manager supports this, it must set this property to a value of 1 when it is in ``showing the desktop'' mode,
+and a value of zero if it is not in this mode.
+
+Pager can send request to enter or leave this mode by sending a client message.
+The window manager may decide to refuse the request.
+
+\secc Other root window messages
+In this section, we will list client messages sent to the root window which are not connected
+with any property (they are stateless).
+
+\heading \uns NET\uns CLOSE\uns WINDOW
+Message to be sent to the root window by pagers wanting to close a window.
+Window manager must attempt to closed the specified window.
+This is preferred to the "WM_DELETE" message or killing the client directly by pager,
+because window manager might be more clever and do something else than simply closing the window -- it might for example introduce a timeout.
+
+\heading \uns NET\uns MOVERESIZE\uns WINDOW
+Can be used by pagers wanting to move or resize a window instead of using a "ConfigureRequest".
+Window managers should treat it exactly like a "ConfigureRequest", except that they should use the gravity specified in the message.
+It allows pagers to exactly position and resize a window including its decorations without knowing the size of the decorations
+by using "StaticGravity".
+
+\heading \uns NET\uns WM\uns MOVERESIZE
+This message allows clients to initiate window movement or resizing.
+They can define their own move and size grips, whilst letting the window manager control the actual operation.
+This means that all moves/resizes can happen in a consistent manner as defined by the window manager.
+
+\heading \uns NET\uns RESTACK\uns WINDOW
+Can be used by pagers wanting to restack a window.
+It should be used only by pagers, applications can use normal "ConfigureRequest".
+This is useful, because window manager may put restrictions on configure requests from applications,
+for example it may under some conditions refuse to raise a window.
+This request makes it clear it comes from a pager or similar tool, and therefore the Window Manager should always obey it.
+
+\heading \uns NET\uns REQUEST\uns FRAME\uns EXTENTS
+Can be used by a client whose window has not yet been mapped.
+It is an estimate of the frame extents it will be given upon mapping.
+Window manager must respond be estimating the frame extends and setting the window's "_NET_FRAME_EXTENTS"
+property accordingly.
+Client must set any window properties it intends to set before sending this message, so the window manager
+has a good basis for estimation.
+The client must be able to cope with imperfect estimates.
+
+\secc Application window properties
+\heading \uns NET\uns WM\uns NAME
+The client should set this to the title of the window in UTF-8 encoding.
+If set, the window manager should use this in preference to "WM_NAME".
+
+\heading \uns NET\uns WM\uns VISIBLE\uns NAME
+If the window manager displays a window name other than "_NET_WM_NAME", it must set this to the title displayed in UTF-8 encoding.
+It allows pagers to display the same title as the window manager.
+
+\heading \uns NET\uns WM\uns ICON\uns NAME
+The client should set this to the title of the icon for this window in UTF-8 encoding.
+If set, the window manager should use this in preference to "WM_ICON_NAME".
+
+\heading \uns NET\uns WM\uns VISIBLE\uns ICON\uns NAME
+If the window manager displays an icon name other than "_NET_WM_ICON_NAME" the window manager must set this to the title displayed in UTF-8 encoding.
+
+\heading \uns NET\uns WM\uns DESKTOP
+Index of the desktop the window is in (or wants to be).
+If it is not specified by the client, window manager should place it as it wishes.
+Value "0xFFFFFFFF" indicates that the window should appear on all desktops.
+Client can request a change of desktop for non-withdrawn window by sending a client message to the root window.
+
+\heading \uns NET\uns WM\uns WINDOW\uns TYPE
+This should be set by the client before mapping to a list of atoms indicating the functional type of the window.
+This property should be used by the window manager in determining the decoration,
+stacking position and other behavior of the window.
+The client should specify window types in order of preference (the first being most preferable)
+but must include at least one of the basic window type atoms.
+Possible values are as follows, listed without the "_NET_WM_WINDOW_TYPE_" prefix:
+\begitems
+* "DESKTOP" -- indicates a desktop feature.
+For example single window containing desktop icons.
+* "DOCK" -- indicates a dock or panel feature.
+Those windows would be typically kept on top of all other windows.
+* "TOOLBAR"
+* "MENU"
+* "UTILITY"
+* "SPLASH"
+* "DIALOG"
+* "DROPDOWN_MENU"
+* "POPUP_MENU"
+* "TOOLTIP"
+* "NOTIFICATION"
+* "COMBO"
+* "DND"
+* "NORMAL"
+\enditems
+
+\heading \uns NET\uns WM\uns STATE
+
+Possible states are as follows, listed without the "_NET_WM_STATE_" prefix:
+\begitems
+* "MODAL"
+* "STICKY" -- indicates that the window manager should keep the window's position fixed on the screen, even when the virtual desktop scrolls.
+* "MAXIMIZED_VERT", "MAXIMIZED_HORZ" -- indicates that the window is vertically/horizontally maximized
+* "SHADED" -- indicates that the window is shaded
+* "SKIP_TASKBAR" -- indicates that the window should not be included on a taskbar.
+* "SKIP_PAGER" -- indicates that the window should not be included on a pager.
+* "HIDDEN" -- should be set by the window manager to indicate that a window would not be visible on the screen if its desktop/viewport were active and its coordinates were within the screen bounds.
+The canonical example is that minimized windows should be in the "HIDDEN" state.
+Pagers and similar applications should use this state instead of "WM_STATE" to decide whether to display a window in miniature representations of the windows on a desktop.
+* "FULLSCREEN" -- indicates that the window should fill the entire screen and have no window decorations.
+Additionally the window manager is responsible for restoring the original geometry after a switch from fullscreen back to normal window.
+* "ABOVE", "BELOW" -- indicates that the window should be on top of/below most windows.
+See the section~\ref[sec:stackingorder].
+They are mainly meant for user preferences and should not be used by applications.
+* "DEMANDS_ATTENTION"
+* "FOCUSED"
+\enditems
+%_NET_WM_ALLOWED_ACTIONS
+\heading{\uns NET\uns WM\uns STRUT\uns PARTIAL (\uns NET\uns WM\uns STRUT)}
+This property must be set by the client if the window is to reserve space at the edge of the screen.
+"_NET_WM_STRUT" is older, but clients may still set it in addition to "_NET_WM_STRUT_PARTIAL" to ensure backward compatibility with window managers supporting older versions of the specification.
+The property contains 4 cardinals specifying the width of the reserved area at each border of the screen, and an additional 8 cardinals specifying the beginning and end corresponding to each of the four struts.
+The purpose of struts is to reserve space at the borders of the desktop.
+This is very useful for a docking area, a taskbar or a panel, for instance.
+The window manager should take this reserved area into account when constraining window positions - maximized windows, for example, should not cover that area.
+%_NET_WM_ICON_GEOMETRY
+%_NET_WM_ICON
+%_NET_WM_PID
+%_NET_WM_HANDLED_ICONS
+%_NET_WM_USER_TIME
+%_NET_WM_USER_TIME_WINDOW
+%_NET_FRAME_EXTENTS
+%_NET_WM_OPAQUE_REGION
+%_NET_WM_BYPASS_COMPOSITOR
+%
+%\secc Desktop model
+%This spec assumes a desktop model that consists of one or more completely independent desktops which may or may not be larger than the screen area. When a desktop is larger than the screen it is left to the Window Manager if it will implement scrolling or paging.
+%
+%\secc Pagers and taskbars
+%This specification attempts to make reasonable provisions for window manager independent pagers and taskbars. Window Managers that require / desire additional functionality beyond what can be achieved using the mechanisms set out in this specification may choose to implement their own pagers, which communicate with the Window Manager using further, window manager specific hints, or some other means.
+%
+%Pagers should decide whether to show a miniature version of a window using the following guidelines:
+%
+%If either _NET_WM_STATE_SKIP_PAGER or _NET_WM_STATE_HIDDEN are set on a window, then the pager should not show that window.
+%
+%The pager may choose not to display windows with certain semantic types; this spec has no recommendations, but common practice is to avoid displaying _NET_WM_WINDOW_TYPE_DOCK for example.
+%
+%If the _NET_WM_STATE_SKIP_PAGER and _NET_WM_STATE_HIDDEN hints are not present, and the Window Manager claims to support _NET_WM_STATE_HIDDEN, then the window should be shown if it's in either NormalState or IconicState.
+%
+%For Window Managers that do not support _NET_WM_STATE_HIDDEN, the pager should not show windows in IconicState. These Window Managers are probably using an older version of this specification.
+%
+\label[sec:stackingorder]
+\secc Stacking order
+To obtain good interoperability between different Desktop Environments, the following layered stacking order is recommended, from the bottom:
+\begitems
+* windows of type "_NET_WM_TYPE_DESKTOP"
+* windows having state "_NET_WM_STATE_BELOW"
+* windows not belonging in any other layer
+* windows of type "_NET_WM_TYPE_DOCK" (unless they have state "_NET_WM_TYPE_BELOW") and windows having state "_NET_WM_STATE_ABOVE"
+* focused windows having state "_NET_WM_STATE_FULLSCREEN"
+\enditems
+Windows that are transient for another window should be kept above this window.
+The window manager may choose to put some windows in different stacking positions, for example to allow the user to bring currently a active window to the top and return it back when the window looses focus.
