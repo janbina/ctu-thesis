@@ -28,7 +28,7 @@ Pressing a button initiates a window manager action on the represented window, t
 \endinsert
 
 \midinsert
-\picw=5cm \cinspic img/toolbar.pdf
+\picw=9cm \cinspic img/toolbar.pdf
 \caption/f Taskbar displaying two windows
 \endinsert
 
@@ -89,8 +89,6 @@ Thus, activating a window may involve additional steps like moving it to the cur
 As stated in section~\ref[sec:propertiesatoms], clients of X Server are communicating with each other using properties.
 EWMH defines many new properties and in this section, we will take a look at those which are set on root window.
 Root window properties are useful for communication between window manager and pagers.
-
-We will skip "NET_VIRTUAL_ROOTS" and "NET_DESKTOP_LAYOUT". %TODO
 
 \heading \uns NET\uns SUPPORTED
 This property must by set by the window manager to indicate which hints it supports.
@@ -166,6 +164,14 @@ and a value of zero if it is not in this mode.
 Pager can send request to enter or leave this mode by sending a client message.
 The window manager may decide to refuse the request.
 
+\heading Other
+We will not discuss into details these root window properties, as they are not relevant to our window manager use case.
+Details about those properties could be found in the specification~\cite[ewmh].
+\begitems
+* "NET_VIRTUAL_ROOTS"
+* "NET_DESKTOP_LAYOUT"
+\enditems
+
 \secc Other root window messages
 In this section, we will list client messages sent to the root window which are not connected
 with any property (they are stateless).
@@ -204,111 +210,172 @@ has a good basis for estimation.
 The client must be able to cope with imperfect estimates.
 
 \secc Application window properties
+Application window properties are set on their top-level window either by themselves or by window manager or pager.
+Some of them are updated throughout the lifetime of the application, so window managers and pagers should listen
+for these changes and update accordingly.
+
 \heading \uns NET\uns WM\uns NAME
 The client should set this to the title of the window in UTF-8 encoding.
-If set, the window manager should use this in preference to "WM_NAME".
+If set, the window manager should use this in preference to "WM_NAME" (see section~\ref[sec:clientproperties]).
 
 \heading \uns NET\uns WM\uns VISIBLE\uns NAME
 If the window manager displays a window name other than "_NET_WM_NAME", it must set this to the title displayed in UTF-8 encoding.
-It allows pagers to display the same title as the window manager.
+It allows pagers to display the same title as the window manager does.
 
 \heading \uns NET\uns WM\uns ICON\uns NAME
 The client should set this to the title of the icon for this window in UTF-8 encoding.
-If set, the window manager should use this in preference to "WM_ICON_NAME".
+If set, the window manager should use this in preference to "WM_ICON_NAME" (see section~\ref[sec:clientproperties]).
 
 \heading \uns NET\uns WM\uns VISIBLE\uns ICON\uns NAME
 If the window manager displays an icon name other than "_NET_WM_ICON_NAME" the window manager must set this to the title displayed in UTF-8 encoding.
 
 \heading \uns NET\uns WM\uns DESKTOP
 Index of the desktop the window is in (or wants to be).
-If it is not specified by the client, window manager should place it as it wishes.
+It must must be an integer from interval $[0,"_NET_NUMBER_OF_DESKTOPS")$, or a special value "0xFFFFFFFF".
+If it is not specified by the client upon transition from the "Withdrawn" state, window manager should place it as it wishes.
 Value "0xFFFFFFFF" indicates that the window should appear on all desktops.
 Client can request a change of desktop for non-withdrawn window by sending a client message to the root window.
 
 \heading \uns NET\uns WM\uns WINDOW\uns TYPE
 This should be set by the client before mapping to a list of atoms indicating the functional type of the window.
-This property should be used by the window manager in determining the decoration,
-stacking position and other behavior of the window.
-The client should specify window types in order of preference (the first being most preferable)
-but must include at least one of the basic window type atoms.
-Possible values are as follows, listed without the "_NET_WM_WINDOW_TYPE_" prefix:
+It should be used by the window manager in determining the decoration, stacking position and other behavior of the window.
+If client wants to specify more than one window type, they should be ordered by preference -- the first being most preferable.
+The client should specify window types in order of preference (the first being most preferable).
+Extensions can define new window types, but each client must include at least one of the basic types defined here.
+Basic window types are as follows, listed without the "_NET_WM_WINDOW_TYPE_" prefix:
 \begitems
+* "NORMAL" --  indicates that this is a normal, top-level window, either managed or override-redirect.
+Managed windows with neither "_NET_WM_WINDOW_TYPE" nor "WM_TRANSIENT_FOR" set must be taken as this type.
+Override-redirect windows without "_NET_WM_WINDOW_TYPE", must be taken as this type, whether or not they have "WM_TRANSIENT_FOR" set.
 * "DESKTOP" -- indicates a desktop feature.
 For example single window containing desktop icons.
 * "DOCK" -- indicates a dock or panel feature.
-Those windows would be typically kept on top of all other windows.
-* "TOOLBAR"
-* "MENU"
-* "UTILITY"
-* "SPLASH"
-* "DIALOG"
-* "DROPDOWN_MENU"
-* "POPUP_MENU"
-* "TOOLTIP"
-* "NOTIFICATION"
-* "COMBO"
-* "DND"
-* "NORMAL"
+Those windows would be typically kept on top of all other windows by window manager.
+* "TOOLBAR", "MENU" -- indicate toolbar and pinnable menu windows, respectively (i.e. toolbars and menus ``torn off'' from the main application).
+Windows of this type may set the "WM_TRANSIENT_FOR" hint indicating the main application window.
+* "UTILITY" -- indicates a small persistent utility window, such as a palette or toolbox.
+It is distinct from type "TOOLBAR" because it does not correspond to a toolbar torn off from the main application.
+It's distinct from type "DIALOG" because it isn't a transient dialog, the user will probably keep it open while they're working.
+Windows of this type may set the "WM_TRANSIENT_FOR" hint indicating the main application window.
+* "SPLASH" -- indicates that the window is a splash screen displayed as an application is starting up.
+* "DIALOG" --  indicates that this is a dialog window.
+If "_NET_WM_WINDOW_TYPE" is not set, then managed windows with "WM_TRANSIENT_FOR" set must be taken as this type.
+Override-redirect windows with "WM_TRANSIENT_FOR", but without "_NET_WM_WINDOW_TYPE" must be taken as "_NET_WM_WINDOW_TYPE_NORMAL".
+* "DROPDOWN_MENU", "POPUP_MENU", "TOOLTIP", "NOTIFICATION", "COMBO", "DND" -- various types typically used on override-redirect windows.
+For details, see the specification~\cite[ewmh].
 \enditems
 
 \heading \uns NET\uns WM\uns STATE
-
+A list of hints describing the window state.
+Atoms present in the list must be considered set, atoms not present in the list must be considered not set.
+Window manager should honor the state whenever withdrawn window requests to be mapped.
+Window manager must jeep this property updated to reflect the current state of the window.
 Possible states are as follows, listed without the "_NET_WM_STATE_" prefix:
 \begitems
-* "MODAL"
+* "MODAL" -- indicates that this is a modal dialog box.
 * "STICKY" -- indicates that the window manager should keep the window's position fixed on the screen, even when the virtual desktop scrolls.
-* "MAXIMIZED_VERT", "MAXIMIZED_HORZ" -- indicates that the window is vertically/horizontally maximized
-* "SHADED" -- indicates that the window is shaded
+* "MAXIMIZED_VERT", "MAXIMIZED_HORZ" -- indicates that the window is vertically/horizontally maximized.
+* "SHADED" -- indicates that the window is shaded.
 * "SKIP_TASKBAR" -- indicates that the window should not be included on a taskbar.
 * "SKIP_PAGER" -- indicates that the window should not be included on a pager.
-* "HIDDEN" -- should be set by the window manager to indicate that a window would not be visible on the screen if its desktop/viewport were active and its coordinates were within the screen bounds.
+* "HIDDEN" -- should be set by the window manager to indicate that a window would not be visible on the screen if its desktop/viewport
+were active and its coordinates were within the screen bounds.
 The canonical example is that minimized windows should be in the "HIDDEN" state.
 Pagers and similar applications should use this state instead of "WM_STATE" to decide whether to display a window in miniature representations of the windows on a desktop.
 * "FULLSCREEN" -- indicates that the window should fill the entire screen and have no window decorations.
 Additionally the window manager is responsible for restoring the original geometry after a switch from fullscreen back to normal window.
 * "ABOVE", "BELOW" -- indicates that the window should be on top of/below most windows.
-See the section~\ref[sec:stackingorder].
+See the section~\ref[sec:stackingorder] for details.
 They are mainly meant for user preferences and should not be used by applications.
-* "DEMANDS_ATTENTION"
-* "FOCUSED"
+* "DEMANDS_ATTENTION" -- indicates that some action in or with the window happened.
+For example, it may be set by the window manager if the window requested activation but the window manager refused it, or the application may set it if it finished some work.
+This state may be set by both the client and the window manager.
+It should be unset by the window manager when it decides the window got the required attention (usually, that it got activated).
+* "FOCUSED" -- indicates whether the window's decorations are drawn in an active state.
+Clients must regard it as a read-only hint.
+It cannot be set at map time or changed via a "_NET_WM_STATE" client message.
+The window given by "_NET_ACTIVE_WINDOW" will usually have this hint.
 \enditems
-%_NET_WM_ALLOWED_ACTIONS
-\heading{\uns NET\uns WM\uns STRUT\uns PARTIAL (\uns NET\uns WM\uns STRUT)}
+
+An implementation may add new atoms to this list.
+Implementations without extensions must ignore any unknown atoms, effectively removing them from the list.
+These extension atoms must not start with the prefix "_NET".
+
+A client can request a change of the state by sending a client message to the root window.
+This message contains mainly id of the window to which the change should be applied,
+the action, which is one of "REMOVE", "ADD", "TOGGLE", and one or two properties to alter.
+It allows two properties to be changed simultaneously, specifically to allow both horizontal and
+vertical maximization to be altered together.
+
+\heading \uns NET\uns WM\uns ALLOWED\uns ACTIONS
+Set by the window manager to indicate which operations it supports for this window.
+The window manager must keep this property updated to reflect the actions which are currently available for a window.
+Taskbars, pagers, and other tools use this property to decide which actions should be made available to the user.
+Possible atoms, listed without the "_NET_WM_ACTION" prefix:
+\begitems
+* "MOVE"
+* "RESIZE"
+* "MINIMIZE"
+* "SHADE"
+* "STICK"
+* "MAXIMIZE_HORZ"
+* "MAXIMIZE_VERT"
+* "FULLSCREEN"
+* "CHANGE_DESKTOP"
+* "CLOSE"
+* "ABOVE"
+* "BELOW"
+\enditems
+
+An implementation may add new atoms to this list.
+Implementations without extensions must ignore any unknown atoms, effectively removing them from the list.
+These extension atoms must not start with the prefix "_NET".
+
+The actions listed here are those that the window manager will honor for this window.
+The operations must still be requested through the normal mechanisms.
+For example, "_NET_WM_ACTION_CLOSE" does not mean that clients can send a "WM_DELETE_WINDOW" message to this window -- it means that clients can
+use a "_NET_CLOSE_WINDOW" message to ask the window manager to do so.
+
+Window Managers should ignore the value of "_NET_WM_ALLOWED_ACTIONS" when they initially manage a window.
+This value may be left over from a previous window manager with different policies.
+
+\heading{\uns NET\uns WM\uns STRUT\uns PARTIAL, \uns NET\uns WM\uns STRUT}
+Property "_NET_WM_STRUT_PARTIAL" was introduced later than "_NET_WM_STRUT" and contains some additional parameters.
+Window managers should check for the newer property first and use the older version only if it is missing.
+Similarly, clients may set "_NET_WM_STRUT" in addition to the newer one to ensure backward compatibility with
+window managers supporting older version.
+
 This property must be set by the client if the window is to reserve space at the edge of the screen.
-"_NET_WM_STRUT" is older, but clients may still set it in addition to "_NET_WM_STRUT_PARTIAL" to ensure backward compatibility with window managers supporting older versions of the specification.
-The property contains 4 cardinals specifying the width of the reserved area at each border of the screen, and an additional 8 cardinals specifying the beginning and end corresponding to each of the four struts.
+The property contains 4 cardinals specifying the width of the reserved area at each border of the screen,
+and an additional 8 cardinals specifying the beginning and end corresponding to each of the four struts.
+The client may change this property at any time, therefore the window manager must listen for property notify events
+and update its state accordingly.
+
 The purpose of struts is to reserve space at the borders of the desktop.
-This is very useful for a docking area, a taskbar or a panel, for instance.
+This is useful for a docking area, a taskbar or a panel, for instance.
 The window manager should take this reserved area into account when constraining window positions - maximized windows, for example, should not cover that area.
-%_NET_WM_ICON_GEOMETRY
-%_NET_WM_ICON
-%_NET_WM_PID
-%_NET_WM_HANDLED_ICONS
-%_NET_WM_USER_TIME
-%_NET_WM_USER_TIME_WINDOW
-%_NET_FRAME_EXTENTS
-%_NET_WM_OPAQUE_REGION
-%_NET_WM_BYPASS_COMPOSITOR
-%
-%\secc Desktop model
-%This spec assumes a desktop model that consists of one or more completely independent desktops which may or may not be larger than the screen area. When a desktop is larger than the screen it is left to the Window Manager if it will implement scrolling or paging.
-%
-%\secc Pagers and taskbars
-%This specification attempts to make reasonable provisions for window manager independent pagers and taskbars. Window Managers that require / desire additional functionality beyond what can be achieved using the mechanisms set out in this specification may choose to implement their own pagers, which communicate with the Window Manager using further, window manager specific hints, or some other means.
-%
-%Pagers should decide whether to show a miniature version of a window using the following guidelines:
-%
-%If either _NET_WM_STATE_SKIP_PAGER or _NET_WM_STATE_HIDDEN are set on a window, then the pager should not show that window.
-%
-%The pager may choose not to display windows with certain semantic types; this spec has no recommendations, but common practice is to avoid displaying _NET_WM_WINDOW_TYPE_DOCK for example.
-%
-%If the _NET_WM_STATE_SKIP_PAGER and _NET_WM_STATE_HIDDEN hints are not present, and the Window Manager claims to support _NET_WM_STATE_HIDDEN, then the window should be shown if it's in either NormalState or IconicState.
-%
-%For Window Managers that do not support _NET_WM_STATE_HIDDEN, the pager should not show windows in IconicState. These Window Managers are probably using an older version of this specification.
-%
+
+\heading \uns NET\uns FRAME\uns EXTENTS
+This property must be set by the window manager to the extents of the window's frame.
+It has four integer values, "left", "right", "top" and "bottom", which specify widths of the respective borders added by the window manager.
+
+\heading Other
+We will not discuss into details these application window properties, as they are not relevant to our window manager use case.
+Details about those properties could be found in the specification~\cite[ewmh].
+\begitems
+* "_NET_WM_ICON_GEOMETRY"
+* "_NET_WM_ICON"
+* "_NET_WM_PID"
+* "_NET_WM_HANDLED_ICONS"
+* "_NET_WM_USER_TIME"
+* "_NET_WM_USER_TIME_WINDOW"
+* "_NET_WM_OPAQUE_REGION"
+* "_NET_WM_BYPASS_COMPOSITOR"
+\enditems
+
 \label[sec:stackingorder]
 \secc Stacking order
-To obtain good interoperability between different Desktop Environments, the following layered stacking order is recommended, from the bottom:
+To obtain good interoperability between different desktop environments, the following layered stacking order is recommended, from the bottom:
 \begitems
 * windows of type "_NET_WM_TYPE_DESKTOP"
 * windows having state "_NET_WM_STATE_BELOW"
@@ -317,4 +384,6 @@ To obtain good interoperability between different Desktop Environments, the foll
 * focused windows having state "_NET_WM_STATE_FULLSCREEN"
 \enditems
 Windows that are transient for another window should be kept above this window.
-The window manager may choose to put some windows in different stacking positions, for example to allow the user to bring currently a active window to the top and return it back when the window looses focus.
+
+The window manager may choose to put some windows in different stacking positions,
+for example to allow the user to bring currently active window to the top and return it back when the window looses focus.
