@@ -1,0 +1,8 @@
+ctrl + alt + {h,j,k,l}
+    swmctl resize -{w,s,n,e} 20
+
+super + alt + m : {h,j,k,l}
+    swmctl move -{w,s,n,e} 20
+
+{_,shift + ,super + }XF86MonBrightness{Down,Up}
+    bright {-1,-10,min,+1,+10,max}
