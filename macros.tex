@@ -8,9 +8,11 @@
 
 % codeblock from file with caption and label
 \def\codeblock#1#2#3 {
+    \midinsert
     \verbinput (-) listings/#3
     \clabel[#1]{#2}
     \caption/l #2
+    \endinsert
 }
 
 % active underscore
