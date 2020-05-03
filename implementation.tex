@@ -1,78 +1,57 @@
 \chap Implementation
 
-% ======================================================================================================================
-\label[sec:xlibAndXCB]  % ==============================================================================================
-\sec Xlib and XCB % ====================================================================================================
-% ======================================================================================================================
+% ######################################################################################################################
+\sec Tools % ###########################################################################################################
+% ######################################################################################################################
 
-%Xlib and XCB are two helper libraries that provide API for talking to the X server.
-%
-%Xlib, also known as libX11, is the original C language X11 API, released in 1985.
-%It was designed to look like a traditional library API, hiding the fact that calls result
-%in protocol requests to a server.
-%Calls that don't require a response from the X server are queued in a buffer
-%to be sent as a batch of requests to the server.
-%Those that require a response flush all the buffered requests and then
-%block until the response is received.
-%This mix of synchronous and asynchronous behavior causes some problems,
-%because it is not obvious which calls implicitly flush the buffer and which
-%do not.\cite[XlibXCB]
-%
-%XCB is a second attempt at defining a C language binding for X11.
-%It was first released in 2001, after many years of experience with Xlib,
-%learning from it and other protocol interface libraries.
-%XCB makes the client-server nature of the protocol explicit in its design.
-%The client is in charge of deciding when to flush the request buffer,
-%when to read results and when to wait for the server to respond.\cite[XlibXCB]
-%
-%In the code listings~\ref[code:xlib] and~\ref[code:xcb], we can see comparison of those two libraries on the task of looking up window property.
-%Xlib generates the request to the X server to retrieve the property and appends it to its buffer of requests.
-%Since this is a request that requires a response, Xlib then flushes the buffer, sending the contents to the X server.
-%Next, Xlib waits until the X server processes all the requests preceding the property retrieve request, and sends the property retrieve reply.
-%Xlib then returns the reply to the client.
-%XCB on the other hand, provides functions generated directly from the protocol descriptions in an "obvious" mechanistic way.
-%XCB functions map directly onto the protocol, with separate functions to put requests into the outgoing buffer and to read results back from the X server asynchronously later.
-%The power of XCB is in allowing those two steps to have as much code as you want between them.
-%The programmer decides when to wait for data, instead of being forced to wait for the data returned by a request at the time the request is issued.\cite[XlibXCB]
-%
-%\codeblock{code:xlib}{Window property lookup using Xlib}{winproperty_xlib.c}
-%\codeblock{code:xcb}{Window property lookup using XCB}{winproperty_xcb.c}
-%
-%Xlib and XCB are compatible, meaning that one can mix calls to the first with calls to the other.
-%This compatibility was achieved by rebuilding libX11 as a layer on top of libxcb.
-%Xlib and XCB share the same X server connection and pass control of it back and forth.
-%That option was introduced in libX11 version 1.2, and since version 1.4, released in 2010, it is always present.\cite[XlibXCB]
-%
-%Most applications should call Xlib and XCB sparingly.
-%Higher level toolkits provide more efficient programming models, and support features expected in modern applications,
-%including support for complex internationalized input and output, accessibility, and integration with desktop environments.
-%However, sometimes applications will find themselves needing to make calls to the raw underlying X11 libraries for operations not supported by toolkits.
-%For example, an application might need to make calls to X extension API's not covered in the current version of the toolkit's programming model.\cite[XlibXCB]
+In this section, we will describe tools used for development, testing as well as tools that made certain design decisions possible.
 
-% ======================================================================================================================
-\sec Go % ==============================================================================================================
-% ======================================================================================================================
+% ######################################################################################################################
+\secc Go % #############################################################################################################
+% ######################################################################################################################
 
-% ======================================================================================================================
-\sec XGB and xgbutil % =================================================================================================
-% ======================================================================================================================
+Go programming language~\cite[golang] in version $1.13$ was used for the implementation of both SWM and swmctl.
+Firstly released in 2009, Go is a statically typed, compiled programming language.
+It was designed at Google by Robert Griesemer, Rob Pike, and Ken Thompson~\cite[golang].
+Go refers to itself as being expressive, concise, clean, and efficient~\cite[golang].
 
-There are two unofficial libraries for accessing X11 API from Go,
-xgb\urlnote{https://github.com/BurntSushi/xgb} and xgbutil\urlnote{https://github.com/BurntSushi/xgbutil}.
+Go was designed to combine the efficiency and safety of languages like Java or C++ and fluidity of Python.
+It tries to reduce clutter and complexity.
+Go has no forward declarations or header files -- everything is declared exactly once.
+Variable types are derived when using the declare-and-initialize construct, so the type has not to be specified explicitly.
+It is an object-oriented language -- it has types and methods and allows an object-oriented style of programming.
+There is no type hierarchy though, only interfaces.
+Interfaces are not implemented explicitly -- a type automatically satisfies any interface that specifies a subset of its methods.
 
-XGB is closely modeled after XCB, so it is just a low-level API to communicate with the
-core X protocol and many of the X extensions.
-It claims being thread safe and according to benchmarks, it gets immediate improvement from parallelism.
-In the code listing~\ref[code:xgb], you can see example of window property lookup using XGB.
-It is very similar to XCB version~\ref[code:xcb], the only difference being that we can simply
-call "Reply()" method on the cookie object returned from "GetProperty" function, instead of passing the cookie to
+One of Go's most important features, and feature which puts it apart from other system programming languages (such as C, C++, Rust), is garbage collection.
+According to Go's authors, managing the lifetimes of allocated objects is one of the biggest sources of bookkeeping in system programs.
+Manual memory management consumes a significant amount of programmer time and is often the cause of bugs.
+Go wants to eliminate such programmer overheads by garbage collection.
+Its introduction to go language was possible thanks to advances in its technology in the last few years prior to Go launch.
+Go authors are confident that it can be implemented cheaply enough, and with low enough latency, that it could be a viable approach even for networked systems~\cite[golang].
+
+% ######################################################################################################################
+\secc X libraries for Go % #############################################################################################
+% ######################################################################################################################
+
+There are two unofficial libraries for accessing X11 API from Go, XGB~\cite[xgb] and xgbutil~\cite[xgbutil].
+
+XGB, standing for X Go Binding, is closely modeled after XCB, so it is just a low-level API to communicate with
+the core X protocol and many of the X extensions (such as ICCCM, EWMH or Xinerama).
+It claims to be thread safe and according to benchmarks, it gets immediate improvement from parallelism~\cite[xgb].
+
+To compare XGB with XCB, we will use the example of window property lookup.
+Window property lookup using XCB was shown in the code listing~\ref[code:xcb],
+the same call implemented using XGB can be seen in the code listing ~\ref[code:xgb].
+As expected, both versions are very similar, the only difference is that in XGB, we can simply
+call "Reply" method on the cookie object returned from "GetProperty" function, instead of passing the cookie to
 another function.
 
 \codeblock{code:xgb}{Window property lookup using XGB}{winproperty_go.go}
 
 Xgbutil, on the other hand, is higher level utility library working on top of the XGB.
-Its main goal is to make various X related tasks easier.
-Those might be, for example:
+Its main goal is to make various X related tasks easier~\cite[xgbutil].
+Those are, for example:
 \begitems
 * binding keys,
 * using the EWMH or ICCCM specs with the window manager,
@@ -87,6 +66,245 @@ It has no cookie/reply mechanism though, so we are losing the asynchronicity of 
 We can, however, always fall back to using XGB for cases in which we need to be asynchronous.
 To process raw "GetPropertyReply", which itself is just a byte array with some meta data,
 xgbutil defines set of functions like "PropValNums()" and "PropValWindows()".
-These extract slice of integers and slice of window identifiers, respectively, out of the "GetPropertyReply".
+These extract slice of integers or slice of window identifiers, respectively, out of the "GetPropertyReply".
+Users of the xgbutil library have the possibility to either use high-level functions like "icccm.WmNormalHintsGet",
+or stay with the XGB, optionally utilise those helper functions from xgbutil.
 
 \codeblock{code:xgbutil}{Xgbutil API showcase}{xgbutil.go}
+
+Xgbutil can help us also with event handling, core part of each application interacting with the X server using X protocol.
+Applications usually deal with X events using so called event loop, its typical implementation can be seen in the code listing~\ref[code:xeventloop].
+It is an infinite for loop, which starts by waiting for next X event and then branches based on the type of the event.
+Application will usually have to handle much more than three events and there will also be another branching for each of them,
+because, for example, events on root window are handled differently than events on application's top level windows.
+Because of multiple branching and many possible cases, this will quickly become unclear and difficult to maintain.
+Xgbutil offers callback mechanism to handle X events.
+You can simply define functions (callbacks) and specify the event type and window for which that callback will be executed.
+Whole event loop is then implemented inside xgbutil's "xevent.Main" function, which calls appropriate callbacks for each event type and window.
+Example callbacks definition can be seen in the code example~\ref[code:xgbutilevents].
+
+\codeblock{code:xeventloop}{X event loop}{x_eventloop.go}
+
+\codeblock{code:xgbutilevents}{Xgbutil event handling}{xgbutil_events.go}
+
+Xgbutil also defines "xwindow.Window" structure which is a wrapper around standard X window identifier (unsigned integer).
+This structure contains several methods for easier manipulation with windows, such as "Move", "Resize", "Map", "Unmap" and much more.
+
+Xgbutil was a great help in implementation of SWM and its higher-level functions and mechanisms were used whenever it was possible/beneficial.
+There were a few usecases for which no high-level api was available and in those cases, XGB was used.
+One example is setting border width of the window, which is not possible using the "xwindow.Window.Configure" method, so
+"xproto.ConfigureWindowChecked" must have been used.
+
+% ######################################################################################################################
+\secc Xdotool % ########################################################################################################
+% ######################################################################################################################
+
+Xdotool is a simple command line tool for communication with X server.
+While its main use case is to fake input from the mouse and keyboard, it also supports some parts of EWMH protocol,
+and thus lets you perform various window manager actions~\cite[xdotool].
+Actions important for out usecase are:
+\begitems
+* "(get|set)_desktop" -- get and set the current desktop.
+* "(get|set)_num_desktops" -- get and set number of desktops.
+* "(get|set)_desktop_for_window" -- get and set the desktop for window.
+* "windowactivate" -- activate a window.
+Sends "_NET_ACTIVE_WINDOW", window manager should do necessary changes so that specified window could be shown,
+for example switch to desktop the window is on, and then activate it (give it input focus).
+* "windowminimize" -- minimize a window.
+\enditems
+
+To specify a window on which the action should be performed, one can either directly provide its ID, or
+use one of those three commands to obtain it:
+
+\begitems
+* "getactivewindow" -- get an ID of active window.
+* "selectwindow" -- get an ID of a window by clicking on it.
+* "search" -- get IDs of windows whose name or class is matching the search term.
+Various filters are available, you can, for example, limit the search only to windows located on the specified desktop.
+\enditems
+
+Xdotool can chain commands, so you can use one command to get a window ID first and then perform an action on it, like this:
+
+\ttline=0 \begtt
+xdotool windowactivate 56623105
+xdotool getactivewindow windowminimize
+xdotool search "chromium" set_desktop_for_window 3
+\endtt \ttline=-1
+
+% ######################################################################################################################
+\secc Wmctrl % #########################################################################################################
+% ######################################################################################################################
+
+Wmctrl is, as well as xdotool, a command line tool for communication with X server.
+Unlike xdotool, wmctrl is specialized directly on interaction with EWMH compatible window manager, though.
+It is a bit more complex than xdotool, because, as stated in its documentation, it provides access to almost all the features defined in the EWMH specification~\cite[wmctrl].
+This means that it can do all the window manager related tasks xdotool can do and much more, but the commands are usually not as straightforward.
+That is also caused by arguments being named by a single letter, which mostly seems to be chosen by random.
+We will show two commands which will be important for our use case, the rest could be seen in the documentation~\cite[wmctrl].
+
+\begitems
+* "wmctrl -c <WIN>" -- gracefully close specified window.
+* "wmctrl -r <WIN> -b <STATE>" -- change the state of the specified window.
+This command could be used, for example, to make the window maximized, minimized, or fullscreen.
+It sends the "_NET_WM_STATE" client message as specified in EWMH.
+The format of the state argument is: "(remove|add|toggle),<PROP1>[,<PROP2>]", and the following properties are supported:
+\begitems \style x
+* "modal",
+* "sticky",
+* "maximized_vert", "maximized_horz",
+* "shaded",
+* "skip_taskbar", "skip_pager",
+* "hidden",
+* "fullscreen",
+* "above", "below".
+\enditems
+\enditems
+
+The window, on which the action should be performed, could be specified in one of these ways:
+
+\begitems
+* By default, window argument is interpreted as a string matched against the window title and the first matching window is used.
+* Using the "-i" option, the argument will be interpreted as a numerical window ID represented as a decimal or hexadecimal ("0x" prefix) number.
+* Special strings ":ACTIVE:" and ":SELECT:" may be used to use the currently active window or to let the user select the window by clicking on it, respectively.
+\enditems
+
+You can then use wmctrl to close the window or toggle its maximized state like this:
+
+\ttline=0 \begtt
+wmctrl -c -i 56623105
+wmctrl -r :ACTIVE: -b toggle,maximized_vert,maximized_horz
+\endtt \ttline=-1
+
+% ######################################################################################################################
+\secc Sxhkd % ##########################################################################################################
+% ######################################################################################################################
+
+Sxhkd, standing for {\em Simple X hotkey daemon}, is an X daemon that reacts to input events by executing commands~\cite[sxhkd].
+You provide it with one or more configuration files, which define the associations between the input events and the commands.
+
+Example configuration file can be seen in the code listing~\ref[code:sxhkd].
+It demonstrates how sxhkd makes it very easy to map multiple shortcuts to multiple commands at once.
+It is done using syntax "{_,A,B} + X", which will define three shortcuts -- "X", "A + X", and "B + X".
+Underscore is representing an empty sequence element -- this is useful if we want to have different variants of command
+based on modifiers used (as in the example, line 7).
+
+\codeblock{code:sxhkd}{Example configuration file for sxhkd}{sxhkd.txt}
+
+Sxhkd can execute defined commands both on key press (default behavior) and on key release (using modifier ``"@"'').
+It has also very interesting feature called {\em chord chain} -- one can specify multiple chords separated by semicolons,
+the command will then only be executed after receiving each chord of the chain in consecutive order.
+One can also use colon instead of semicolon to indicate that the chord chain shall not be aborted when the chain tail is
+reached -- see the example, line 4.
+That means that if we take our example, upon pressing "super + alt + m", {\em moving mode} will be activated and we can
+then move the window just by pressing keys "h, j, k, l".
+
+% ######################################################################################################################
+\secc Xephyr % #########################################################################################################
+% ######################################################################################################################
+
+Xephyr is a nested X server that runs as an X application~\cite[xephyr].
+This is very useful for testing the window manager during the development, because one can make the window manager
+manage the Xephyrs display and see its debug log in the terminal right next to it.
+
+\midinsert
+\picw=15cm \cinspic img/xephyr.png
+\clabel[fig:xephyr]{Xephyr running swm}
+\caption/f Swm running in xephyr which runs in another instance of swm.
+\endinsert
+
+% ######################################################################################################################
+\secc Xvfb % ###########################################################################################################
+% ######################################################################################################################
+
+Xvfb, standing for {\em X virtual framebuffer} is an in-memory display server implementing the X11 display server protocol~\cite[xvfb].
+Xvfb acts exactly like normal X display server, serving requests and sending events as appropriate, but performing all graphical
+operations in virtual memory without showing any output on the screen.
+This makes it ideal for testing X clients, including window managers, on machines with no display hardware and no physical input device.
+
+% ######################################################################################################################
+\sec Design % ##########################################################################################################
+% ######################################################################################################################
+
+One of the core principles of Unix philosophy is that programs should do one thing well,
+as stated by Doug McIlroy, one of the founders of the Unix tradition, in the Bell System Technical Journal:
+{\em ``Make each program do one thing well.
+To do a new job, build afresh rather than complicate old programs by adding new features.''}
+
+% ######################################################################################################################
+\secc Desktops -- groups % ##############################################################################################
+% ######################################################################################################################
+
+% ######################################################################################################################
+\sec Implementation % ##################################################################################################
+% ######################################################################################################################
+
+% ######################################################################################################################
+\secc Structure % #######################################################################################################
+% ######################################################################################################################
+
+% ######################################################################################################################
+\secc Desktops -- groups % ##############################################################################################
+% ######################################################################################################################
+
+\midinsert
+\picw=10cm \cinspic img/group_info.png
+\clabel[fig:groupinfo]{Info box showing group membership}
+\caption/f Info box showing group membership.
+\endinsert
+
+% ######################################################################################################################
+\secc Taking ownership % ###############################################################################################
+% ######################################################################################################################
+
+
+
+
+
+\secc Taskbar, Pagers
+
+There exists many free open source implementations of taskbar/pager for X11 window system.
+Just to name a few:
+\begitems
+* bmpanel2~\cite[bmpanel2]
+* pypanel~\cite[pypanel]
+* fbpanel~\cite[fbpanel]
+* lemonbar~\cite[lemonbar]
+* polybar~\cite[polybar]
+* rieman~\cite[rieman]
+\enditems
+
+We can divide those taskbars into two groups.
+The first group includes {\em bmpanel2}, {\em pypanel} and {\em fbpanel}.
+Each of them provides various features, such as desktop switching, pager, taskbar, system tray, clock etc.
+The other group would include {\em lemonbar} and {\em polybar}.
+Those two are providing the basic interface of the bar -- they handle the communication with X11, struts.
+They also provide 
+It is not common to have standalone pager implementation, as pagers are usually part of taskbars, but {\em rieman} is an example of one.
+
+In fact, EWMH specification specifically says: ``Note that this state ("_NET_WM_STATE_STICKY") has to do with viewports, not desktops''.
+
+\begtt
+moveamount 1
+bind CM-k  window-move-up
+bind CMS-k window-move-up-big
+\endtt
+
+\begtt
+ctrl + alt + {h,j,k,l}
+swmctl move -{w,s,n,e} 20
+\endtt
+
+Size and color of window borders can be changed using swmctl command.
+User must specify width and three colors -- one for window in inactive state, one for active (focused) and one for attention state.
+All borders can be specified at once using command "config border", or one by one using command "config border-top" and its variants.
+One can, for example, set top border to be 3 pixel wide while the others only 1 pixel wide by issuing these two commands:
+\ttline=0 \begtt
+swmctl config border 1 B0BEC5 00BCD4 F44336
+swmctl config border-top 3 B0BEC5 00BCD4 F44336
+\endtt
+
+% ######################################################################################################################
+\sec Testing % #########################################################################################################
+% ######################################################################################################################
+
+ss
