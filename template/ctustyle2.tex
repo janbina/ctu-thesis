@@ -38,10 +38,11 @@
 \testfile{ams-math.tex}{petr.olsak.net/opmac.html}
 \testfile{lmfonts.tex}{petr.olsak.net/csplain.html}
 
-\def\totlist{} \def\toflist{}
+\def\totlist{} \def\toflist{} \def\tollist{}
 
 \def\Xtab#1#2#3{\addto\totlist{\totline{#1}{#2}{#3}}}
 \def\Xfig#1#2#3{\addto\toflist{\tofline{#1}{#2}{#3}}}
+\def\Xlst#1#2#3{\addto\tollist{\tolline{#1}{#2}{#3}}}
 
 \input opmac
 
@@ -155,6 +156,7 @@
 \mtdef {tables}       {Tables}            {Tabulky}        {Tabuľky}
 \mtdef {figures}      {Figures}           {Obrázky}        {}
 \mtdef {figures0}     {Figures}           {Obrazky}        {}
+\mtdef {listings}     {Listings}          {whatever}       {whatever}
 \mtdef {supervisor}   {Supervisor}        {Vedoucí práce}  {Vedúci práce}
 \mtdef {supervisorD}  {Supervisor}        {Školitel}       {Školiteľ}
 \mtdef {bibliography} {References}        {Literatura}     {Literatúra}
@@ -170,6 +172,11 @@
 \def\keepaccents{\keepacc{thanks}%
   \keepacc{declaration}\keepacc{figures}\keepacc{specifi}}
 
+% nums for tables and figures are defined in opmac
+\sdef{mt:l:en}{Listing}
+\newcount\lnum
+\def\thelnum{\thechapnum.\the\lnum}
+\def\athelnum{.}
 
 %%% Worktype
 
@@ -589,6 +596,30 @@
    \tofpages \vfil\break
 }
 
+%%% Listings
+
+\newbox\tolbox
+
+\def\tolpages{
+   \setbox\tolbox=\vbox{\sethsizefront \parskip=0pt \iindent=9mm \tollist\vfil}
+   \prepbox\tolbox
+   \let\tmp=\do
+   \ifvoid\tolbox \let\tmp=\relax \fi
+   \ifx\tmp\do
+      \insertoutline{\ifvoid\tolbox\else \mtext{listings}\fi}
+      \setbox\leftbox=\vsplit\tolbox to\frontht
+      \frontpage[\ifdim\wd\leftbox=0pt  \else\mtext{listings}\fi/%
+                 \ifdim\wd\rightbox=0pt\fi]
+      \loop \let\tmp=\relax
+            \ifvoid\tolbox \else \setbox\leftbox=\vsplit\tolbox to\frontht
+                                 \let\tmp=\do \fi
+            \ifx\tmp\do \vfil\break \frontpage[/] \repeat
+   \fi
+}
+\addto\makefront{%
+   \tolpages \vfil\break
+}
+
 %%% Typessetting of the document:
 
 \addto\makefront{%
@@ -715,11 +746,13 @@
 \def\captionhook#1{\typosize[10/12]%
    \ifx\clabeltext\undefined \else
       \toks0=\expandafter{\clabeltext}%
-      \ifx#1t\edef\tmp{\noexpand\wref\noexpand\Xtab
+      \ifx#1t     \edef\tmp{\noexpand\wref\noexpand\Xtab
                        {{\lastlabel}{\thetnum}{\the\toks0}}}\tmp
-      \else  \edef\tmp{\noexpand\wref\noexpand\Xfig
+      \else\ifx#1l\edef\tmp{\noexpand\wref\noexpand\Xlst
+                       {{\lastlabel}{\thelnum}{\the\toks0}}}\tmp
+      \else       \edef\tmp{\noexpand\wref\noexpand\Xfig
                        {{\lastlabel}{\thefnum}{\the\toks0}}}\tmp
-   \fi\fi
+   \fi\fi\fi
    \global\let\clabeltext=\undefined
    \vskip-\parskip
 }
@@ -731,13 +764,14 @@
    \noindent\llap{\bf\ref[#1].\enspace}%
    {#3\unskip}\nobreak\tocdotfill\pgref[#1]\nobreak\hskip-\iindent\null\par}}
 \let\totline=\tofline
+\let\tolline=\tofline
 
 %%% Numbered paragraphs
 
 \newcount\numA \newcount\numB \newcount\numC \newcount\numD \newcount\numE
 
 \def\chaphook#1\relax{\numA=0 \numB=0 \numC=0 \numD=0 \numE=0 
-   \secnum=0 \seccnum=0 \tnum=0 \fnum=0 \dnum=0 \relax}
+   \secnum=0 \seccnum=0 \tnum=0 \fnum=0 \lnum=0 \dnum=0 \relax}
 
 \def\numberedpar#1#2{\par \global\advance\csname num#1\endcsname by1
    \noindent\wlabel{\thechapnum.\the\csname num#1\endcsname}%
