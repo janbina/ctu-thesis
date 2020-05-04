@@ -1,5 +1,6 @@
 # Resulting pdf document
 thesis.pdf
+cover/cover.pdf
 # OPmac ref files
 *.ref
 
