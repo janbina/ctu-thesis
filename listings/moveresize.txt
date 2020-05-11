@@ -1,0 +1,3 @@
+swmctl moveresize -g {nw,ne,sw,se} -wr .5 -hr .5
+
+swmctl moveresize -g c -wr .7 -hr .7

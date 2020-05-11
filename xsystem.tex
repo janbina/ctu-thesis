@@ -28,6 +28,7 @@ Version 11 is a complete window programming package.
 It offers much more flexibility in the areas of supported display
 features, window manager styles, and support for multiple screens and provides better performance than X Version 10.~\cite[xguide1]
 
+\label[sec:xarch]
 \sec Architecture
 X uses a client-server model.
 The server is the software that manages one display, keyboard, and mouse.
@@ -140,6 +141,20 @@ Normally this loop is implemented as an infinite while loop,
 beginning with an event−getting routine and followed by a switch statement that branches according to the event type.
 Within each branch for an event type, there may be additional branches corresponding to the window in which the event
 occurred or other fields in the event structure.~\cite[xguide1]
+
+\label[sec:xwinhierarchy]
+\sec Window Hierarchy
+X windows are arranged in a tree hierarchy.
+Each window always has exactly one parent window, which is assigned as the window is created.
+The only window that has no parent is called the {\em root window} and fills the entire screen.
+The root window is created by the X server as it starts up.~\cite[xguide1]
+
+The first windows to be created by each client are children of the root window.
+The children of the root window are special -- they are called top-level windows and they are managed by the window manager.
+Each child may also have its own child windows.
+These child windows of the top−level windows are used to create application features like buttons and text boxes.
+Each window is contained within the limits of its parent and each window has its own coordinate system.
+The origin of a window is the top−left corner of the window and the x and y coordinates increase to the right and bottom.~\cite[xguide1]
 
 \sec The Window Manager
 The window manager is just another client of X server, but by convention, it is given special responsibilities.

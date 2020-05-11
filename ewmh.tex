@@ -67,6 +67,7 @@ the screen size (paging) or it may allow arbitrary positions (scrolling).
 To fulfill the ICCCM principle that clients should behave the same regardless whether a window manager is running or not,
 window managers which implement large desktops must interpret all client-provided geometries with respect to the current viewport.
 
+\label[sec:ewmhdesktops]
 \secc Virtual desktops
 Most X servers have only a single screen.
 The window manager may virtualize this resource and offer multiple so-called 'virtual desktops', of which only one can be shown on the screen at a time.
@@ -87,6 +88,7 @@ In the X world, activating a window means to give it the input focus.
 This may not be possible if the window is unmapped, because it is on a different desktop.
 Thus, activating a window may involve additional steps like moving it to the current desktop (or changing to the desktop the window is on), deiconifying it or raising it.
 
+\label[sec:ewmhrootprops]
 \secc Root window properties
 As stated in section~\ref[sec:propertiesatoms], clients of X Server are communicating with each other using properties.
 EWMH defines many new properties and in this section, we will take a look at those which are set on root window.
@@ -174,6 +176,7 @@ Details about those properties could be found in the specification~\cite[ewmh].
 * "NET_DESKTOP_LAYOUT"
 \enditems
 
+\label[sec:ewmhrootmsg]
 \secc Other root window messages
 In this section, we will list client messages sent to the root window which are not connected
 with any property (they are stateless).

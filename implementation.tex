@@ -1,16 +1,21 @@
 \chap Implementation
 
+In this chapter, we will describe the implementation process of SWM -- Simple Window Manager.
+Firstly, we will go through {\em tools} used for the implementation, as well as for testing and communication with the window manager.
+Then, we will discuss the {\em design} decisions made and some detail from the {\em implementation} itself.
+Lastly, we will look on {\em testing} process.
+
 % ######################################################################################################################
 \sec Tools % ###########################################################################################################
 % ######################################################################################################################
 
-In this section, we will describe tools used for development, testing as well as tools that made certain design decisions possible.
+In this section, we will describe tools used for development, testing, and tools that made certain design decisions possible.
 
 % ######################################################################################################################
 \secc Go % #############################################################################################################
 % ######################################################################################################################
 
-Go programming language~\cite[golang] in version $1.13$ was used for the implementation of both SWM and swmctl.
+Go programming language~\cite[golang] in version $1.14$ was used for the implementation of both swm and swmctl.
 Firstly released in 2009, Go is a statically typed, compiled programming language.
 It was designed at Google by Robert Griesemer, Rob Pike, and Ken Thompson~\cite[golang].
 Go refers to itself as being expressive, concise, clean, and efficient~\cite[golang].
@@ -125,11 +130,11 @@ Various filters are available, you can, for example, limit the search only to wi
 
 Xdotool can chain commands, so you can use one command to get a window ID first and then perform an action on it, like this:
 
-\ttline=0 \begtt
+\begtt
 xdotool windowactivate 56623105
 xdotool getactivewindow windowminimize
 xdotool search "chromium" set_desktop_for_window 3
-\endtt \ttline=-1
+\endtt
 
 % ######################################################################################################################
 \secc Wmctrl % #########################################################################################################
@@ -170,10 +175,10 @@ The window, on which the action should be performed, could be specified in one o
 
 You can then use wmctrl to close the window or toggle its maximized state like this:
 
-\ttline=0 \begtt
+\begtt
 wmctrl -c -i 56623105
 wmctrl -r :ACTIVE: -b toggle,maximized_vert,maximized_horz
-\endtt \ttline=-1
+\endtt
 
 % ######################################################################################################################
 \secc Sxhkd % ##########################################################################################################
@@ -199,6 +204,7 @@ That means that if we take our example, upon pressing "super + alt + m", {\em mo
 then move the window just by pressing keys "h, j, k, l".
 
 % ######################################################################################################################
+\label[sec:xephyr] % ###################################################################################################
 \secc Xephyr % #########################################################################################################
 % ######################################################################################################################
 
@@ -207,12 +213,13 @@ This is very useful for testing the window manager during the development, becau
 manage the Xephyrs display and see its debug log in the terminal right next to it.
 
 \midinsert
-\picw=15cm \cinspic img/xephyr.png
+\picw=14cm \cinspic img/xephyr.png
 \clabel[fig:xephyr]{Xephyr running swm}
 \caption/f Swm running in xephyr which runs in another instance of swm.
 \endinsert
 
 % ######################################################################################################################
+\label[sec:xvfb] % #####################################################################################################
 \secc Xvfb % ###########################################################################################################
 % ######################################################################################################################
 
@@ -225,26 +232,282 @@ This makes it ideal for testing X clients, including window managers, on machine
 \sec Design % ##########################################################################################################
 % ######################################################################################################################
 
-One of the core principles of Unix philosophy is that programs should do one thing well,
-as stated by Doug McIlroy, one of the founders of the Unix tradition, in the Bell System Technical Journal:
+The primary design goal for SWM was to be {\em ``small, easy to use yet hackable stacking window manager.''}
+To design such window manager, we based it on one of the core principles of Unix philosophy, that programs should do one thing well,
+as stated by Doug McIlroy, one of the founders of the Unix tradition, in the Bell System Technical Journal~\cite[mcilroy]:
 {\em ``Make each program do one thing well.
 To do a new job, build afresh rather than complicate old programs by adding new features.''}
 
-% ######################################################################################################################
-\secc Desktops -- groups % ##############################################################################################
-% ######################################################################################################################
+To honor this principle, SWM does not come with its own taskbar or application launcher, as some window managers do.
+Instead, it focuses on that one thing, window management, and the rest is left for third party applications.
+Thanks to ICCCM and EWMH specifications, third party applications can interact with SWM seamlessly
+and user can choose any application that fits his needs instead of using the one bundled with window manager.
+
+For example, there are many open source taskbar implementations,
+like polybar~\cite[polybar], lemonbar~\cite[lemonbar], or pypanel~\cite[pypanel], just to name a few.
+To mention some application launchers that could be used with SWM, we can name dmenu~\cite[dmenu] or rofi~\cite[rofi].
+
+In this section, we will discuss some of the design choices made in development of swm into detail.
 
 % ######################################################################################################################
+\secc Configuration and controlling % ##################################################################################
+% ######################################################################################################################
+
+Most of the window managers are using configuration files with lots and lots of options you can configure.
+With swm, we decided to take a different approach:
+\begitems
+* There is no need for swm to have commands for actions like maximizing or minimizing the window -- since it supports EWMH
+and there are tools for sending EWMH messages (xdotool, wmctrl), we can just make use of them.
+* There is no need to handle keyboard shortcuts -- users can use sxhkd that does it better than we could ever do.
+\enditems
+This means that to maximize and minimize the window, as well as to do many more actions, user can use sxhkd in combination
+with xdotool or wmctrl and swm does not have to be involved at all.
+
+Not everything could be done through EWMH and third party tools, though.
+To address those cases, swm comes with two tools -- swmctl and swmrc -- that we will discuss in the next section.
+
+% ######################################################################################################################
+\secc Swmctl and Swmrc % ###############################################################################################
+% ######################################################################################################################
+
+Swmctl is a simple command line utility that can be used to send commands to swm.
+It is primarily meant to be used in combination with sxhkd to invoke the commands with keyboard shortcuts,
+but it can also be used directly from command line.
+This makes it easy to test the command first and edit the configuration file only after it works exactly how one wants it to.
+
+All the swmctl's commands will be discussed one by one in the {\em implementation}~\ref[sec:impl] section later,
+but to get an idea of how swmctl works and how it is better than simple configuration file, lets have a look at
+following example.
+
+To move a window using keyboard in cwm, one has to bind keyboard shortcuts in its configuration file like this:
+\begtt
+moveamount 1
+bind CM-k  window-move-up
+bind CMS-k window-move-up-big
+\endtt
+As you can see, there is an option "moveamount", which defines how many pixels the window will move.
+Then, there are two commands for each direction "window-move-X" and "window-move-X-big".
+The first one moves the window by "moveamount" pixels, the second one moves it by ten times "moveamount" pixels.
+
+In swmctl, on the other hand, there is a "move" command, which, by an argument takes the direction(s) and amount of pixels to move the window by.
+User can then bind this command to keyboard shortcut using sxhkd like this:
+\begtt
+ctrl + alt + {h,j,k,l}
+    swmctl move -{w,s,n,e} 20
+\endtt
+
+This approach is both much more simple and versatile than cwm's:
+\begitems
+* while cwm is limited to two move amounts (and they are even tight together), swm can handle arbitrary amount,
+* swm can move the window in multiple directions in one command, and it can even be moved by different amount of pixels in each direction.
+\enditems
+
+Swmrc is just a script that is executed upon startup of swm.
+It is executed after all the initialization has been done, so the window manager is running and
+can accept any command, be it swmctl's one or EWMH message sent using xdotool, but right before all the existing windows
+are adopted by swm.
+This makes it ideal for all configuration commands -- one can, for example, set the names of the groups, color of borders etc.
+
+% ######################################################################################################################
+\secc Desktops -- Groups % #############################################################################################
+% ######################################################################################################################
+
+Virtual desktops, sometimes called workspaces or window groups, offer a way of organizing applications.
+Switching to different desktop hides all the applications from previous desktop and shows applications from new desktop.
+This way, user can group applications that are used together and switch between different tasks easily.
+
+Many slightly different models of virtual desktops exist among window managers.
+The most standard model is using multiple desktops, one of them being visible at any given time
+and window always belonging to exactly one of them.
+In another model, more than one desktop could be visible at a time, or window can belong to more than one group, or both.
+
+Firstly, lets briefly summarize what EWMH tells about virtual desktops~\cite[ewmh]:
+\begitems
+* only one desktop can be shown on the screen at a time,
+* there may be a fixed number of desktops, or new ones may be created dynamically,
+* window manager offers a way for the user to move clients between desktops,
+* clients may be allowed to occupy more than one desktop simultaneously.
+\enditems
+For more detailed description, see section~\ref[sec:ewmhdesktops].
+
+For SWM, we decided to build on cwm's desktop (group) model and design it in a similar way.
+There is unlimited amount of standard groups (cwm has fixed amount of nine groups),
+and  one special group (called sticky), that is always visible.
+Every standard group could be either visible or hidden and each window can belong to arbitrary number of groups.
+Window is visible if any of its group is visible, otherwise hidden.
+
+Although this group model violates EWMH specification (only one desktop can be shown on the screen at a time),
+it is the most versatile solution and, in a way, superset of all others.
+Depending on the implementation (which will be discussed in section~\ref[sec:groupimpl]),
+user can always opt to have only one group visible at a time and each window assigned to exactly one group.
+
+% ######################################################################################################################
+\label[sec:impl]
 \sec Implementation % ##################################################################################################
 % ######################################################################################################################
 
-% ######################################################################################################################
-\secc Structure % #######################################################################################################
-% ######################################################################################################################
+In this section, we will cover implementation of the window manager, from structuring the project to some
+interesting implementation details.
 
 % ######################################################################################################################
-\secc Desktops -- groups % ##############################################################################################
+\secc Project Structure % ##############################################################################################
 % ######################################################################################################################
+
+The project structure is based on Go modules.
+Go modules were first introduced in Go version $1.11$ and became the default in version $1.13$~\cite[gomodules].
+It is basically a dependency management system which makes dependency version information explicit and easier to manage~\cite[gomodules].
+A module is a collection of Go packages stored in a file tree, backed by "go.mod" file.
+In the code example~\ref[code:gomod], you can see excerpt of SWM's "go.mod" file.
+It defines the module path, which is also the import path used for the root directory,
+version of Go, which should be used for compilation,
+and dependency requirements, which are the other modules needed for a successful build~\cite[gomodules].
+
+\codeblock{code:gomod}{Go module configuration file.}{gomod.txt}
+
+Since there is no official guide on how to structure packages inside Go module, we took inspiration from {\em Standard Go Project Layout}~\cite[gostructure].
+They propose a structure with four top-level directories, {\em cmd}, {\em internal}, {\em pkg} and {\em vendor}.
+This structure is based on the structure of some popular Go projects, such as Docker~\cite[docker] or Kubernetes~\cite[kubernetes],
+as well as on choices made by Go team in Go's standard library.
+
+\begitems
+* {\Blue cmd\Black} directory should contain main applications for the project -- in our case, that is {\em swm} and {\em swmctl}.
+Common practice is to have small "main" function which imports and invokes the code from the {\em internal} and {\em pkg} directories.
+* {\Blue internal\Black} directory should contain private application and library code -- the code you don't want others importing in their applications or libraries.
+Since swm is not a library and doesn't contain any code which could be reused in other applications, all of its code will reside inside this directory.
+As of Go version $1.14$, Go compiler itself prevents others from importing the code inside this directory~\cite[gointernal].
+* {\Blue pkg\Black} directory should contain code that's meant to be used by other applications.
+If the project is small, it is not necessary to put packages inside {\em pkg} directory -- unlike {\em internal}, it does not provide any
+extra value, so those packages could stay in root directory.
+It can be, however, useful for large projects or projects with lots of non-Go components.
+\enditems
+
+Complete project structure with all the packages, helper files and directories could be seen in the figure~\ref[fig:structure].
+All the source code for swm and swmctl is in directories {\em cmd} and {\em internal}.
+According to recommendation, "main" functions of both swm and swmctl are very minimal and they basically only invoke the code from the {\em internal} directory.
+Then, there is directory with examples, which contain example configuration file for {\em sxhkd} and example {\em swmrc} startup script.
+They are useful for newcomers, to show them what is possible to do and provide them with some basic usable configuration.
+Directory {\em test} contains tests, which are written in Go as well, with an accompanying shell script which does the compilation and prepares the testing environment.
+Finally, "go.mod" and "go.sum" files are module configuration files used by Go compiler to fetch and verify dependencies.
+
+\midinsert
+\dirtree{%
+    .1 .
+    .2 cmd.
+    .3 swm\DTcomment{swm executable}.
+    .3 swmctl\DTcomment{swmctl executable}.
+    .2 examples\DTcomment{directory with example configuration files}.
+    .2 internal.
+    .3 communication\DTcomment{communication between swm and swmctl}.
+    .3 config\DTcomment{holds configuration}.
+    .3 cursors\DTcomment{holds loaded X cursors}.
+    .3 decoration\DTcomment{interface for window decorations}.
+    .3 focus\DTcomment{focus management}.
+    .3 groupmanager\DTcomment{group management}.
+    .3 heads\DTcomment{holds screens and their configurations}.
+    .3 stack\DTcomment{stack management}.
+    .3 util\DTcomment{utilities}.
+    .3 window\DTcomment{window structure and operations on single window}.
+    .3 windowmanager\DTcomment{window management}.
+    .2 test\DTcomment{tests}.
+    .2 go.mod\DTcomment{go configuration file}.
+    .2 go.sum\DTcomment{go configuration file}.
+}
+\medskip
+\clabel[fig:structure]{Source code structure}
+\caption/f Source code structure.
+\endinsert
+
+% ######################################################################################################################
+\secc Inter-process communication % ####################################################################################
+% ######################################################################################################################
+
+Communication between swm and swmctl is done using unix sockets,
+which is a socket family used to communicate between processes on the same machine efficiently~\cite[unixsocket],
+and therefore ideal for our needs.
+Sockets bound to a filesystem pathname are used.
+For this purpose, swm creates its own directory inside user's runtime directory defined by an environment variable "XDG_RUNTIME_DIR",
+which usually points to "/run/user/$USER_ID/".
+Each socket is named like ``":$1.$2"'', where "$1" is X display number and "$2" its default screen.
+The socket address can then look like this: \begtt /run/user/1000/swm/:0.0 \endtt
+This guarantees that multiple swm instances can run on different X screens simultaneously (for example using Xephyr)
+and they all have different communication channel.
+
+Communication is done by sending null-terminated strings back and forth over the socket.
+Swmctl is designed to be as simple as possible -- it only collects its command line arguments, sends them to the socket and waits for reply.
+All the heavy lifting is done inside swm itself -- it listens on the socket for command, parses it, and sends back a reply.
+Reply is just an arbitrary null-terminated string which is then written to the standard output by swmctl.
+
+Updating existing or adding new command then requires changes inside swm only, swmctl does not have to be modified.
+
+% ######################################################################################################################
+\label[sec:groupimpl]
+\secc Desktops -- groups % #############################################################################################
+% ######################################################################################################################
+
+As described in design section, virtual desktops in swm are replaced with groups.
+Each window belongs to at least one group. Each group could be either visible or hidden, except for sticky group, which is always visible.
+In this section, we will discuss groups from the implementation point of view.
+
+Since we tried to stay as EWMH compatible as possible, all the EWMH properties are honored and updated by swm in a way that makes the most sense:
+\begitems
+* Root window property "_NET_NUMBER_OF_DESKTOPS" is fully supported -- number of desktops corresponds to number of groups
+and is updated by swm upon change.
+Requests to change the number of desktops are always honored and results in changing the number of groups.
+When the change leads to removal of some groups, windows whose only groups is going to be removed are reassigned to a different, valid group.
+* Root window property "_NET_CURRENT_DESKTOP" is supported. It is set by swm to ID of the group which is visible and which was made visible most recently.
+Request to change the current desktop are honored by making the group of corresponding ID the only visible group.
+* Root window property "_NET_DESKTOP_NAMES" is fully supported. It is updated by swm to the names user sets using swmctl
+and request to change it are honored and names reported by swm updated accordingly.
+* Client property "_NET_WM_DESKTOP" is supported and is set to list of IDs in ascending order of all groups the window is part of.
+Even though ewmh states that {\em ``clients may be allowed to occupy more than one desktop simultaneously''} (see section~\ref[sec:ewmhdesktops]),
+it is not very common and most tools treat "_NET_WM_DESKTOP" as a single integer.
+To address this issue, swmctl provides a command to retrieve all the groups the window is part of.
+\enditems
+
+The only feature that cannot be captured by any existing EWMH property is the possibility to have more groups (desktops) visible
+at the same time. This makes sense, because it goes against the EWMH specification, which says: {\em ``only one virtual desktop can be shown on the screen at a time.''}
+To address this, swmctl provides a command to obtain all visible group IDs, but also, we crated custom root window property
+called "_SWM_VISIBLE_GROUPS".
+It is set by swm to list of IDs (in ascending order) of all groups which are visible.
+This might be useful for existing tools which already make use of some root window properties -- they will not need
+to incorporate swmctl, but instead, they will look just for one more property.
+For example, polybar~\cite[polybar] provides module for EWMH desktops~\cite[polybarworkspaces].
+It has an indication of active desktop, which makes use of "_NET_CURRENT_DESKTOP".
+Using "_SWM_VISIBLE_GROUPS" property, it should be quite easy to modify it to indicate not only active desktop, but also all visible groups of swm.
+
+To achieve the functionality described in design section, swmctl provides this set of commands:
+\begtt
+swmctl group mode (sticky|auto)
+swmctl group (toggle|show|hide|only) <GROUP-ID>
+swmctl group (set|add|remove) [-id <WINDOW-ID>] [-g <GROUP-ID>]
+swmctl group names <NAME> [<NAME>...]
+swmctl group get [-id <WINDOW-ID>]
+swmctl group get-visible
+\endtt
+
+\begitems
+* "mode (sticky|auto)" configures the grouping mode. If the group mode is "sticky", newly created windows are always assigned to sticky group.
+If the mode is "auto", "_NET_WM_DESKTOP" client property is used to determine group for window and if it is not set, window is assigned to the group which
+is visible and was made visible most recently (same logic as "_NET_CURRENT_DESKTOP").
+* "(toggle|show|hide|only) <GROUP-ID>" is there to change the visibility of the group. Option "only" makes only the group with provided ID visible,
+the rest of groups will be made invisible (except for sticky group).
+* "(set|add|remove) [-id <WINDOW-ID>] [-g <GROUP-ID>]" changes the groups the window is part of. You can "set" its group, which
+will make it belong to specified group only, "add" a group, which will add specified group to all the groups the window is already part of,
+or "remove" the window from specified group. If you remove the window from its only group, new group will be automatically assigned to it, since
+every window has to be part of some group. This group is based on grouping mode.
+Both the group ID and window ID arguments are optional. If not provided, window ID defaults to active window and group ID to current group.
+* "names <NAME> [<NAME>...]" sets the group names.
+* "get [-id <WINDOW-ID>]" returns list of group IDs the window belongs to. Window ID argument is optional  and defaults to active window.
+* "get-visible" returns list of group IDs which are in visible state.
+\enditems
+
+Swm also indicates the group membership of window in its UI.
+Every time the group membership changes, either using swmctl command or EWMH client message,
+small info box in the top left corner of the window is shown for three seconds.
+This info box lists names of all the groups the window is member of.
+Example can be seen in the picture~\ref[fig:groupinfo].
+The window in the example is member of groups named "5", "G.14" and "S", where "S" is the name used for the sticky group.
+This info box is also shown upon execution of "swmctl group get" command.
 
 \midinsert
 \picw=10cm \cinspic img/group_info.png
@@ -253,58 +516,271 @@ To do a new job, build afresh rather than complicate old programs by adding new 
 \endinsert
 
 % ######################################################################################################################
-\secc Taking ownership % ###############################################################################################
+\label[sec:becomingwm]
+\secc Becoming a window manager % ######################################################################################
 % ######################################################################################################################
 
+In the section~\ref[sec:xarch], it was already said that ``window manager is a client that has authority over the layout of windows on the
+screen'' and that ``certain X protocol features are used only by the window manager to enforce this authority''~\cite[xguide0].
+In this section, we will look at this mechanism in more detail and discuss how can X client become window manager.
 
+The first thing swm has to do after the start is to get a connection to the X server,
+which is the case for all applications that want to communicate with X server, not only for window managers.
+After swm connects to X server, it becomes its regular client.
+They can already communicate with each other, smw can, for example, send a request to create a window.
 
+To do its job, the window manager needs to intercept requests of other clients to change the state of their top-level windows.
+This is done using mechanism called {\em substructure redirection}.
+Substructure refers to the size, position, and overlapping order of the children of a window.
+Substructure redirection allows a window manager to intercept any request by an application to change the size, position, border width,
+or stacking order of its top-level windows on the screen.~\cite[xguide1]
 
+This means that to become a window manager, client has to register for substructure redirection on the root window.
+Xlib programming manual says: ``When the window manager selects SubstructureRedirectMask on the root window,
+an attempt by any other client to change the configuration of any child of the root window will fail.
+Instead an event describing the layout change request will be sent to the window manager.
+The window manager then reads the event and determines whether to honor the request, modify it, or deny it completely.''~\cite[xguide1]
 
-\secc Taskbar, Pagers
+For this to work, the X server only allows one running program to register for substructure redirection on any given window at any given time~\cite[chuanji].
+If there is already a window manager running, attempts to register for substructure redirection on the root window will fail.
 
-There exists many free open source implementations of taskbar/pager for X11 window system.
-Just to name a few:
+After connecting to the X server, swm tries to register for substructure redirection on the root window.
+If it does not succeed, swm assumes there is already another window manager running, writes that information to
+the standard output, and quits.
+There is, however, an option for swm to replace the running window manager.
+To do that, user has to run swm with "--replace" flag.
+
+To replace running window manager, swm makes use of mechanism called {\em selection},
+which is part of the ICCCM specification and was discussed in the section~\ref[sec:icccmselection].
+Swm sends the "SetSelectionOwner" request, resulting in running window manager receiving the "SelectionClear" event.
+It must react to it by releasing all resources it has managed and must then destroy the window that owned the selection.
+ICCCM specifically says: ``For example, a window manager losing ownership of "WM_S2" must deselect from "SubstructureRedirect"
+on the root window of screen 2 before destroying the window that owned "WM_S2".''
+Swm is therefore, after sending the "SetSelectionOwner" request, waiting for "DestroyNotify" event, indicating that
+previous window manager destroyed its window and then tries to register for substructure redirection again -- this time it should succeed.
+
+Unfortunately, not all window manager supports ICCCM's selection mechanism.
+For example, i3, dwm, awesome, herb, bspwm and others do not. % TODO
+However, if such window manager supports at least EWMH, there exists one last possibility for swm to replace it.
+EWMH requires supporting window managers to set "_NET_SUPPORTING_WM_CHECK" root window property to be the ID of a child
+window created by themselves, as described in the section~\ref[sec:ewmhrootprops].
+Swm could obtain this ID, forcibly kill that window, and take the substructure redirection for itself.
+
+% ######################################################################################################################
+\secc Window Decorations and Reparenting % #############################################################################
+% ######################################################################################################################
+
+Window manager usually adds its own graphical elements to top-level windows, called window decorations.
+Window decoration could be anything -- from simple one-pixel border to a title bar with window name
+and buttons to manipulate it.
+Example of such window decoration is shown in figure~\ref[fig:windecor].
+It depicts a window with a blue border and a title bar with three buttons -- those buttons are typically used to
+minimize, (de)maximize and close the window.
+Another common functionality of window decorations is moving and resizing the window using a pointing device -- by dragging its borders or title bar.
+
+Window decorations are usually created and managed by the window manager, mainly to unify the looks across all applications.
+However, some applications opt to custom implementation.
+In this case, they need to give a hint to window manager not to draw any other decorations.
+To implement the moving and resizing functionality, they can use the "_NET_WM_MOVERESIZE" EWMH client message (see section~\ref[sec:ewmhrootmsg]),
+minimizing, maximizing, and closing the window is also possible through EWMH protocol.
+This might be beneficial for applications that need to show some kind of toolbar in their UI anyway, so they include window manipulating
+buttons and borders as well for better integration.
+For example, see figure~\ref[fig:customdecor] with custom window decorations of document viewer Evince and Google Chrome web browser.
+
+\midinsert
+\picw=12.5cm \cinspic img/decor.pdf
+\clabel[fig:windecor]{Window decorations}
+\caption/f Window decorations -- borders, title bar, buttons.
+\endinsert
+
+\midinsert
+\picw=12cm \cinspic img/decor_custom.png
+\clabel[fig:customdecor]{Window decorations of Evince and Google Chrome}
+\caption/f Custom window decorations of Evince and Google Chrome.
+\endinsert
+
+Swm's window decorations are pretty minimal.
+There is no title bar with buttons, just a simple solid color border around the window and rectangle box indicating group membership -- see figure~\ref[fig:groupinfo].
+All the colors, as well as the font and color used for group names and width of the borders, are customizable using following swmctl's commands:
+\begtt
+swmctl config border 2 B0BEC5 00BCD4 F44336
+swmctl config border-top 5 B0BEC5 00BCD4 F44336
+// also border-bottom, border-left, border-right
+
+swmctl config font "/usr/share/fonts/TTF/JetBrainsMono-Bold.ttf"
+
+swmctl config info-bg-color 00BCD4
+swmctl config info-text-color FFFFFF
+\endtt
+It is possible to configure all the borders at once or each one separately using "config border-top" command and its variants.
+This means each border could have different width and color.
+There are three colors for each border -- they are used to indicate one of three possible window states:
 \begitems
-* bmpanel2~\cite[bmpanel2]
-* pypanel~\cite[pypanel]
-* fbpanel~\cite[fbpanel]
-* lemonbar~\cite[lemonbar]
-* polybar~\cite[polybar]
-* rieman~\cite[rieman]
+* normal,
+* active (focused),
+* attention (see state "_NET_WM_STATE_DEMANDS_ATTENTION" in section~\ref[sec:ewmhrootmsg]).
 \enditems
 
-We can divide those taskbars into two groups.
-The first group includes {\em bmpanel2}, {\em pypanel} and {\em fbpanel}.
-Each of them provides various features, such as desktop switching, pager, taskbar, system tray, clock etc.
-The other group would include {\em lemonbar} and {\em polybar}.
-Those two are providing the basic interface of the bar -- they handle the communication with X11, struts.
-They also provide 
-It is not common to have standalone pager implementation, as pagers are usually part of taskbars, but {\em rieman} is an example of one.
+When it comes to window decorations, an important topic is {\em reparenting}.
+As mentioned in section~\ref[sec:xwinhierarchy], X window hierarchy is tree-based,
+and all top-level application windows are created as direct children of so-called root window.
+Window manager might step into that and, before it maps the application window, create new window (child of the root)
+and {\em reparent} application's top-level window, using the newly created window as its parent.
+This is very important for advanced window decorations, like title bars or even borders with different width or color on each side.
+Those decorations has to be created as windows and, by having the same parent window (the one created by window manager)
+as the top-level application window, one can easily manipulate with all of them in sync using the parent window.
 
-In fact, EWMH specification specifically says: ``Note that this state ("_NET_WM_STATE_STICKY") has to do with viewports, not desktops''.
+Reparenting is quite complicated, though.
+As stated by Peter Hofmann, the author of window manager called katriawm:~\cite[katriawm]
+{\em ``Reparenting is not as easy as you might think.
+Reparenting adds an additional layer of complexity -- or maybe even more than one layer.
+Plus, reparenting does not magically fix all your problems. For example, Java expects to run under a reparenting window manager by default.
+If it does not, then you might only get a grey window.
+Surely, when you write a reparenting WM, even a simple one, this must be fixed, right?
+No, it won't be fixed.
+I ended up with either half of the window being grey or with misplaced menus.''}
 
+While developing swm, we faced those issues as well.
+If the window manager is non-reparenting, applications using the standard Java GUI toolkit are rendered
+as a plain gray boxes instead of rendering the GUI~\cite[javaarch].
+One solution to this might be to set the name of the window manager to one of those that are hard-coded in the Java GUI toolkit
+as non-reparenting~\cite[javaarch].
+This solution was used in early days of development of swm.
+The best solution, though, is to actually reparent the windows.
+
+In the end, we chose to reparent all the windows in swm.
+Not only it did solve the problems with apps using the Java GUI toolkit, but it also made it possible to provide better window decorations.
+This was not primary design goal, but it is nice to have.
+
+% ######################################################################################################################
+\secc Moving and resizing % ############################################################################################
+% ######################################################################################################################
+
+For moving and resizing windows, smwctl provides three commands, "move", "resize" and "moveresize". Their syntax is as follows:
 \begtt
-moveamount 1
-bind CM-k  window-move-up
-bind CMS-k window-move-up-big
+swmctl move [-id <WINDOW-ID>]
+            [-n <NUM>] [-e <NUM>] [-s <NUM>] [-w <NUM>]
+
+swmctl resize [-id <WINDOW-ID>]
+              [-n <NUM>] [-e <NUM>] [-s <NUM>] [-w <NUM>]
+
+swmctl moveresize  [-id <WINDOW-ID>]
+                   [-o <ORIGIN>]
+                   [-x <NUM>] [-y <NUM>] [-w <NUM>] [-h <NUM>]
+                   [-xr <NUM>] [-yr <NUM>] [-wr <NUM>] [-hr <NUM>]
 \endtt
 
-\begtt
-ctrl + alt + {h,j,k,l}
-swmctl move -{w,s,n,e} 20
-\endtt
+The first two commands will just alter current position or size of the window -- they will move it or resize it by a specified amount
+of pixels in a specified direction.
+The window ID argument is optional and active (focused) window is used by default.
+The movement is specified by cardinal directions, {\sbf n}orth, {\sbf e}ast, {\sbf s}outh, and {\sbf w}est.
+It is possible to combine them, so to move the window 20 pixels north and 10 pixels east, one can issue a command:
+\begtt swmctl move -n 20 -e 10 \endtt
+and to enlarge the window by 10 pixels in each direction, this command:
+\begtt swmctl resize -n 10 -e 10 -s 10 -w 10 \endtt
+To shrink the window, one can simply provide negative number of pixels.
 
-Size and color of window borders can be changed using swmctl command.
-User must specify width and three colors -- one for window in inactive state, one for active (focused) and one for attention state.
-All borders can be specified at once using command "config border", or one by one using command "config border-top" and its variants.
-One can, for example, set top border to be 3 pixel wide while the others only 1 pixel wide by issuing these two commands:
-\ttline=0 \begtt
-swmctl config border 1 B0BEC5 00BCD4 F44336
-swmctl config border-top 3 B0BEC5 00BCD4 F44336
-\endtt
+The "moveresize" command can be used to set the exact position and size for the window.
+The window ID argument is again optional, defaulting to active (focused) window.
+There are two ways of how to provide position and size: absolute and relative.
+Absolute is just the amount of pixels, relative is the proportion to the screen size.
+Arguments for position and size are "-x", "-y", "-w", and "-h", for x and y coordinate, width and height.
+For relative, one can use the variants "-xr", "-yr", "-wr", and "-hr".
+Lastly, there is one more argument, "-o" for origin, that defines the origin for x and y coordinates.
+Origin is specified by cardinal directions and the default value is "nw", meaning that origin is in top left corner.
+Origin makes it easy to constraint window to any side, without the need to calculate x and y coordinates.
+For example, to make the window half the width and half the height of the screen and constraint it to any corner, this command can be used:
+\begtt swmctl moveresize -g {nw,ne,sw,se} -wr .5 -hr .5 \endtt
+
+% ######################################################################################################################
+\secc Stacking % #######################################################################################################
+% ######################################################################################################################
+
+The stacking is done in the way recommended by the EWMH -- see the section~\ref[sec:stackingorder].
+Each window belongs to some layer, based on its "_NET_WM_WINDOW_TYPE" property,
+and within each layers, windows are ordered chronologically -- window {\em raised} earlier will be below those raised later
+Window can be also brought layer up or down using "_NET_WM_STATE_ABOVE" or "_NET_WM_STATE_BELOW" states, as well as.
+all the way to the top using "_NET_WM_STATE_FULLSCREEN".
+
+The stacking logic is encapsulated inside of the "stack" package.
+For every window, we track the layer it belongs to and the time it was last raised (brought to the top of its layer) there.
+Raising a window then means to update the time it was last raised, sort all the windows based on the layer and time,
+and inform the X server about the new stacking order, which will make it redraw affected windows.
+
+Raising usually happens when the window is activated (for example by user clicking on it).
+This means, raising usually only involves single window.
+Because of swm's group model (multiple groups visible at the same time), we need to be able to raise multiple windows at once as well, though.
+That is the case when a group is made visible while some other groups are already visible.
+In this case, we want to raise all the windows of newly visible group above the rest of the windows (respecting layers).
+Swm handles this situation correctly by updating the raise time of all the windows in the group with respect to their
+previous raise time -- the stacking order within the group stays the same.
+
+% ######################################################################################################################
+\secc Window Cycling % #################################################################################################
+% ######################################################################################################################
+
+Window cycling is another common window manager feature.
+It is directly tight to keyboard shortcut, usually "alt + Tab" and it provides simple and fast way to switch between recently active windows.
+Most window managers comes with UI that lists all the windows user can cycle to, highlighting currently chosen window -- see figure~\ref[fig:cycling].
+In minimalistic window managers, this UI is usually missing, though.
+This is the case for cwm, for example.
+
+Swm provides very simple window cycling functionality as well.
+It is controlled via three swmctl commands -- example sxhkd mapping could be seen in the code listing~\ref[code:cyclingshortcuts].
+Swm does not come with any window cycling UI, it just temporarily raises particular window to the very top of the stack -- even above fullscreen windows,
+so it can always be seen.
+User can cycle in both directions, using commands "swmctl cycle-win" and "swmctl cycle-win-rev".
+After the cycling operation is done, that is, after "swmctl cycle-win-end" is called, window that was selected
+is raised permanently, this time respecting its layer though, and given the input focus (activated).
+
+Window cycling functionality can be implemented by third party applications as well.
+There is, for example, open source application called {\em alttab}, that describes
+itself as {\em ``X11 window switcher designed for minimalistic window managers or standalone X11 session''}~\cite[alttab].
+It comes with decent UI and claims that {\em``it's lightweight and depends only on basic X11 libs,
+conforming to the usage of lightweight window manager''}~\cite[alttab].
+It works well with swm, the only problem is that it lists windows based on the "_NET_CURRENT_DESKTOP" EWMH property,
+and thus not showing windows from all visible groups in swm, that makes it only semi-usable.
+
+\codeblock{code:cyclingshortcuts}{Cycling commands usage}{cycling_commands.txt}
+
+\midinsert
+\picw=8cm \cinspic img/cycling.png
+\clabel[fig:cycling]{Window cycling UI}
+\caption/f Window cycling UI in xfce.
+\endinsert
+
+% ######################################################################################################################
+\secc ICCCM and EWMH Compatibility % ###################################################################################
+% ######################################################################################################################
+
+One of the goals of SWM was to be more ICCCM and EWMH compliant than cwm.
+
+As for ICCCM, swm tries to be fully compliant.
+It is not easy and straight-forward task though, because ICCCM is known for being ambiguous and difficult to correctly implement~\cite[icccmdifficulties].
+With swm, we tried hard and implemented even selection atoms that are not essential
+for the window manager to work and are usually left out (see section~\ref[sec:becomingwm]).
+There are some ICCCM properties that are not used by swm, though.
+For example, swm does not make any use of "WM_ICON_NAME", because it does not show anything when the window is
+in iconified state -- that is left for third party task bars and pagers.
+It does not mean that "WM_ICON_NAME" is not supported, though -- it just is not used because of the design and architecture of swm.
+
+As for EWMH, swm tries to be fully compliant as well.
+In section~\ref[sec:groupimpl], we discussed EWMH properties related to desktops and their usage and interpretation in swm.
+Than, following EWMH properties are not supported, because swm does not offer features to which they are tight:
+\begitems
+* "_NET_DESKTOP_VIEWPORT" -- swm desktops (groups) does not have viewports.
+* "_NET_VIRTUAL_ROOTS" -- according to EWMH specification~\cite[ewmh], this property must be set by window managers
+using technique of virtual roots. Swm does not use this technique and so it does not set this property.
+* "_NET_DESKTOP_LAYOUT" -- according to EWMH specification~\cite[ewmh], this property is set by pagers, and thus
+it is not in scope of swm.
+* "_NET_SHOWING_DESKTOP" -- desktop showing feature is not implemented in swm.
+* "_NET_WM_NAME", "_NET_WM_VISIBLE_NAME" -- swm is not showing window name anywhere in its UI and thus it is not
+making use of "_NET_WM_NAME" property nor it is setting "_NET_WM_VISIBLE_NAME" property.
+* "_NET_WM_ICON_NAME", "_NET_WM_VISIBLE_ICON_NAME" -- same as above.
+* "_NET_WM_STATE_SHADED", "_NET_WM_ACTION_SHADE" -- swm does not draw title bars for windows and thus shaded state does not make sense for it.
+\enditems
 
 % ######################################################################################################################
 \sec Testing % #########################################################################################################
 % ######################################################################################################################
 
-ss

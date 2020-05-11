@@ -1,0 +1,8 @@
+module github.com/janbina/swm
+
+go 1.14
+
+require (
+    github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046
+    //...
+)

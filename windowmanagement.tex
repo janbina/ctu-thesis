@@ -2,7 +2,7 @@
 
 A window manager is a system software that manages windows.
 That means, it controls the placement and appearance of windows within a windowing system in a graphical user interface (GUI).
-It allows windows to be opened, closed, resized, or moved.
+It allows windows to be opened, closed, resized, moved, maximized, minimized and more.
 Window manager is also responsible for tracking which window is currently active and thus receiving the user's input.
 Window manager can be part of a desktop environment or it can be used standalone.
 
@@ -14,39 +14,62 @@ It is based on Desktop, which resembles the top of an office desk. %todo
 
 A desktop environment bundles together a variety of components to provide common graphical user interface elements
 such as icons, toolbars, wallpapers, and desktop widgets~\cite[arch_de].
-Most desktop environments also include a set of integrated applications and utilities, such as text editor, file manager or web browser.
+Most desktop environments also include a set of integrated applications and utilities, such as text editor, file manager, or web browser.
 Probably the most important part of a desktop environment is window manager.
-While desktop environments provide their own window manager, it can be usually replaced with another compatible one.
+While the desktop environment provides its own window manager, it can be usually replaced with another compatible one.
 Some of the most widespread desktop environments for Linux are:
 \begitems
 * {\sbf KDE} --
 * {\sbf GNOME} -- part of the GNU Project, it aims to be simple and easy to use.
 Its default display is Wayland instead of Xorg~\cite[gnome].
-* {\sbf Cinnamon} -- fork of GNOME, developed to be the default desktop environment for Linux Mint~\cite[cinnamon].
-It is known for its similarity to Windows user interface, so it is often recommended for new Linux users.
+%* {\sbf Cinnamon} -- fork of GNOME, developed to be the default desktop environment for Linux Mint~\cite[cinnamon].
+%It is known for its similarity to Windows user interface, so it is often recommended for new Linux users.
 * {\sbf Xfce} -- one of the most lightweight desktop environments.
 It aims to be fast and low on system resources, while still being visually appealing and user friendly~\cite[xfce].
 \enditems
 
+As mentioned earlier, window manager can be also used standalone, without desktop environment.
+This is for more experienced users, since they have to configure everything...
+
 \sec Types of window managers
+
+
 
 \secc Stacking window managers
 
+Stacking window managers, also known as floating, provide the standard desktop metaphor used in commercial operating systems like Windows and OS X~\cite[arch_wm].
+Windows act like pieces of paper on a desk -- they can be stacked on top of each other and moved around and resized freely by the user.
+Moving or resizing one window does not affect the position or size of other windows, only their visible area.
+Window manager must maintain the stacking order of the windows and only the top window on the stack is guaranteed to be fully visible.
+Example layout of a stacking window manager could be seen in the picture~\ref[fig:stacking].
+
 \midinsert
-\picw=10cm \cinspic img/stacking.pdf
-\caption/f xxx
+\picw=6cm \cinspic img/stacking.pdf
+\clabel[fig:stacking]{Stacking window manager layout}
+\caption/f Layout of a stacking window manager with overlapping windows.
 \endinsert
 
 \secc Tiling window managers
 
+Tiling window managers tile the windows so that none are overlapping and they usually use all the available screen space.
+They usually make very extensive use of keyboard shortcuts and have less or no reliance on the mouse~\cite[arch_wm].
+It is not possible to move or resize windows freely -- enlarging a window shrinks its adjacent windows and vice versa
+and moving is typically done by swapping the window's position with another window.
+Example layout of a tiling window manager could be seen in the picture~\ref[fig:tiling].
+
 \midinsert
-\picw=10cm \cinspic img/tiling.pdf
-\caption/f Pager displaying four desktops with some windows on each of them.
+\picw=6cm \cinspic img/tiling.pdf
+\clabel[fig:tiling]{Tiling window manager layout}
+\caption/f Layout of a tiling window manager, windows are covering the whole screen with no overlaps.
 \endinsert
 
 \secc Dynamic window managers
 
-\secc Compositing window managers
+Dynamic window managers are a combination of tiling and stacking approach~\cite[arch_wm].
+They usually offer many different layouts of window placement and user is able to dynamically switch between them.
+One of those layouts is floating window layout, which acts like stacking window manager, the others are tiling layout with different window arrangements.
+One of the most common tiling layouts is called {\em master-stack} layout, in which one window (master) is considered the most important and it has
+dedicated half of the screen, while the other windows are displayed one below the other on the second half of the screen.
 
 \sec Windowing system
 
@@ -59,7 +82,51 @@ asxasx
 
 
 
-\secc cwm
+\secc Cwm
+
+Cwm (Calm Window Manager) is a stacking window manager for the X Window System.
+It describes itself as a {\em ``window manager which contains many features that concentrate on the efficiency
+and transparency of window management, while maintaining the simplest and most pleasant aesthetic''}~\cite[cwm].
+
+Cwm is oriented towards heavy keyboard usage -- resizing, moving, hiding, raising or lowering windows, all can be done using
+keyboard shortcuts~\cite[cwm2].
+It could be even configured to move the mouse cursor using keyboard, so that one could use the computer without any pointing device.
+User can either define custom shortcuts using cwm's configuration file, or use the default ones.
+
+Cwm's interface is very minimal -- it only draws a one-pixel border around windows by default.
+The width of the border and its color can be configured though.
+Cwm offers several menus, which can be used to launch applications or switch between running applications.
+The principle of these menus is that cwm shows a list of relevant content and user can search in it and finally pick one of the filtered options~\cite[cwm3].
+Windows are searched by their current title, old titles and by their label, which is a custom string user can assign to every window.
+
+Instead of the traditional virtual desktop concept, cwm is using groups.
+There are nine groups with IDs 1--9 and a special ``sticky'' group with ID 0.
+Each window is assigned to one of those groups, the user can then change its group with a keyboard shortcut.
+While the sticky group is always visible on the screen, the normal group can be either visible or hidden.
+This means that unlike virtual desktops, multiple groups could be visible at the same time.
+The visibility of the group can be controlled by keyboard shortcuts as well.
+
+In the picture~\ref[fig:cwmmenu], we can see example of one of those cwm's menus.
+This one shows all the top-level windows.
+There are various information included:
+\begitems
+* the group ID on the left,
+* ``!'' indicates active (focused) window,
+* ``\&'' indicates hidden windows,
+* the label of the window in square brackets,
+* and finally the title of the window.
+\enditems
+
+All the cwm's configuration is done using configuration file ".cwmrc".
+The user may add, modify or remove shortcuts, change colors and other aspects of window management behavior~\cite[cwm3].
+
+\midinsert
+\picw=8cm \cinspic img/cwm.png
+\clabel[fig:cwmmenu]{Cwm's running apps menu}
+\caption/f Cwm's menu showing all managed windows.
+\endinsert
+
+\secc dwm
 
 asxax
 
@@ -71,6 +138,15 @@ asxax
 
 asxax
 
+\secc i3
+
+Window manager i3~\cite[i3] is dynamic tiling window manager.
+It is primarily targeted at developers and advanced users and its main goal are
+clear documentation, proper multi-monitor support, a tree structure for windows, and different modes~\cite[i3arch].
+
+
+asxax
+
 \secc Herbstluftwm
 
 asxax
@@ -79,9 +155,7 @@ asxax
 
 asxax
 
-\secc dwm
 
-asxax
 
 \secc spectrwm
 
@@ -90,9 +164,5 @@ asxax
 \secc xmonad
 
 asxax
-
-\secc Sxhkd
-
-
 
 

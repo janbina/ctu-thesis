@@ -1,0 +1,6 @@
+alt + Tab
+    swmctl cycle-win
+alt + shift + Tab
+    swmctl cycle-win-rev
+@Alt_L
+    swmctl cycle-win-end

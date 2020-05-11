@@ -1,0 +1,11 @@
+Testing cycling ... OK
+Testing desktop names ... OK
+Testing group basics ... OK
+Testing group window creation ... OK
+Testing group window movement ... OK
+Testing group visibility ...
+    error: groups.go:191: Window should be mapped
+    error: groups.go:198: Window should be mapped
+Errors in group visibility: 2
+Testing group membership ... OK
+Total number of errors: 2

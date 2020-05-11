@@ -37,6 +37,7 @@ ICCCM manual~\cite[icccm] will be constantly referenced here, so we will explici
 %
 %For example, the claim is often made: "The client I'm writing is important, and it needs to be on top." Perhaps it is important when it is being run in earnest, and it should then be run under the control of a window manager that recognizes "important" windows through some private protocol and ensures that they are on top. However, imagine, for example, that the "important" client is being debugged. Then, ensuring that it is always on top is no longer the appropriate window management policy, and it should be run under a window manager that allows other windows (for example, the debugger) to appear on top.
 
+\label[sec:icccmselection]
 \secc Selection
 Selections are the primary mechanism that X Version 11 defines for the exchange of information between clients, for example, by cutting and pasting between windows.
 There can be an arbitrary number of selections (each named by an atom) and that they are global to the server.
