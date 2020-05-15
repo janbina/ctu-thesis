@@ -6,6 +6,7 @@ Then, we will discuss the {\em design} decisions made and some detail from the {
 Lastly, we will look on {\em testing} process.
 
 % ######################################################################################################################
+\label[sec:tools]
 \sec Tools % ###########################################################################################################
 % ######################################################################################################################
 
@@ -36,6 +37,7 @@ Its introduction to go language was possible thanks to advances in its technolog
 Go authors are confident that it can be implemented cheaply enough, and with low enough latency, that it could be a viable approach even for networked systems~\cite[golang].
 
 % ######################################################################################################################
+\label[sec:xgbutil]
 \secc X libraries for Go % #############################################################################################
 % ######################################################################################################################
 
@@ -653,6 +655,7 @@ Not only it did solve the problems with apps using the Java GUI toolkit, but it 
 This was not primary design goal, but it is nice to have.
 
 % ######################################################################################################################
+\label[sec:moveresize]
 \secc Moving and resizing % ############################################################################################
 % ######################################################################################################################
 
@@ -716,6 +719,7 @@ Swm handles this situation correctly by updating the raise time of all the windo
 previous raise time -- the stacking order within the group stays the same.
 
 % ######################################################################################################################
+\label[sec:cycling]
 \secc Window Cycling % #################################################################################################
 % ######################################################################################################################
 
@@ -784,3 +788,91 @@ making use of "_NET_WM_NAME" property nor it is setting "_NET_WM_VISIBLE_NAME" p
 \sec Testing % #########################################################################################################
 % ######################################################################################################################
 
+Since nearly everything the window manager does is based on communication with the X server (receiving its events and responding to them),
+it is impossible to thoroughly test the window manager without the X server running.
+There are few parts that might be tested in isolation (Unit tested), though.
+For example, it would be possible to test "stack", "focus" and "groupmanager" packages this way.
+They all maintain their internal state (e.g., stacking order), so we might call methods they provide and test that this internal state is updated accordingly.
+In the end though, we want to test that the window manager reacts to the respective X events and that the internal state
+is also applied to the X state anyway.
+Because of that, we went with integration testing to test SWM.
+
+Martin Fl\"oser, former maintainer of KDE's window manager KWin, said in his article about window manager testing from 2012:
+``Given that we would have to basically start the full-blown KWin to perform tests which interact with the X-Server,
+unit tests are out of scope and only integration tests seem feasible.''~\cite[unittesting]
+He also described how could the setup for window manager testing look like:
+``We basically need a dedicated testing framework which starts a (nested) X Server, starts KWin,
+performs a test and shuts down both KWin and the X Server.
+A framework which is decoupled from the running system.''~\cite[unittesting]
+
+In this chapter, we will describe how was the testing done for SWM, as well as what is tested.
+
+\secc Testing Architecture
+
+In section~\ref[sec:tools], we described two tools that can run nested X Server, Xephyr (\ref[sec:xephyr]), and Xvfb (\ref[sec:xvfb]).
+Both of them would be usable for testing purposes, Xvfb is much better though -- we do not need any graphical output for testing,
+and Xvfb does just that.
+This allows us to run tests even on machines with no display hardware, like test servers.
+
+Tests are, as well as swm itself, written in Go, and same helper libraries were used -- XGB and xgbutil (\ref[sec:xgbutil]).
+To run the tests, there is single shell script that could be seen in code listing~\ref[code:testrunner].
+It compiles swm, swmctl and test app, starts Xvfb with swm and runs the test application on it.
+
+The testing application runs various tests, outputting the test name and whether it finished correctly or with some errors,
+in which case those errors are printed to the output as well.
+Example output could be seen in the listing~\ref[code:testresult].
+
+\codeblock{code:testrunner}{Test runner}{testscript.sh}
+\codeblock{code:testresult}{Test result}{testresult.txt}
+
+\secc Testing process
+
+One particular problem in testing is the asynchronicity of X.
+Because of it, it is not possible to send a request and check if it succeeded right after.
+For example, after sending a request to change a window state, we need to wait before checking that it was really changed.
+One option to do that would be to actually wait (i.e., sleep) before checking.
+This has shown to be a possible, but not an ideal solution -- one has to choose the appropriate sleep time,
+long enough to be sure that the changes already took affect, but not very long at the same time.
+This leads to the state that the tests are both slow and can fail randomly at the same time.
+A better solution is to wait for an appropriate X event, which is not as easy but is failproof and much faster.
+
+Example test case could be seen in code example~\ref[code:testexample].
+It tests whether window size changes correctly after sending a request to make it horizontally maximized.
+Firstly, a dummy window is created, and both the window geometry and the root window geometry are retrieved.
+After that, a request to add "_NET_WM_STATE_MAXIMIZED_HORZ" state to the window is sent.
+Then, the test application waits for "ConfigureNotify" event, which is issued upon changing window size.
+After that, window geometry (supposedly changed) is retrieved again and compared to what is believed to be
+the correct geometry in the horizontally maximized state -- window height and "y" coordinate stay the same, while
+the "x" coordinate and width are those of root window.
+
+\codeblock{code:testexample}{Test result}{test_example.go}
+
+\secc Test Coverage
+
+Implemented tests cover the core functionality of swm, as well as the communication between swm and swmctl, and correct reaction to various X events,
+mainly those defined by EWMH.
+Tests are separated into eleven functions, their brief description follows:
+
+\begitems
+* Cycling -- tests that the window cycling (see \ref[sec:cycling]) works correctly.
+Issues swmctl commands to cycle windows back and forth and test that correct window gets activated.
+* Desktop names -- tests that desktop (group) names are set correctly (by EWMH conventions, see section \ref[sec:ewmhrootprops]) by the swmctl command.
+* Group basics -- tests basic group manipulations using EWMH properties. That is, that the number of groups could be changed
+by requests to change "_NET_NUMBER_OF_DESKTOPS" root window property and that current group could be changed by requests to change "_NET_CURRENT_DESKTOP" root window property.
+* Group window creation -- test two swm's group modes, sticky and auto (see section \ref[sec:groupimpl]).
+Changes current group mode using swmctl command, creates some window and tests that they are assigned correct group.
+* Group window movement -- tests that windows could be moved to different group by requests to change their "_NET_WM_DESKTOP" property.
+Also tests that if some groups are removed, windows from those groups are moved to another group.
+* Group visibility -- makes different groups visible/hidden by issuing appropriate swmctl commands and tests that windows are
+appropriately mapped/unmapped based on their group membership.
+* Group membership -- tests that one window could be member of multiple groups. Adds/removes window from different groups
+and tests that correct groups are reported by swmctl command.
+* Moving command -- tests swmctl move command (see section \ref[sec:moveresize]).
+Issues the command with different set of arguments and tests that window geometry changed appropriately.
+* Resizing command -- tests swmctl resize command (see section \ref[sec:moveresize]).
+Issues the command with different set of arguments and tests that window geometry changed appropriately.
+* Move-resize command -- tests swmctl moveresize command (see section \ref[sec:moveresize]).
+Issues the command with different set of arguments and tests that window geometry changed appropriately.
+* Window states -- tests that windows react properly to requests to change their "_NET_WM_STATE" EWMH property (see section \ref[sec:ewmhappprops]).
+For example, making the window maximized, fullscreen, hidden, focused, etc.
+\enditems

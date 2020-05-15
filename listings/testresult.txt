@@ -6,6 +6,9 @@ Testing group window movement ... OK
 Testing group visibility ...
     error: groups.go:191: Window should be mapped
     error: groups.go:198: Window should be mapped
-Errors in group visibility: 2
 Testing group membership ... OK
+Testing moving command ... OK
+Testing resizing command ... OK
+Testing moveresize command ... OK
+Testing window states ... OK
 Total number of errors: 2
