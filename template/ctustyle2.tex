@@ -481,29 +481,21 @@
 
 \def\abstractpage{
    \chardef\orilang=\language
-   \setbox\leftbox=\vbox{\sethsizefront 
-         \ifx\loadpattrs\undefined \def\initlanguage##1##2\message##3{##2}\fi
-         \if&\the\abstractCZ&\shyph \the\abstractSK \par
-            \let\keywords=\keywordsSK 
-            \let\titleL=\titleSK
-            \let\subtitleL=\subtitleSK
-         \else \chyph \the\abstractCZ \par
-            \let\keywords=\keywordsCZ 
-            \let\titleL=\titleCZ
-            \let\subtitleL=\subtitleCZ
-         \fi
-         \if&\the\keywords&\else{\bf\mtext{keywords}:} \the\keywords\par\fi
-         \ifnum\orilang=\language \else
-            \if&\the\titleL&\else{\bf\mtext{trans}:} \the\titleL
-               \if&\the\subtitleL&\else \space(\the\subtitleL)\fi\fi\fi
-         \vfil}
-   \setbox\rightbox=\vbox{\sethsizefront 
-         \ifx\loadpattrs\undefined \def\initlanguage##1##2\message##3{##2}\fi
-         \ehyph \the\abstractEN \par
-         \if&\the\keywordsEN&\else{\bf\mtext{keywords}:} \the\keywordsEN\par\fi
-         \ifnum\orilang=\language \else
-            \if&\the\titleEN&\else{\bf\mtext{trans}:} \the\titleEN
+   \setbox\leftbox=\vbox{\sethsizefront
+          \ifx\loadpattrs\undefined \def\initlanguage##1##2\message##3{##2}\fi
+          \ehyph \the\abstractEN \par
+          \if&\the\keywordsEN&\else{\bf\mtext{keywords}:} \the\keywordsEN\par\fi
+          \ifnum\orilang=\language \else
+             \if&\the\titleEN&\else{\bf\mtext{trans}:} \the\titleEN
                \if&\the\subtitleEN&\else \space(\the\subtitleEN)\fi\fi\fi
+          \vfil}
+   \setbox\rightbox=\vbox{\sethsizefront
+         \ifx\loadpattrs\undefined \def\initlanguage##1##2\message##3{##2}\fi
+         \ehyph \the\abstractCZ \par
+         \if&\the\keywordsCZ&\else{\bf\mtext{keywords}:} \the\keywordsCZ\par\fi
+         \ifnum\orilang=\language \else
+            \if&\the\titleCZ&\else{\bf\mtext{trans}:} \the\titleCZ
+               \if&\the\subtitleCZ&\else \space(\the\subtitleCZ)\fi\fi\fi
          \vfil}
    \prepbox\leftbox \prepbox\rightbox
    \ifvoid\leftbox \ifvoid\rightbox \let\abstractpage=\relax \fi\fi
@@ -511,19 +503,19 @@
       \setbox0=\vsplit\leftbox to\frontht
       \ifvoid\leftbox
          \setbox\leftbox=\box0
-         \insertoutline{Abstrakt/Abstract}
-         \frontpage[Abstrakt/Abstract]
+         \insertoutline{Abstract/Abstrakt}
+         \frontpage[Abstract/Abstrakt]
       \else
          \setbox1=\box\leftbox  % long abstracts, two pages for abstracts
          \setbox\leftbox=\box0
          \setbox0=\box\rightbox
          \setbox\rightbox=\box1
-         \insertoutline{Abstrakt}
-         \frontpage[Abstrakt/]
-         \setbox\leftbox=\vsplit0 to\frontht
-         \setbox\rightbox=\box0
          \insertoutline{Abstract}
          \frontpage[Abstract/]
+         \setbox\leftbox=\vsplit0 to\frontht
+         \setbox\rightbox=\box0
+         \insertoutline{Abstrakt}
+         \frontpage[Abstrakt/]
    \fi\fi
 }
 \addto\makefront{%
