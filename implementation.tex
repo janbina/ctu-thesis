@@ -359,7 +359,7 @@ interesting implementation details.
 The project structure is based on Go modules.
 Go modules were first introduced in Go version $1.11$ and became the default in version $1.13$~\cite[gomodules].
 It is basically a dependency management system which makes dependency version information explicit and easier to manage~\cite[gomodules].
-A module is a collection of Go packages stored in a file tree, backed by "go.mod" file.
+A~module is a collection of Go packages stored in a file tree, backed by "go.mod" file.
 In the code example~\ref[code:gomod], you can see excerpt of SWM's "go.mod" file.
 It defines the module path, which is also the import path used for the root directory,
 version of Go, which should be used for compilation,
@@ -641,7 +641,7 @@ Plus, reparenting does not magically fix all your problems. For example, Java ex
 If it does not, then you might only get a grey window.
 Surely, when you write a reparenting WM, even a simple one, this must be fixed, right?
 No, it won't be fixed.
-I ended up with either half of the window being grey or with misplaced menus.''}
+I~ended up with either half of the window being grey or with misplaced menus.''}
 
 While developing swm, we faced those issues as well.
 If the window manager is non-reparenting, applications using the standard Java GUI toolkit are rendered
@@ -804,7 +804,7 @@ unit tests are out of scope and only integration tests seem feasible.''~\cite[un
 He also described how could the setup for window manager testing look like:
 ``We basically need a dedicated testing framework which starts a (nested) X Server, starts KWin,
 performs a test and shuts down both KWin and the X Server.
-A framework which is decoupled from the running system.''~\cite[unittesting]
+A~framework which is decoupled from the running system.''~\cite[unittesting]
 
 In this chapter, we will describe how was the testing done for SWM, as well as what is tested.
 
@@ -835,7 +835,7 @@ One option to do that would be to actually wait (i.e., sleep) before checking.
 This has shown to be a possible, but not an ideal solution -- one has to choose the appropriate sleep time,
 long enough to be sure that the changes already took affect, but not very long at the same time.
 This leads to the state that the tests are both slow and can fail randomly at the same time.
-A better solution is to wait for an appropriate X event, which is not as easy but is failproof and much faster.
+A~better solution is to wait for an appropriate X event, which is not as easy but is failproof and much faster.
 
 Example test case could be seen in code example~\ref[code:testexample].
 It tests whether window size changes correctly after sending a request to make it horizontally maximized.
@@ -859,7 +859,7 @@ Tests are separated into eleven functions, their brief description follows:
 Issues swmctl commands to cycle windows back and forth and test that correct window gets activated.
 * Desktop names -- tests that desktop (group) names are set correctly (by EWMH conventions, see section \ref[sec:ewmhrootprops]) by the swmctl command.
 * Group basics -- tests basic group manipulations using EWMH properties. That is, that the number of groups could be changed
-by requests to change "_NET_NUMBER_OF_DESKTOPS" root window property and that current group could be changed by requests to change "_NET_CURRENT_DESKTOP" root window property.
+by requests to change root window property "_NET_NUMBER_OF_DESKTOPS" and that current group could be changed by requests to change "_NET_CURRENT_DESKTOP" root window property.
 * Group window creation -- test two swm's group modes, sticky and auto (see section \ref[sec:groupimpl]).
 Changes current group mode using swmctl command, creates some window and tests that they are assigned correct group.
 * Group window movement -- tests that windows could be moved to different group by requests to change their "_NET_WM_DESKTOP" property.

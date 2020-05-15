@@ -33,7 +33,7 @@ features, window manager styles, and support for multiple screens and provides b
 X uses a client-server model.
 The server is the software that manages one display, keyboard, and mouse.
 The client is a program displaying on the screen and taking input from that keyboard and mouse.
-A client sends drawing drawing requests and information requests to the server, and the server sends back to the client user input,
+A~client sends drawing drawing requests and information requests to the server, and the server sends back to the client user input,
 replies to information requests, and error reports.
 The client may be running on the same machine as the server or on a different machine over the network.~\cite[xguide0]
 
@@ -89,14 +89,14 @@ Round-trip requests should be minimized in client programs, because they lower p
 \label[sec:propertiesatoms]
 \sec Properties and Atoms
 The developers of X needed a way to allow clients to communicate arbitrary data with each other, and they came up with properties.
-A property is a packet of information associated with a window, made available to all the clients running under a server.
+A~property is a packet of information associated with a window, made available to all the clients running under a server.
 Properties are used by clients to store information that other clients might need or want to know and to read that information when set by other clients.~\cite[xguide1]
 
 Each property has a unique integer ID, called an atom, and name, which is an ASCII string.
 An atom is just a nickname for a property, so that arbitrary length property name strings
 do not have to be transferred back and forth between the client and the server.
 The atom is assigned by the server and will remain defined in the server even after the client that defined it terminates.
-A property is uniquely identified by an atom and a window.
+A~property is uniquely identified by an atom and a window.
 Each property has a type, which itself is a property.~\cite[xguide1]
 
 The data associated with a property can be stored as an array of 8−bit quantities, 16−bit quantities, or 32−bit quantities only.
@@ -128,7 +128,7 @@ Here are some other examples of events:~\cite[xguide1]
 * Window mapped or unmapped -- "MapNotify", "UnmapNotify".
 * Mouse crossing a window boundary -- "EnterNotify", "LeaveNotify".
 \enditems
-A client must select the event types that it wants the server to send for each window.
+A~client must select the event types that it wants the server to send for each window.
 For example, a scrollbar may require mouse button events but not keyboard events, while the main window of an
 application may require keyboard but not mouse events.
 One would select different event types on each of these windows.~\cite[xguide1]

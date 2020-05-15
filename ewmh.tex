@@ -46,16 +46,16 @@ EWMH tries to address the following issues:
 \secc Additional States
 The ICCCM allows window managers to implement additional window states, which will appear to clients as substates of "NormalState" and "IconicState".
 As a two common examples, we can name {\em maximized} and {\em shaded} states.
-A window manager may implement these additional states as proper substates of "NormalState" and "IconicState",
+A~window manager may implement these additional states as proper substates of "NormalState" and "IconicState",
 or it may treat them as independent flags, allowing for example a maximized window to be iconified and to re-appear as maximized upon de-iconification.
 \begitems
 * {\sbf Maximization} -- maximizing should give window as much of the screen area as possible.
 This may not be the full screen area, but only a smaller work area, because window manager may
 reserve some space for other windows, such as taskbars.
-A window manager is expected to remember the geometry of a maximized window and restore it upon demaximization.
+A~window manager is expected to remember the geometry of a maximized window and restore it upon demaximization.
 Modern window managers typically allow separate horizontal and vertical maximization.
 * {\sbf Shading} -- an alternative to iconification.
-A shaded window typically shows only the titlebar, the client window is hidden, thus shading is not useful for windows which are not decorated with a titlebar.
+A~shaded window typically shows only the titlebar, the client window is hidden, thus shading is not useful for windows which are not decorated with a titlebar.
 \enditems
 
 \secc Large Desktops
@@ -75,11 +75,11 @@ There is some variation among the features of virtual desktop implementations.
 There may be a fixed number of desktops, or new ones may be created dynamically.
 The size of the desktops may be fixed or variable.
 
-A window manager which implements virtual desktops generally offers a way for the user to move clients between desktops.
+A~window manager which implements virtual desktops generally offers a way for the user to move clients between desktops.
 Clients may be allowed to occupy more than one desktop simultaneously.
 
 \secc Sticky Windows
-A window manager which implements a large or virtual desktops typically offers a way for the user to make certain windows {\em sticky}.
+A~window manager which implements a large or virtual desktops typically offers a way for the user to make certain windows {\em sticky}.
 That means that these windows will stay at the same position on the screen when the viewport is moved on large desktop,
 and for virtual desktops, they will be visible on all desktops.
 
@@ -107,7 +107,7 @@ These properties should be set and updated by the window manager.
 
 \heading \uns NET\uns NUMBER\uns OF\uns DESKTOPS
 This property should be set and updated by the window manager to indicate the number of virtual desktops.
-A pager can request a change in the number of desktops by sending a message to the root window.
+A~pager can request a change in the number of desktops by sending a message to the root window.
 The window manager is free to honor or reject this request.
 If the request is honored "_NET_NUMBER_OF_DESKTOPS" must be set to the new number of desktops
 and other related properties also must be updated.
@@ -118,19 +118,19 @@ If the "_NET_CURRENT_DESKTOP" is out of the new range of available desktops, it 
 \heading \uns NET\uns DESKTOP\uns GEOMETRY
 This property contains "width" and "height" common for all the desktops.
 This is equal to the screen size if the window manager doesn't support large desktops, otherwise it's equal to the virtual size of the desktop.
-A pager can request a change in the desktop geometry by sending a message to the root window.
+A~pager can request a change in the desktop geometry by sending a message to the root window.
 The window manager is free to honor or reject this request.
 
 \heading \uns NET\uns DESKTOP\uns VIEWPORT
 Array of "x" and "y" coordinates that define the top left corner of each desktop's viewport.
 For window managers that don't support large desktops, this must always be set to $(0,0)$.
-A pager can request to change the viewport for the current desktop by sending a message to the root window.
+A~pager can request to change the viewport for the current desktop by sending a message to the root window.
 The window manager is free to honor or reject this request.
 
 \heading \uns NET\uns CURRENT\uns DESKTOP
 The index of the current desktop, which must be an integer from interval $[0,"_NET_NUMBER_OF_DESKTOPS")$.
 It must be set and updated by the window manager.
-A pager can request to switch to another virtual desktop by sending a message to the root window.
+A~pager can request to switch to another virtual desktop by sending a message to the root window.
 
 \heading \uns NET\uns DESKTOP\uns NAMES
 The names of all virtual desktops.
@@ -272,7 +272,7 @@ For details, see the specification~\cite[ewmh].
 \enditems
 
 \heading \uns NET\uns WM\uns STATE
-A list of hints describing the window state.
+A~list of hints describing the window state.
 Atoms present in the list must be considered set, atoms not present in the list must be considered not set.
 Window manager should honor the state whenever withdrawn window requests to be mapped.
 Window manager must jeep this property updated to reflect the current state of the window.
@@ -307,7 +307,7 @@ An implementation may add new atoms to this list.
 Implementations without extensions must ignore any unknown atoms, effectively removing them from the list.
 These extension atoms must not start with the prefix "_NET".
 
-A client can request a change of the state by sending a client message to the root window.
+A~client can request a change of the state by sending a client message to the root window.
 This message contains mainly id of the window to which the change should be applied,
 the action, which is one of "REMOVE", "ADD", "TOGGLE", and one or two properties to alter.
 It allows two properties to be changed simultaneously, specifically to allow both horizontal and

@@ -355,14 +355,14 @@ and must be prepared to deal with any size and location.
 Window manager can respond to a "ConfigureRequest" request in three different ways:
 \begitems
 * Not change the size, location, border width, or stacking order of the window at all.\nl
-A client will receive a synthetic "ConfigureNotify" event that describes the (unchanged) geometry of the window.
+A~client will receive a synthetic "ConfigureNotify" event that describes the (unchanged) geometry of the window.
 The client will not receive a real "ConfigureNotify" event because no change has actually taken place.
 * Move or restack the window without resizing it or changing its border width.\nl
-A client will receive a synthetic "ConfigureNotify" event following the change that describes the new geometry of the window.
+A~client will receive a synthetic "ConfigureNotify" event following the change that describes the new geometry of the window.
 The client may not receive a real "ConfigureNotify" event that describes this change because the window manager may have reparented the top-level window.
 If the client does receive a real event, the synthetic event will follow the real one.
 * Resize the window or change its border width (regardless of whether the window was also moved or restacked).\nl
-A client that has selected for "StructureNotify" events will receive a real "ConfigureNotify" event.
+A~client that has selected for "StructureNotify" events will receive a real "ConfigureNotify" event.
 Note that the coordinates in this event are relative to the parent, which may not be the root if the window has been reparented.
 The "TranslateCoordinates" request can be used to convert the coordinates if required.
 \enditems
