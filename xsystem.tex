@@ -1,5 +1,5 @@
 \label[chap:xsystem]
-\chap The X Window system
+\chap The X Window System
 The X Window System is a network transparent window system which runs on a wide range of computing and graphics machines.
 It should be relatively straightforward to build the X.Org Foundation software distribution on most ANSI C and POSIX compliant systems.
 Commercial implementations are also available for a wide range of platforms.~\cite[xman]
@@ -69,7 +69,8 @@ When the client and server are on the same machine, the connection is based on l
 shared memory, or UNIX domain sockets.
 However, even local connections use the X protocol.~\cite[xguide0]
 
-\secc Message types
+\secc Message Types
+
 The X protocol specifies four types of messages -- requests, replies, events and errors.
 While requests are sent from the client to the server, replies, events and errors are sent from the server to the client.
 \begitems
@@ -86,7 +87,7 @@ Request that requires a reply is called a round-trip request.
 Round-trip requests should be minimized in client programs, because they lower performance in case of network delays.~\cite[xguide0]
 
 \label[sec:propertiesatoms]
-\sec Properties and atoms
+\sec Properties and Atoms
 The developers of X needed a way to allow clients to communicate arbitrary data with each other, and they came up with properties.
 A property is a packet of information associated with a window, made available to all the clients running under a server.
 Properties are used by clients to store information that other clients might need or want to know and to read that information when set by other clients.~\cite[xguide1]
@@ -144,6 +145,7 @@ occurred or other fields in the event structure.~\cite[xguide1]
 
 \label[sec:xwinhierarchy]
 \sec Window Hierarchy
+
 X windows are arranged in a tree hierarchy.
 Each window always has exactly one parent window, which is assigned as the window is created.
 The only window that has no parent is called the {\em root window} and fills the entire screen.
@@ -157,6 +159,7 @@ Each window is contained within the limits of its parent and each window has its
 The origin of a window is the top−left corner of the window and the x and y coordinates increase to the right and bottom.~\cite[xguide1]
 
 \sec The Window Manager
+
 The window manager is just another client of X server, but by convention, it is given special responsibilities.
 Much of the communication between clients and the window manager and vice versa occurs through properties, the rest is
 occurring through events.
@@ -165,7 +168,8 @@ window manager, even if one is running.
 An application must be prepared for the window manager to ignore, modify, or
 honor the preferences it indicates through the window manager hints.~\cite[xguide1]
 
-\sec X Client libraries
+\sec X Client Libraries
+
 Two official helper libraries that provide API for talking to the X Server exist, xlib and XCB.
 
 \secc Xlib

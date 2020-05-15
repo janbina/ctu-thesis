@@ -39,7 +39,7 @@ Go authors are confident that it can be implemented cheaply enough, and with low
 
 % ######################################################################################################################
 \label[sec:xgbutil]
-\secc X libraries for Go % #############################################################################################
+\secc X Libraries for Go % #############################################################################################
 % ######################################################################################################################
 
 There are two unofficial libraries for accessing X11 API from Go, XGB~\cite[xgb] and xgbutil~\cite[xgbutil].
@@ -253,7 +253,7 @@ To mention some application launchers that could be used with SWM, we can name d
 In this section, we will discuss some of the design choices made in development of swm into detail.
 
 % ######################################################################################################################
-\secc Configuration and controlling % ##################################################################################
+\secc Configuration and Controlling % ##################################################################################
 % ######################################################################################################################
 
 Most of the window managers are using configuration files with lots and lots of options you can configure.
@@ -421,7 +421,7 @@ Finally, "go.mod" and "go.sum" files are module configuration files used by Go c
 \endinsert
 
 % ######################################################################################################################
-\secc Inter-process communication % ####################################################################################
+\secc Inter-Process Communication % ####################################################################################
 % ######################################################################################################################
 
 Communication between swm and swmctl is done using unix sockets,
@@ -444,7 +444,7 @@ Updating existing or adding new command then requires changes inside swm only, s
 
 % ######################################################################################################################
 \label[sec:groupimpl]
-\secc Desktops -- groups % #############################################################################################
+\secc Desktops -- Groups % #############################################################################################
 % ######################################################################################################################
 
 As described in design section, virtual desktops in swm are replaced with groups.
@@ -520,7 +520,7 @@ This info box is also shown upon execution of "swmctl group get" command.
 
 % ######################################################################################################################
 \label[sec:becomingwm]
-\secc Becoming a window manager % ######################################################################################
+\secc Becoming a Window Manager % ######################################################################################
 % ######################################################################################################################
 
 In the section~\ref[sec:xarch], it was already said that ``window manager is a client that has authority over the layout of windows on the
@@ -657,7 +657,7 @@ This was not primary design goal, but it is nice to have.
 
 % ######################################################################################################################
 \label[sec:moveresize]
-\secc Moving and resizing % ############################################################################################
+\secc Moving and Resizing % ############################################################################################
 % ######################################################################################################################
 
 For moving and resizing windows, smwctl provides three commands, "move", "resize" and "moveresize". Their syntax is as follows:
@@ -826,7 +826,7 @@ Example output could be seen in the listing~\ref[code:testresult].
 \codeblock{code:testrunner}{Test runner}{testscript.sh}
 \codeblock{code:testresult}{Test result}{testresult.txt}
 
-\secc Testing process
+\secc Testing Process
 
 One particular problem in testing is the asynchronicity of X.
 Because of it, it is not possible to send a request and check if it succeeded right after.

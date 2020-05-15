@@ -66,7 +66,7 @@ When the new manager notices that the window owning the selection has been destr
 it knows that it can successfully proceed to control the resource it is planning to manage.
 If the old manager does not destroy the window within a reasonable time, the new manager should check with the user before destroying the window itself or killing the old manager.
 
-\secc Clients actions
+\secc Clients Actions
 Clients should, as far as possible, do exactly what they would do in the absence of a window manager,
 except for the following:
 \begitems
@@ -90,7 +90,7 @@ Transitions between states happen when the top-level window is mapped and unmapp
 We will talk about that more later on.
 
 \label[sec:clientproperties]
-\secc Client properties
+\secc Client Properties
 Once the client has one or more top-level windows, it should place properties on those windows to inform the window manager of the behavior that the client desires.
 If any of these properties are not supplied, window managers can assume values they find convenient -- clients that depend on particular values must explicitly supply them.
 The window manager will not change properties written by the client.
@@ -314,7 +314,7 @@ In particular, window managers should present newly mapped "WM_TRANSIENT_FOR" wi
 even if mapping top-level windows normally does require interaction.
 Dialogue boxes, for example, are an example of windows that should have "WM_TRANSIENT_FOR" set.
 
-\secc Changing window state
+\secc Changing Window State
 As already mentioned in section~\ref[sec:toplevelwindow], window manager will assign each top-level window one of three states:
 \begitems
 * "NormalState" -- top-level window is visible.

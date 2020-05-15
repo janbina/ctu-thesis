@@ -10,7 +10,7 @@ Its latest version 1.5 was released in 2011.\cite[ewmh]
 In this section, we will cover parts of EWMH which are related to window managers and therefore important for us.
 EWMH specification~\cite[ewmh] will be constantly referenced here, so we will explicitly refer only other sources if they are used.
 
-\secc Pagers and taskbars
+\secc Pagers and Taskbars
 Throughout this section, we will talk about special X Server Clients.
 We already know what window manager is, now we will also use term {\em pager} to refer to desktop utility applications, such as pagers and taskbars.
 
@@ -34,7 +34,7 @@ Pressing a button initiates a window manager action on the represented window, t
 \caption/f Taskbar displaying three windows.
 \endinsert
 
-\secc Scope of ewmh
+\secc Scope of EWMH
 EWMH tries to address the following issues:
 \begitems
 * Allow clients to influence their initial state with respect to maximization, shading, stickiness, desktop, stacking order.
@@ -43,7 +43,7 @@ EWMH tries to address the following issues:
 * Enable pagers and taskbars to be implemented as separate clients and allow them to work with any compliant window manager.
 \enditems
 
-\secc Additional states
+\secc Additional States
 The ICCCM allows window managers to implement additional window states, which will appear to clients as substates of "NormalState" and "IconicState".
 As a two common examples, we can name {\em maximized} and {\em shaded} states.
 A window manager may implement these additional states as proper substates of "NormalState" and "IconicState",
@@ -58,7 +58,7 @@ Modern window managers typically allow separate horizontal and vertical maximiza
 A shaded window typically shows only the titlebar, the client window is hidden, thus shading is not useful for windows which are not decorated with a titlebar.
 \enditems
 
-\secc Large desktops
+\secc Large Desktops
 The window manager may offer to arrange the managed windows on a desktop that is larger than the root window.
 The screen functions as a viewport on this large desktop.
 Different policies regarding the positioning of the viewport on the desktop can be implemented: The window manager may only allow the viewport position to change in increments of
@@ -68,7 +68,7 @@ To fulfill the ICCCM principle that clients should behave the same regardless wh
 window managers which implement large desktops must interpret all client-provided geometries with respect to the current viewport.
 
 \label[sec:ewmhdesktops]
-\secc Virtual desktops
+\secc Virtual Desktops
 Most X servers have only a single screen.
 The window manager may virtualize this resource and offer multiple so-called 'virtual desktops', of which only one can be shown on the screen at a time.
 There is some variation among the features of virtual desktop implementations.
@@ -78,7 +78,7 @@ The size of the desktops may be fixed or variable.
 A window manager which implements virtual desktops generally offers a way for the user to move clients between desktops.
 Clients may be allowed to occupy more than one desktop simultaneously.
 
-\secc Sticky windows
+\secc Sticky Windows
 A window manager which implements a large or virtual desktops typically offers a way for the user to make certain windows {\em sticky}.
 That means that these windows will stay at the same position on the screen when the viewport is moved on large desktop,
 and for virtual desktops, they will be visible on all desktops.
@@ -89,7 +89,7 @@ This may not be possible if the window is unmapped, because it is on a different
 Thus, activating a window may involve additional steps like moving it to the current desktop (or changing to the desktop the window is on), deiconifying it or raising it.
 
 \label[sec:ewmhrootprops]
-\secc Root window properties
+\secc Root Window Properties
 As stated in section~\ref[sec:propertiesatoms], clients of X Server are communicating with each other using properties.
 EWMH defines many new properties and in this section, we will take a look at those which are set on root window.
 Root window properties are useful for communication between window manager and pagers.
@@ -177,7 +177,7 @@ Details about those properties could be found in the specification~\cite[ewmh].
 \enditems
 
 \label[sec:ewmhrootmsg]
-\secc Other root window messages
+\secc Other Root Window Messages
 In this section, we will list client messages sent to the root window which are not connected
 with any property (they are stateless).
 
@@ -215,7 +215,7 @@ has a good basis for estimation.
 The client must be able to cope with imperfect estimates.
 
 \label[sec:ewmhappprops]
-\secc Application window properties
+\secc Application Window Properties
 Application window properties are set on their top-level window either by themselves or by window manager or pager.
 Some of them are updated throughout the lifetime of the application, so window managers and pagers should listen
 for these changes and update accordingly.
@@ -380,7 +380,7 @@ Details about those properties could be found in the specification~\cite[ewmh].
 \enditems
 
 \label[sec:stackingorder]
-\secc Stacking order
+\secc Stacking Order
 To obtain good interoperability between different desktop environments, the following layered stacking order is recommended, from the bottom:
 \begitems
 * windows of type "_NET_WM_TYPE_DESKTOP"
