@@ -1,1 +1,48 @@
+\label[chap:conclusions]
 \chap Conclusions
+
+In this thesis, we described the working mechanisms of the X Window System Protocol
+and two standard protocols defined on top of it, ICCCM and EWMH.
+Those mechanisms and policies were described especially concerning window managers,
+special X Server clients that control the placement and appearance of windows.
+We also described what a window manager is, its different types,
+and features it usually offers, demonstrated on some existing implementations.
+Finally, a new stacking window manager called swm was designed in such a way
+that it is small, extensible, and scriptable.
+It was implemented in Go, a modern system programming language,
+is ICCCM and EWMH compliant, and comes with stacking window management,
+advanced window grouping mechanism, basic window decorations, and the command-line
+utility that makes it easy to manipulate the windows in a simple but powerful way.
+We also described how a window manager could be tested and how tests for core features of swm were implemented.
+
+\nonum
+\sec Future Work
+
+Swm is an open-source project, its source code is published on GitHub\urlnote{https://github.com/janbina/swm} under the MIT license.
+It was designed and implemented in a way to be built upon, to be extended with new functionalities, and adapted to various uses and user preferences.
+Therefore, there is a potential for it to be extended by third parties, either in a way of contributions or by starting a whole new
+project using swm as a starting point.
+
+%In this thesis, we described the working mechanisms of X Window System Protocol
+%and two standard protocols defined on top of it, ICCCM and EWMH.
+%%especially in regard to window managers, special X Server clients
+%%that control the placement and appearance of windows.
+%Those mechanisms and policies were described especially with respect to window managers,
+%special X Server clients that control the placement and appearance of windows.
+%% VARIANTS ^^^^
+%We also described what a window manager is, its different types, and features it usually offers,
+%demonstrated on some existing %window manager
+%implementations.
+%Finally, a new stacking window manager called swm was designed in such a way
+%that it is small, extensible, and scriptable.
+%It was implemented in Go, a modern system programming language,
+%is ICCCM and EWMH compliant, and comes with stacking window management,
+%advanced window grouping mechanism, basic window decorations, and its own
+%command-line utility that makes it easy to manipulate the windows
+%in a simple but powerful way.
+%We also described how a window manager could be tested and how tests for core
+%features of swm were implemented.
+
+% ???
+%Some additions that come to mind may include better window decorations or some mechanism to assign different properties
+%to windows upon startup based on application -- for example, web browser always starts maximized.
