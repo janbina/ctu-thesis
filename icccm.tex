@@ -361,12 +361,12 @@ The client will not receive a real "ConfigureNotify" event because no change has
 A~client will receive a synthetic "ConfigureNotify" event following the change that describes the new geometry of the window.
 The client may not receive a real "ConfigureNotify" event that describes this change because the window manager may have reparented the top-level window.
 If the client does receive a real event, the synthetic event will follow the real one.
-* Resize the window or change its border width (regardless of whether the window was also moved or restacked).\nl
-A~client that has selected for "StructureNotify" events will receive a real "ConfigureNotify" event.
-Note that the coordinates in this event are relative to the parent, which may not be the root if the window has been reparented.
-The "TranslateCoordinates" request can be used to convert the coordinates if required.
+* Resize the window or change its border width.\nl
+A~client will receive a real "ConfigureNotify" event, provided that it has selected for "StructureNotify" events.
+The coordinates in this event are relative to the parent, which may not be the root if the window has been reparented.
 \enditems
-The general rule is that coordinates in real "ConfigureNotify" events are in the parent's space; in synthetic events, they are in the root space.
+The general rule is that coordinates in real "ConfigureNotify" events are in the parent's space;
+in synthetic events, they are in the root space.
 
 Clients should be aware that their borders may not be visible.
 Window managers are free to use reparenting techniques to decorate client's top-level windows with borders containing titles,

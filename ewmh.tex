@@ -128,7 +128,7 @@ A~pager can request to change the viewport for the current desktop by sending a 
 The window manager is free to honor or reject this request.
 
 \heading \uns NET\uns CURRENT\uns DESKTOP
-The index of the current desktop, which must be an integer from interval $[0,"_NET_NUMBER_OF_DESKTOPS")$.
+An integer from interval $[0,"_NET_NUMBER_OF_DESKTOPS")$ that specifies the index of the current desktop.
 It must be set and updated by the window manager.
 A~pager can request to switch to another virtual desktop by sending a message to the root window.
 
@@ -189,7 +189,7 @@ because window manager might be more clever and do something else than simply cl
 
 \heading \uns NET\uns MOVERESIZE\uns WINDOW
 Can be used by pagers wanting to move or resize a window instead of using a "ConfigureRequest".
-Window managers should treat it exactly like a "ConfigureRequest", except that they should use the gravity specified in the message.
+Window managers should treat it the same way they treat a "ConfigureRequest", except that they should use the gravity specified in the message.
 It allows pagers to exactly position and resize a window including its decorations without knowing the size of the decorations
 by using "StaticGravity".
 
