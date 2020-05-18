@@ -1,1 +1,57 @@
 \chap Introduction
+
+Window manager, being a tool that controls the placement and appearance of windows on the screen,
+is probably one of the most important parts of a graphical user interface of today's personal computers.
+Generally, we can divide window managers into two categories, stacking window managers and tiling window managers.
+Stacking window managers provide the traditional desktop metaphor and are the most widely used type.
+They allow users to stack windows on top of each other, move them around, and resize them freely.
+Tiling window managers, on the other hand, organize windows to some predefined, grid-like layouts.
+Windows are sized so they cover the whole screen, do not overlap, and can't be moved or resized freely.
+There are also window managers that combine both these approaches and are referred to as dynamic window managers.
+
+While a lot of tiling window managers have been created in recent years, it is not the case for stacking window managers.
+Available stacking window managers are either outdated, written in an unmaintainable and inextensible style, or they are
+part of large desktop environments and with lots of dependencies.
+Therefore, we feel a need for a small, easy to use, stacking window manager, that will be easily extensible.
+
+%TODO some more ideas...
+%While there are many tiling window managers
+%While there is a plethora of tiling window managers available for the X Window System,
+%the most widely used windowing system for Linux, situation is quite different for stacking window managers.
+%Existing stacking window managers are either part of a big desktop environment
+%There seems to be lack of a small, easy to use and extensible stacking window manager.
+%Those existing are either large
+%Stacking window managers are usually part of a big desktop environment, opinionated and not easily extensible.
+%Those few existing stacking window managers that are small and meant to be used standalone,
+%without the desktop environment, are quite old, implemented in C, mostly in a one big file,
+%which makes them unmaintainable and inextensible.
+
+\nonum
+\sec Goals of the Thesis
+
+The primary goal of this thesis is to design and implement a stacking window manager for the X11 Window System.
+This window manager should be small, easy to use, and implemented in a modern system programming language.
+It should be also compliant with two standard protocols defined on top of the X Window System Protocol,
+Inter-Client Communication Conventions Manual (ICCCM), and Extended Window Manager Hints (EWMH).
+Its core features should include:
+\begitems
+* stacking window management,
+* basic window decorations,
+* basic tiling (moving windows to half/thirds of the screen),
+* extensibility,
+* scriptability.
+\enditems
+The implementation should be tested.
+
+\nonum
+\sec Structure of the Thesis
+
+The rest of the thesis is organised as follows.
+In Chapter~\ref[chap:winman], we describe the windowing system, desktop environment, and window manager.
+Different types of window managers are discussed and some window managers are described in detail.
+In Chapter~\ref[chap:xsystem], we talk about the X Window System.
+We discuss its history, architecture, and the X protocol.
+In Chapter~\ref[chap:icccmewmh], two standard protocols defined on top of the X protocol, ICCCM and EWMH, are introduced.
+Chapter~\ref[chap:impl] is the core part of the thesis, describing the design and implementation process.
+Firstly, we go through the tools used to in the process.
+Then, we describe the design choices, some implementation details, and finally how was the window manager tested.
