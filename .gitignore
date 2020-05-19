@@ -3,6 +3,9 @@ out/thesis.pdf
 out/cover.pdf
 # OPmac ref files
 *.ref
+#idea
+.idea/*
+!.idea/runConfigurations/
 
 # Created by https://www.gitignore.io/api/tex
 # Edit at https://www.gitignore.io/?templates=tex
