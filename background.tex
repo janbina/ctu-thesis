@@ -9,15 +9,52 @@ From a programmer's point of view, a windowing system implements graphical primi
 or drawing a line on the screen, effectively providing an abstraction of the graphics hardware from higher level
 elements of the graphical interface like window managers~\cite[winsys2].
 
-The most popular windowing system (display server) among Linux users is the {\em X Window System}~\cite[arch_xorg],
-and its reference, open-source implementation {\em X.Org Server} provided be the X.Org Foundation~\cite[xorg].
+The most popular windowing system among Linux users is the {\em X Window System}~\cite[arch_xorg],
+and its reference, open-source implementation {\em X.Org Server} provided by the X.Org Foundation~\cite[xorg].
 The X Window System, also referred to as X or X11, originated at MIT in 1984~\cite[xman2].
 Another windowing system is {\em Wayland}, which is intended as a simpler replacement for X~\cite[wayland].
 Wayland started in 2008 and comes with different architecture, trying to solve problems in X's approach.
-The architecture was described and compared to X's architecture in article ``Wayland Architecture''~\cite[wayarch].
 
-Since the goal of this thesis was to build a window manager for X Window System,
-we will focus on this system and it will be discussed in detail in chapter~\ref[chap:xsystem].
+The main problem in X's approach is that it does not isolate apps from each other.
+As a result, all X applications have access to everything on the screen, all can register to receive every keystroke,
+even if they do not have input focus, and they can even inject keystrokes into other windows~\cite[xproblems].
+We can see the architecture schemes of X and Wayland in figures~\ref[fig:xarch] and~\ref[fig:wayarch].
+The numbers show the flow of the events from the input device to the point where the change it affects appears on screen.
+For detailed description of architectures, see~\cite[wayarch].
+The only difference between those two schemes is the compositor.
+The compositor is responsible for rendering the entire screen contents.
+Since the window location on screen is controlled by the compositor and may be transformed
+in a number of ways (e.g., scaled down, rotated), the X server does not have the info to decide which client
+should receive the event.
+The X server acts as a middleman that introduces an extra step between applications and the compositor
+and an extra step between the compositor and the hardware.
+In wayland, on the other hand, the compositor is part of the display server.
+The wayland protocol lets the compositor send the input events directly to the clients and lets
+the client send the response directly to the compositor.~\cite[wayarch]
+
+\midinsert
+\line{\hsize=.5\hsize \vtop{%
+    \clabel[fig:xarch]{X architecture scheme}
+    \picw=7.7cm \cinspic img/xarch.pdf
+    \caption/f X architecture scheme
+    \par}\vtop{%
+    \clabel[fig:wayarch]{Wayland architecture scheme}
+    \picw=6.6cm \cinspic img/wayarch.pdf
+    \caption/f Wayland architecture scheme
+    \par}}
+\endinsert
+
+Even though Wayland is meant to replace X in the future, it is not happening quite yet.
+One of its problems is apps compatibility -- Samuel Walladge said in his article called {\em Are we Wayland yet?}
+from the end of 2019: ``I soon discovered that many many apps either only supported X11, or crashed on Wayland.''~\cite[arewewayland]
+Those apps then require XWayland, which provides embedded X server for apps that do not support Wayland yet.
+Another problem is that ``screen recording or sharing apps just do not work''~\cite[arewewayland],
+which is caused by the Wayland architecture that isolates each client.
+Walladge also mentions stability issues and comes to a conclusion that the time for switching to Wayland did not come yet.
+Similar problems and conclusions are also outlined in articles {\em X11 Sucks… So What's Up With Wayland?}~\cite[x11sucks]
+and {\em Wayland v/s Xorg : How Are They Similar \& How Are They Different}~\cite[wayvsxorg].
+Because of that, we decided to build swm for the X Window System
+and from now on, we will focus on it.
 
 \sec Desktop Environment and Window Manager
 
