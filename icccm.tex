@@ -19,11 +19,18 @@
 
 \label[sec:icccm]
 \sec ICCCM
-Inter-Client Communication Conventions Manual is a standard that defines how X Window System clients should interact with one another.
+It was an explicit design goal of X Version 11 to specify a mechanism, not a policy.
+Because of that, a client that communicates with an X11 server using the protocol defined by
+the X Window System Protocol (discussed in previous section~\ref[sec:xsystem])
+may operate correctly in isolation but may not coexist properly with others sharing the same server.~\cite[icccm]
+
+Standardized communication is important especially for window managers and other special clients like docks, toolbars or pagers,
+because they need to communicate with the rest of the clients as well as with each other.
+Inter-Client Communication Conventions Manual is one of two standards that define how X Window System clients should interact with one another.
 It was designed at the X Consortium in 1988.
 Its latest version 2.0 was released in 1994.~\cite[icccm]
 
-In this section, we will cover parts of ICCCM which are related to window managers and therefore important for us.
+In this section, we will cover parts of ICCCM that are related to window managers and therefore important for us.
 ICCCM manual~\cite[icccm] will be constantly referenced here, so we will explicitly refer only other sources if they are used.
 
 %The ICCCM is known for being difficult to correctly implement.
@@ -42,31 +49,67 @@ ICCCM manual~\cite[icccm] will be constantly referenced here, so we will explici
 
 \label[sec:icccmselection]
 \secc Selection
-Selections are the primary mechanism that X Version 11 defines for the exchange of information between clients, for example, by cutting and pasting between windows.
-There can be an arbitrary number of selections (each named by an atom) and that they are global to the server.
-Each selection is owned by a client and is attached to a window.
+Selections are the primary mechanism that X11 defines for the exchange of information between clients.
+There can be an arbitrary number of selections, each of them is named by an atom, and they are global to the server.
+Each selection can be owned by some client and attached to a window created by that client.
 
-As stated by the ICCCM, window managers should acquire ownership of a selection named "WM_Sn", where "n" is the screen number, for every screen they manage.
-Selection ownership is acquired by calling "SetSelectionOwner" request, specifying the atom that represents the selection, some window that the client created
-and timestamp of the event that triggers the acquisition of the selection.
-If the time in the "SetSelectionOwner" request is in the future relative to the server's current time or is in the past relative
-to the last time the specified selection changed hands, the "SetSelectionOwner" request appears to the client to succeed, but ownership is not actually transferred.
-Client can get the owner of a particular selection by invoking "GetSelectionOwner" request.
+For our window manager use case, we will be concerned about ownership of a selection named "WM_Sn", where "n" is the screen number.
+To do its job, the window manager needs to register for "SubstructureRedirect" events on the root window of the screen it wants to manage
+(we will discuss this in more detail in section~\ref[sec:becomingwm]).
+Since only one client can be registered for substructure redirection on any given window at any given time,
+we need some mechanism to inform the client that is currently registered for it that we (on behalf of the user)
+want to replace it.
+Selection provides this mechanism.
 
-Clients may either give up selection ownership voluntarily or lose it forcibly as the result of some other client's actions.
-To relinquish ownership of a selection voluntarily, a client should execute a "SetSelectionOwner" request for that selection atom,
-with owner specified as "None" and the time specified as the timestamp that was used to acquire the selection.
-Alternatively, the client may destroy the window used as the owner value of the "SetSelectionOwner" request, or the client may terminate.
-In both cases, the ownership of the selection involved will revert to "None".
-If a client gives up ownership of a selection or if some other client executes a "SetSelectionOwner" for it and thus reassigns it forcibly,
-the previous owner will receive a "SelectionClear" event.
+To see this in practice, look at the code listing~\ref[code:selection].
+Firstly, on line 2, we retrieve the owner of the selection we want to manage ("WM_S2").
+We then check if another client owns this selection, in which case we should get confirmation
+from the user that our application could replace it.
+If there is no owner or we have the user's permission to replace it,
+we send the "SetSelectionOwner" request, specifying the selection atom ("WM_S2") and the window to which the selection
+would be attached ("X.Dummy()" in this case).
+If the selection was owned by another client, we then have to wait for its termination, that is, wait for
+the "DestroyNotifyEvent" of the window that owned the selection.
+After that, we can finally register for "SubstructureRedirect" events on the root window of screen 2, since
+we now own the selection "WM_S2".
+The last thing we have to do to comply with ICCCM is to listen for the "SelectionClearEvent".
+We will receive this event when another client sends the "SetSelectionOwner" request (just like we did earlier)
+and we have to release managed resources (substructure redirection on root window) and destroy the window that owns
+the selection.
+In our case, we simply quit, as there is no point for the window manager to run without the substructure redirection.
 
-If a manager loses ownership of a manager selection, a new manager is taking over its responsibilities.
-The old manager must release all resources it has managed and must then destroy the window that owned the selection.
-For example, a window manager losing ownership of "WM_S2" must deselect from "SubstructureRedirect" on the root window of screen 2 before destroying the window that owned "WM_S2".
-When the new manager notices that the window owning the selection has been destroyed,
-it knows that it can successfully proceed to control the resource it is planning to manage.
-If the old manager does not destroy the window within a reasonable time, the new manager should check with the user before destroying the window itself or killing the old manager.
+\midinsert
+\verbinput (-) listings/selection.go
+\clabel[code:selection]{Selection acquiring mechanism}
+\caption/l {
+    Selection acquiring mechanism.
+    Note that the code is simplified a lot and would not compile like this.
+}
+\endinsert
+
+
+
+%As stated by the ICCCM, window managers should acquire ownership of a selection named "WM_Sn", where "n" is the screen number, for every screen they manage.
+%Selection ownership is acquired by calling "SetSelectionOwner" request, specifying the atom that represents the selection, some window that the client created
+%and timestamp of the event that triggers the acquisition of the selection.
+%If the time in the "SetSelectionOwner" request is in the future relative to the server's current time or is in the past relative
+%to the last time the specified selection changed hands, the "SetSelectionOwner" request appears to the client to succeed, but ownership is not actually transferred.
+%Client can get the owner of a particular selection by invoking "GetSelectionOwner" request.
+%
+%Clients may either give up selection ownership voluntarily or lose it forcibly as the result of some other client's actions.
+%To relinquish ownership of a selection voluntarily, a client should execute a "SetSelectionOwner" request for that selection atom,
+%with owner specified as "None" and the time specified as the timestamp that was used to acquire the selection.
+%Alternatively, the client may destroy the window used as the owner value of the "SetSelectionOwner" request, or the client may terminate.
+%In both cases, the ownership of the selection involved will revert to "None".
+%If a client gives up ownership of a selection or if some other client executes a "SetSelectionOwner" for it and thus reassigns it forcibly,
+%the previous owner will receive a "SelectionClear" event.
+%
+%If a manager loses ownership of a manager selection, a new manager is taking over its responsibilities.
+%The old manager must release all resources it has managed and must then destroy the window that owned the selection.
+%For example, a window manager losing ownership of "WM_S2" must deselect from "SubstructureRedirect" on the root window of screen 2 before destroying the window that owned "WM_S2".
+%When the new manager notices that the window owning the selection has been destroyed,
+%it knows that it can successfully proceed to control the resource it is planning to manage.
+%If the old manager does not destroy the window within a reasonable time, the new manager should check with the user before destroying the window itself or killing the old manager.
 
 \secc Clients Actions
 Clients should, as far as possible, do exactly what they would do in the absence of a window manager,
@@ -88,8 +131,10 @@ From the client's point of view, the window manager will regard its top-level wi
 * Withdrawn
 \enditems
 Newly created windows start in the Withdrawn state.
-Transitions between states happen when the top-level window is mapped and unmapped and when the window manager receives certain messages.
-We will talk about that more later on.
+Transitions between states happen when the top-level window is {\em mapped} and {\em unmapped} and when the window manager receives certain messages.
+For historical reasons related to some initial implementations, showing a window in the X11 protocol is called mapping a window,
+and hiding a window is called unmapping~\cite[xBasics].
+Transitions between those states will be described in section~\ref[sec:changingstate].
 
 \label[sec:clientproperties]
 \secc Client Properties
@@ -97,22 +142,19 @@ Once the client has one or more top-level windows, it should place properties on
 If any of these properties are not supplied, window managers can assume values they find convenient -- clients that depend on particular values must explicitly supply them.
 The window manager will not change properties written by the client.
 
-The window manager will examine the contents of these properties when the window makes the transition from the "Withdrawn" state and will monitor
-some properties for changes while the window is in the "Iconic" or "Normal" state.
-Window manager don't have to retain memory of the old value of the property.
-All fields of the property must be set to suitable values in a single "ChangeProperty" request.
-This ensures that the full contents of the property will be available to a new window manager if the existing one crashes or shuts down.
-
 By convention, clients writing or rewriting window manager properties must ensure that the entire content of each property remains valid at all times.
-
-Some of these properties may contain the IDs of resources, such as windows or pixmaps.
-Clients should ensure that these resources exist for at least as long as the window on which the property resides.
+Also, all fields of the property must be set to suitable values in a single "ChangeProperty" request.
+This ensures that the full contents of the property will be available to a new window manager if the existing one crashes or shuts down.
+Contents of these properties are examined by the window manager upon transition from the "Withdrawn" state,
+some properties are also monitored for changes while the window is in the "Iconic" or "Normal" state.
+For example, a file manager usually changes "WM\_NAME" property when the user navigates to different directories,
+and the window manager is expected to observe these changes and reflect them in its UI.
 
 Extending these properties is reserved to the X Consortium; private extensions to them are forbidden.
 Private additional communication between clients and window managers should take place using separate properties.
 The only exception to this rule is the "WM_PROTOCOLS" property, which may be of arbitrary length and which may contain atoms representing private protocols.
 
-In the table~\ref[tab:propsummary], you can see summary of all client properties defined by ICCCM.
+In table~\ref[tab:propsummary], we can see a summary of all client properties defined by ICCCM.
 Some of them will be covered in detail.
 
 \midinsert \clabel[tab:propsummary]{Summary of Window Manager Property Types}
@@ -138,6 +180,7 @@ The "WM_CLASS" property contains two consecutive null-terminated strings.
 These specify the Instance and Class names to be used by both the client and the window manager for looking up resources for the application or as identifying information.
 This property must be present when the window leaves the "Withdrawn" state and may be changed only while the window is in the "Withdrawn" state.
 Window managers may examine the property only when they start up and when the window leaves the "Withdrawn" state, but there should be no need for a client to change its state dynamically.
+For example, in table~\ref[tab:properties], we have seen a window with "WM_CLASS" set to {\em ``jetbrains-goland, jetbrains-goland''}.
 
 %{\sbf WM\_CLIENT\_MACHINE} property should be set by the client to a string that forms the name of the machine running the client as seen from the machine running the server.
 %It is not really useful for window managers.
@@ -147,11 +190,17 @@ Window managers may examine the property only when they start up and when the wi
 %The top-level window is always (implicitly or explicitly) on the watch list.
 
 \heading WM\uns HINTS
-The "WM_HINTS" property is used to communicate to the window manager.
-It conveys the information the window manager needs other than the window geometry, which is available from the window itself;
-the constraints on that geometry, which is available from the "WM_NORMAL_HINTS" structure;
-and various strings, which need separate properties, such as "WM_NAME".
-The contents of the properties can be seen in the table~\ref[tab:hints].
+The "WM_HINTS" property is used to communicate information that does not need separate properties (such as "WM_CLASS")
+to the window manager.
+Its fields could be seen in table~\ref[tab:hints].
+Window managers are free to assume convenient values for all fields of the "WM_HINTS" property if a window is mapped without one.
+For our use case, particularly useful fields would be "flags", "initial_state", and "window_group".
+Field "flags", apart from presence of all the other fields, contains boolean value for "UrgencyHint",
+which is set to "true" when the window needs user attention.
+The value of the "initial_state" field determines the state the client wishes to be in at the time the top-level window is mapped from the "Withdrawn" state,
+that could be either "NormalState" (window is visible) or "IconicState" (icon is visible) -- see section~\ref[sec:toplevelwindow].
+The "window_group" field lets the client specify that this window belongs to a group of windows.
+Window manager can use this hint to manipulate the group as a whole.
 
 \midinsert \clabel[tab:hints]{Contents of hints property}
 \ctable{ll}{
@@ -168,19 +217,6 @@ The contents of the properties can be seen in the table~\ref[tab:hints].
 }
 \caption/t Contents of {"WM_HINTS"}.
 \endinsert
-
-Window managers are free to assume convenient values for all fields of the "WM_HINTS" property if a window is mapped without one.
-Field "flags" contains information about presence of all the other properties and one more boolean value for "UrgencyHint".
-The input field is used to communicate to the window manager the input focus model used by the client.
-The value of the "initial_state" field determines the state the client wishes to be in at the time the top-level window is mapped from the "Withdrawn" state,
-that could be either "NormalState" (window is visible) or "IconicState" (icon is visible) -- see section~\ref[sec:toplevelwindow].
-The "window_group" field lets the client specify that this window belongs to a group of windows.
-An example is a single client manipulating multiple children of the root window.
-By convention, the "window_group" field should be set to the ID of the group leader.
-Window managers may provide facilities for manipulating the group as a whole.
-Clients, at present, have no way to operate on the group as a whole.
-The "UrgencyHint" flag, if set in the flags field, indicates that the client deems the window contents to be urgent, requiring the timely response of the user.
-The window manager must make some effort to draw the user's attention to this window while this flag is set.
 
 \heading WM\uns NAME
 The "WM_NAME" property is an uninterpreted string that the client wants the window manager
@@ -293,7 +329,7 @@ Once the top-level window has been withdrawn, the client may re-use it for anoth
 Clients that do so should remove the "WM_STATE" property if it is still present.
 
 The "WM_STATE" property is often used an an indicator of top-level window.
-For example, some clients (such as xprop\urlnote{https://www.x.org/releases/X11R7.5/doc/man/man1/xprop.1.html})
+For example, some clients (such as xprop~\cite[xprop])
 need to find a top-level window by pointer location (user clicking on window).
 They can do it by searching the window hierarchy beneath the selected location for a window with the "WM_STATE" property.
 This search must be recursive in order to cover all window manager reparenting possibilities.
@@ -316,6 +352,7 @@ In particular, window managers should present newly mapped "WM_TRANSIENT_FOR" wi
 even if mapping top-level windows normally does require interaction.
 Dialogue boxes, for example, are an example of windows that should have "WM_TRANSIENT_FOR" set.
 
+\label[sec:changingstate]
 \secc Changing Window State
 As already mentioned in section~\ref[sec:toplevelwindow], window manager will assign each top-level window one of three states:
 \begitems
