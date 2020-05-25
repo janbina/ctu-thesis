@@ -6,12 +6,12 @@
 A~windowing system is a collection of software that creates the basic GUI (graphical user interface)
 on computer display screens, including the drawing of windows and other graphics primitives for application programs~\cite[winsys].
 From a programmer's point of view, a windowing system implements graphical primitives such as rendering fonts
-or drawing a line on the screen, effectively providing an abstraction of the graphics hardware from higher level
+or drawing a line on the screen, effectively providing an abstraction of the graphics hardware from higher-level
 elements of the graphical interface like window managers~\cite[winsys2].
 
 The most popular windowing system among Linux users is the {\em X Window System}~\cite[arch_xorg],
 and its reference open-source implementation {\em X.Org Server} provided by the X.Org Foundation~\cite[xorg].
-The X Window System, also referred to as X or X11, originated at MIT in 1984~\cite[xman2].
+The X Window System (also referred to as X or X11) originated at MIT in 1984~\cite[xman2].
 Another windowing system is {\em Wayland}, which is intended as a simpler replacement for X~\cite[wayland].
 Wayland started in 2008 and comes with different architecture, trying to solve problems in X's approach.
 
@@ -23,12 +23,12 @@ The numbers show the flow of the events from the input device to the point where
 The only difference between those two schemes is the compositor,
 which is responsible for rendering the entire screen contents.
 Since the window location on the screen is controlled by the compositor and may be transformed
-in a number of ways (e.g., scaled down, rotated), the X server does not have the information to decide which client
+in several ways (e.g., scaled-down, rotated), the X server does not have the information to decide which client
 should receive the event.
 The X server acts as a middleman that introduces an extra step between applications and the compositor
 and an extra step between the compositor and the hardware.
-In wayland, on the other hand, the compositor is part of the display server.
-The wayland protocol lets the compositor send the input events directly to the clients and lets
+In Wayland, on the other hand, the compositor is part of the display server.
+The Wayland protocol lets the compositor send the input events directly to the clients and lets
 the client send the response directly to the compositor.~\cite[wayarch]
 
 \midinsert
@@ -46,10 +46,10 @@ the client send the response directly to the compositor.~\cite[wayarch]
 Even though Wayland is meant to replace X in the future, it is not happening quite yet.
 One of its problems is apps compatibility -- Samuel Walladge said in his article called {\em Are we Wayland yet?}
 from the end of 2019: ``I soon discovered that many many apps either only supported X11, or crashed on Wayland.''~\cite[arewewayland]
-Those apps then require XWayland, which provides embedded X server for apps that do not support Wayland yet.
+Those apps then require XWayland, which provides an embedded X server for apps that do not support Wayland yet.
 Another problem is that ``screen recording or sharing apps just do not work''~\cite[arewewayland],
 which is caused by the Wayland architecture that isolates each client.
-Walladge also mentions stability issues and comes to the conclusion that the time for switching to Wayland did not come yet.
+Walladge also mentions stability issues and concludes that the time for switching to Wayland did not come yet.
 Similar problems and conclusions are also outlined in articles {\em X11 Sucks… So What's Up With Wayland?}~\cite[x11sucks]
 and {\em Wayland v/s Xorg : How Are They Similar \& How Are They Different}~\cite[wayvsxorg].
 Because of that, we decided to build swm for the X Window System
@@ -60,7 +60,7 @@ and from now on, we will focus on it.
 A~desktop environment is an implementation of the desktop metaphor,
 which was introduced by Alan Kay at Xerox PARC in 1970 to help users interact with the computer more easily~\cite[graphics].
 The first commercial personal computer to use the now common desktop metaphor was the Xerox Star.
-Developer of its interface, David Smith, described it like this:
+The developer of its interface, David Smith, described it like this:
 ``Every user’s initial view of the Star is the desktop, which resembles the top of an office desk,
 together with surrounding furniture and equipment.
 It represents a working environment, where projects and accessible resources reside.
@@ -75,12 +75,12 @@ While the desktop environment provides its own window manager, it can be usually
 There is a great offer of desktop environments for Linux, for example, Arch Wiki~\cite[arch_de] lists more than 20 of them.
 Some of the most popular are KDE~\cite[kde], GNOME~\cite[gnome], or Xfce~\cite[xfce].
 
-A~window manager is a system software that manages windows.
+A~window manager is system software that manages windows.
 That means, it controls the placement and appearance of windows within a windowing system in GUI~\cite[arch_wm].
-It allows windows to be opened, closed, resized, moved, maximized, minimized and more.
-Window manager is also responsible for tracking which window is currently active and thus receiving the user's input.
+It allows windows to be opened, closed, resized, moved, maximized, minimized, and more.
+The window manager is also responsible for tracking which window is currently active and thus receiving the user's input.
 Some window managers are specifically developed to be part of a desktop environment, others are instead designed to be used standalone.
-Using standalone window manager allows the user to create a more lightweight and customized environment, tailored to his own specific needs~\cite[arch_wm].
+Using a standalone window manager allows the user to create a more lightweight and customized environment, tailored to his own specific needs~\cite[arch_wm].
 There is a great offer of window managers for Linux.
 For example, Arch Wiki provides a list of window managers categorized by type~\cite[arch_wm], that lists more than 60 of them.
 In section~\ref[sec:managers], we will pick some of them and discuss them in more detail.
@@ -97,7 +97,7 @@ Stacking window managers, also known as floating, provide the traditional deskto
 Windows act like pieces of paper on a desk -- they can be stacked on top of each other, moved around, and resized freely by the user.
 Moving or resizing one window does not affect the position or size of other windows, only their visible area.
 Window manager must maintain the stacking order of the windows and only the top window on the stack is guaranteed to be fully visible.
-Window is usually moved to the top of the stack by the window manager when user starts to interact with it.
+A window is usually moved to the top of the stack by the window manager when the user starts to interact with it.
 Example layout of a stacking window manager is depicted in figure~\ref[fig:stacking].
 Windows are overlapping and only focused window (highlighted in blue) is fully visible.
 
@@ -121,7 +121,7 @@ Example layout of a tiling window manager is depicted in figure~\ref[fig:tiling]
 Tiling window managers could be split into two more categories:
 \begitems
 * {\sbf Dynamic} tiling window managers tile windows based on preset layouts.
-They usually offer many different layouts of window placement and the user is able to dynamically switch between them.
+They usually offer many different layouts of window placement and the user can dynamically switch between them.
 For example, one of the most common tiling layouts is called {\em master-stack} layout,
 in which one window (master) is considered the most important and has dedicated half of the screen space,
 while the rest of the windows are displayed one below the other on the second half of the screen.
@@ -150,12 +150,12 @@ In this section, we will go through some of them, mainly those that inspired swm
 
 Cwm (Calm Window Manager) is a stacking window manager for the X Window System.
 It describes itself as a ``window manager which contains many features that concentrate on the efficiency
-and transparency of window management, while maintaining the simplest and most pleasant aesthetic''~\cite[cwm].
+and transparency of window management while maintaining the simplest and most pleasant aesthetic''~\cite[cwm].
 
-Cwm is oriented towards heavy keyboard usage -- resizing, moving, hiding, raising or lowering windows, all can be done using
+Cwm is oriented towards heavy keyboard usage -- resizing, moving, hiding, raising, or lowering windows, all can be done using
 keyboard shortcuts~\cite[cwm2].
-It could be even configured to move the mouse cursor using keyboard, so that one could use the computer without any pointing device.
-User can either define custom shortcuts using cwm's configuration file, or use the default ones.
+It could be even configured to move the mouse cursor using the keyboard so that one could use the computer without any pointing device.
+The user can either define custom shortcuts using cwm's configuration file or use the defaults.
 
 Cwm's interface is very minimal -- it only draws a one-pixel border around windows by default.
 The width of the border and its color can be configured though.
@@ -170,7 +170,7 @@ While the sticky group is always visible on the screen, the normal group can be 
 This means that unlike virtual desktops, multiple groups could be visible at the same time.
 The visibility of the group can be controlled by keyboard shortcuts as well.
 
-Figure~\ref[fig:cwmmenu] shows cwm desktop with two windows and one of those menus.
+Figure~\ref[fig:cwmmenu] shows a cwm desktop with two windows and one of those menus.
 This menu lists all the managed top-level windows, there are various information included:
 \begitems
 * the group ID on the left,
@@ -186,7 +186,7 @@ The user may add, modify or remove shortcuts, change colors and other aspects of
 \midinsert
 \picw=12cm \cinspic img/cwm.png
 \clabel[fig:cwmmenu]{Cwm desktop}
-\caption/f Cwm desktop with two windows and menu showing all managed windows.
+\caption/f Cwm desktop with two windows and a menu showing all managed windows.
 \endinsert
 
 \secc Openbox
@@ -198,16 +198,16 @@ It is the default window manager of desktop environments LXDE~\cite[lxde] and it
 and it is also offered as one of the options for default window manager in many Linux distributions,
 for example Lubuntu~\cite[lubuntu] and Manjaro~\cite[manjaro].
 
-Although Openbox claims being minimalistic, it is much more advanced than cwm.
+Although Openbox claims to be minimalistic, it is much more advanced than cwm.
 Its default UI could be seen in figure~\ref[fig:openbox].
-It comes with full-featured window decorations that includes border around the window and title bar with window title
-and buttons to minimize, maximize and close the window.
-It also includes {\em root menu} on the desktop.
-Using this menu, one can launch applications, bring minimized windows up again or start various Openbox configuration tools.
-Openbox does not come with bundled taskbar, though, and advices its users to use one of many stand-alone EWMH compatible taskbars.
+It comes with full-featured window decorations that include a border around the window and title bar with window title
+and buttons to minimize, maximize, and close the window.
+It also includes a {\em root menu} on the desktop.
+Using this menu, one can launch applications, bring minimized windows up again, or start various Openbox configuration tools.
+Openbox does not come with a bundled taskbar, though, and advices its users to use one of many stand-alone EWMH compatible taskbars.
 
 Openbox is configured by two configuration files "rc.xml" and "menu.xml".
-The first one "rc.xml" is the main configuration file, responsible for determining the behaviour and settings
+The first one "rc.xml" is the main configuration file, responsible for determining the behavior and settings
 of the overall session, including keyboard shortcuts, theming, virtual desktops settings etc.~\cite[openboxarch]
 The second one, "menu.xml", defines the type, behavior, and items of aforementioned desktop menu.
 Although the default provided is a static menu (it will not automatically update when new applications are installed),
@@ -215,7 +215,7 @@ it is possible to employ the use of dynamic menus that will automatically update
 
 Configuration files are not meant to be easily readable or editable -- Openbox comes with applications to edit them,
 one for "rc.xml", called {\em obconf} and one for "menu.xml", called {\em obmenu}.
-Using obconf, user can, for example, easily switch Opanbox theme, that controls the looks of window decorations and menus.
+Using obconf, user can, for example, easily switch Openbox theme, that controls the looks of window decorations and menus.
 Obconf itself includes many themes to choose from, more themes are available online and one can also
 easily create new or modify existing theme using provided GUI application~\cite[openboxarch].
 
