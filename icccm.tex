@@ -61,7 +61,7 @@ we need some mechanism to inform the client that is currently registered for it 
 want to replace it.
 Selection provides this mechanism.
 
-To see this in practice, look at the code listing~\ref[code:selection].
+To see this in practice, look at code listing~\ref[code:selection].
 Firstly, on line 2, we retrieve the owner of the selection we want to manage ("WM_S2").
 We then check if another client owns this selection, in which case we should get confirmation
 from the user that our application could replace it.
@@ -250,8 +250,8 @@ For obvious geometric reasons, fewer characters will normally be visible in "WM_
 %\endinsert
 
 \heading WM\uns NORMAL\uns HINTS
-The "WM_NORMAL_HINTS" property is of type "WM_SIZE_HINTS", its contents are displayed in the table~\ref[tab:normalhints],
-definitions of the "flags" field in the table~\ref[tab:sizeflags].
+The "WM_NORMAL_HINTS" property is of type "WM_SIZE_HINTS", its contents are displayed in table~\ref[tab:normalhints],
+definitions of the "flags" field in table~\ref[tab:sizeflags].
 To indicate that the size and position of the window (when a transition from the "Withdrawn" state occurs) was specified by the user,
 the client should set the "USPosition" and "USSize" flags, which allow a window manager to know that the user specifically asked where
 the window should be placed or how the window should be sized and that further interaction is superfluous.
@@ -334,7 +334,7 @@ need to find a top-level window by pointer location (user clicking on window).
 They can do it by searching the window hierarchy beneath the selected location for a window with the "WM_STATE" property.
 This search must be recursive in order to cover all window manager reparenting possibilities.
 
-The contents of the "WM_STATE" property are displayed in the table~\ref[tab:wmstate]
+The contents of the "WM_STATE" property are displayed in table~\ref[tab:wmstate]
 \midinsert \clabel[tab:wmstate]{Contents of window state property}
 \ctable{ll}{
     Field & Value \crl\tskip4pt

@@ -10,21 +10,20 @@ or drawing a line on the screen, effectively providing an abstraction of the gra
 elements of the graphical interface like window managers~\cite[winsys2].
 
 The most popular windowing system among Linux users is the {\em X Window System}~\cite[arch_xorg],
-and its reference, open-source implementation {\em X.Org Server} provided by the X.Org Foundation~\cite[xorg].
+and its reference open-source implementation {\em X.Org Server} provided by the X.Org Foundation~\cite[xorg].
 The X Window System, also referred to as X or X11, originated at MIT in 1984~\cite[xman2].
 Another windowing system is {\em Wayland}, which is intended as a simpler replacement for X~\cite[wayland].
 Wayland started in 2008 and comes with different architecture, trying to solve problems in X's approach.
 
-The main problem in X's approach is that it does not isolate apps from each other.
+The main problem in X's approach that Wayland wants to solve, is that it does not isolate apps from each other.
 As a result, all X applications have access to everything on the screen, all can register to receive every keystroke,
 even if they do not have input focus, and they can even inject keystrokes into other windows~\cite[xproblems].
-We can see the architecture schemes of X and Wayland in figures~\ref[fig:xarch] and~\ref[fig:wayarch].
-The numbers show the flow of the events from the input device to the point where the change it affects appears on screen.
-For detailed description of architectures, see~\cite[wayarch].
-The only difference between those two schemes is the compositor.
-The compositor is responsible for rendering the entire screen contents.
-Since the window location on screen is controlled by the compositor and may be transformed
-in a number of ways (e.g., scaled down, rotated), the X server does not have the info to decide which client
+The architecture schemes of X and Wayland are depicted in figures~\ref[fig:xarch] and~\ref[fig:wayarch].
+The numbers show the flow of the events from the input device to the point where the change it affects appears on the screen.
+The only difference between those two schemes is the compositor,
+which is responsible for rendering the entire screen contents.
+Since the window location on the screen is controlled by the compositor and may be transformed
+in a number of ways (e.g., scaled down, rotated), the X server does not have the information to decide which client
 should receive the event.
 The X server acts as a middleman that introduces an extra step between applications and the compositor
 and an extra step between the compositor and the hardware.
@@ -50,7 +49,7 @@ from the end of 2019: ``I soon discovered that many many apps either only suppor
 Those apps then require XWayland, which provides embedded X server for apps that do not support Wayland yet.
 Another problem is that ``screen recording or sharing apps just do not work''~\cite[arewewayland],
 which is caused by the Wayland architecture that isolates each client.
-Walladge also mentions stability issues and comes to a conclusion that the time for switching to Wayland did not come yet.
+Walladge also mentions stability issues and comes to the conclusion that the time for switching to Wayland did not come yet.
 Similar problems and conclusions are also outlined in articles {\em X11 Sucks… So What's Up With Wayland?}~\cite[x11sucks]
 and {\em Wayland v/s Xorg : How Are They Similar \& How Are They Different}~\cite[wayvsxorg].
 Because of that, we decided to build swm for the X Window System
@@ -69,9 +68,9 @@ On the screen are displayed pictures of familiar office objects, such as documen
 These objects are displayed as small pictures, or icons.''~\cite[graphics]
 
 A~desktop environment, as we know it today, bundles together a variety of components to provide common
-graphical user interface elements such as icons, toolbars, wallpapers, and desktop widgets~\cite[arch_de].
+graphical user interface elements such as icons, panels, wallpapers, and desktop widgets~\cite[arch_de].
 Most desktop environments also include a set of integrated applications and utilities, such as text editor, file manager, or web browser.
-Probably the most important part of a desktop environment is window manager.
+One of the most important parts of a desktop environment is a window manager.
 While the desktop environment provides its own window manager, it can be usually replaced with another compatible one~\cite[arch_de].
 There is a great offer of desktop environments for Linux, for example, Arch Wiki~\cite[arch_de] lists more than 20 of them.
 Some of the most popular are KDE~\cite[kde], GNOME~\cite[gnome], or Xfce~\cite[xfce].
@@ -79,16 +78,18 @@ Some of the most popular are KDE~\cite[kde], GNOME~\cite[gnome], or Xfce~\cite[x
 A~window manager is a system software that manages windows.
 That means, it controls the placement and appearance of windows within a windowing system in GUI~\cite[arch_wm].
 It allows windows to be opened, closed, resized, moved, maximized, minimized and more.
-Window manager is also responsible for tracking which window is currently active and thus receiving user's input.
+Window manager is also responsible for tracking which window is currently active and thus receiving the user's input.
 Some window managers are specifically developed to be part of a desktop environment, others are instead designed to be used standalone.
 Using standalone window manager allows the user to create a more lightweight and customized environment, tailored to his own specific needs~\cite[arch_wm].
 There is a great offer of window managers for Linux.
 For example, Arch Wiki provides a list of window managers categorized by type~\cite[arch_wm], that lists more than 60 of them.
 In section~\ref[sec:managers], we will pick some of them and discuss them in more detail.
 
+%TODO: describe the difference between DE and lightweight desktops with just wm
+
 \sec Types of Window Managers
 
-Window managers are usually divided into three classes, based on how windows are drawn on the screen.
+Window managers are usually divided into two classes, based on how windows are drawn on the screen.
 
 \secc Stacking Window Managers
 
@@ -96,12 +97,14 @@ Stacking window managers, also known as floating, provide the traditional deskto
 Windows act like pieces of paper on a desk -- they can be stacked on top of each other, moved around, and resized freely by the user.
 Moving or resizing one window does not affect the position or size of other windows, only their visible area.
 Window manager must maintain the stacking order of the windows and only the top window on the stack is guaranteed to be fully visible.
-Example layout of a stacking window manager could be seen in the figure~\ref[fig:stacking].
+Window is usually moved to the top of the stack by the window manager when user starts to interact with it.
+Example layout of a stacking window manager is depicted in figure~\ref[fig:stacking].
+Windows are overlapping and only focused window (highlighted in blue) is fully visible.
 
 \midinsert
 \picw=8cm \cinspic img/stacking.pdf
 \clabel[fig:stacking]{Stacking window manager layout}
-\caption/f Layout of a stacking window manager with overlapping windows
+\caption/f The layout of a stacking window manager with overlapping windows
 \endinsert
 
 \secc Tiling Window Managers
@@ -110,33 +113,44 @@ Tiling window managers tile the windows so that none are overlapping and they us
 They usually make very extensive use of keyboard shortcuts and have less or no reliance on the mouse~\cite[arch_wm].
 It is not possible to move or resize windows freely -- enlarging a window shrinks its adjacent windows and vice versa,
 moving is typically done by swapping the window's position with another window.
-Example layout of a tiling window manager could be seen in the figure~\ref[fig:tiling].
+Some types of windows, such as dialogs and pop-up windows, are not suited for tiling though.
+Most tiling window managers detect those windows and leave them in a floating state, keeping them above
+the windows that are tiled.
+Example layout of a tiling window manager is depicted in figure~\ref[fig:tiling].
+
+Tiling window managers could be split into two more categories:
+\begitems
+* {\sbf Dynamic} tiling window managers tile windows based on preset layouts.
+They usually offer many different layouts of window placement and the user is able to dynamically switch between them.
+For example, one of the most common tiling layouts is called {\em master-stack} layout,
+in which one window (master) is considered the most important and has dedicated half of the screen space,
+while the rest of the windows are displayed one below the other on the second half of the screen.
+* {\sbf Static (manual)} tiling window managers do not use layouts.
+They let the user decide where windows should be placed.
+Most typically, when a new window is created, one of the existing windows is shrunk to half its width/height and the new window takes freed up space.
+The user can choose the window that will be shrunk and also the direction (vertical or horizontal).
+Sometimes, the user can also choose the default split ratio, so that the new window does not take half, but, for example,
+only a third of the existing window space.
+\enditems
 
 \midinsert
 \picw=8cm \cinspic img/tiling.pdf
 \clabel[fig:tiling]{Tiling window manager layout}
-\caption/f Layout of a tiling window manager, windows are covering the whole screen with no overlaps
+\caption/f The layout of a tiling window manager.
+Windows cover the whole screen (with gaps), there are no overlaps.
 \endinsert
-
-\secc Dynamic Window Managers
-
-Dynamic window managers are a combination of tiling and stacking approach~\cite[arch_wm].
-They usually offer many different layouts of window placement and user is able to dynamically switch between them.
-One of those layouts is floating window layout, which acts like stacking window manager, the others are tiling layouts with different window arrangements.
-One of the most common tiling layout is called {\em master-stack} layout, in which one window (master) is considered the most important and it has
-dedicated half of the screen space, while rest of the windows are displayed one below the other on the second half of the screen.
 
 \label[sec:managers]
 \sec Window Managers
 
 As mentioned before, there is a great offer of window managers for Linux.
-In this section, we will go through some of them, mainly those that inspired SWM in some way.
+In this section, we will go through some of them, mainly those that inspired swm in some way.
 
 \secc Cwm
 
 Cwm (Calm Window Manager) is a stacking window manager for the X Window System.
-It describes itself as a {\em ``window manager which contains many features that concentrate on the efficiency
-and transparency of window management, while maintaining the simplest and most pleasant aesthetic''}~\cite[cwm].
+It describes itself as a ``window manager which contains many features that concentrate on the efficiency
+and transparency of window management, while maintaining the simplest and most pleasant aesthetic''~\cite[cwm].
 
 Cwm is oriented towards heavy keyboard usage -- resizing, moving, hiding, raising or lowering windows, all can be done using
 keyboard shortcuts~\cite[cwm2].
@@ -156,8 +170,8 @@ While the sticky group is always visible on the screen, the normal group can be 
 This means that unlike virtual desktops, multiple groups could be visible at the same time.
 The visibility of the group can be controlled by keyboard shortcuts as well.
 
-In the picture~\ref[fig:cwmmenu], we can see cwm desktop with two windows and one of those menus.
-This menu shows all the managed top-level windows, there are various information included:
+Figure~\ref[fig:cwmmenu] shows cwm desktop with two windows and one of those menus.
+This menu lists all the managed top-level windows, there are various information included:
 \begitems
 * the group ID on the left,
 * ``!'' indicates active (focused) window,
@@ -178,7 +192,7 @@ The user may add, modify or remove shortcuts, change colors and other aspects of
 \secc Openbox
 
 Openbox is a stacking window manager.
-It describes itself as a {\em ``minimalistic, highly configurable, next generation window manager with extensive standards support''}~\cite[openbox].
+It describes itself as a ``minimalistic, highly configurable, next generation window manager with extensive standards support''~\cite[openbox].
 It is designed to be fully compliant with ICCCM and EWMH protocols.
 It is the default window manager of desktop environments LXDE~\cite[lxde] and its successor LXQt~\cite[lxqt],
 and it is also offered as one of the options for default window manager in many Linux distributions,

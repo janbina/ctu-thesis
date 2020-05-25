@@ -1,0 +1,3 @@
+xdotool windowactivate 56623105
+xdotool getactivewindow windowminimize
+xdotool search "chromium" set_desktop_for_window 3

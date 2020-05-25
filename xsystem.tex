@@ -210,7 +210,7 @@ The client is in charge of deciding when to flush the request buffer,
 when to read results and when to wait for the server to respond.\cite[XlibXCB]
 
 \heading Comparison
-In the code listings~\ref[code:xlib] and~\ref[code:xcb], we can see comparison of those two libraries on the task of looking up a window property.
+In code listings~\ref[code:xlib] and~\ref[code:xcb], we can see comparison of those two libraries on the task of looking up a window property.
 Xlib generates the request to the X server to retrieve the property and appends it to its buffer of requests.
 Since this is a request that requires a response, Xlib then flushes the buffer, sending the contents to the X server.
 Next, Xlib waits until the X server processes all the requests preceding the property retrieve request, and sends the property retrieve reply.
