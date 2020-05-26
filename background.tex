@@ -225,33 +225,6 @@ easily create new or modify existing theme using provided GUI application~\cite[
 \caption/f Openbox with two opened window and a menu
 \endinsert
 
-\secc Bspwm
-
-Bspwm (binary space partitioning window manager) is a manual tiling window manager.
-It represents windows as the leaves of a full binary tree, supports multiple monitors and is configured and controlled through messages~\cite[bspwm, bspwmarch].
-It supports a subset of ICCCM and EWMH protocols, it does not state what is supported and what is not, though~\cite[bspwm].
-
-Bspwm is very minimalistic in terms of UI -- it only draws a simple solid color border around its windows and has no build-in taskbar or menus.
-Bspwm only responds to X events, and messages it receives on a dedicated socket.
-It comes with a standalone command line application called {\em bspc}, that writes messages on the bspwm's socket~\cite[bspwm].
-It also does not handle any keyboard or pointer inputs.
-For this it relies on a third party program that translates keyboard and pointer events to bspc invocations~\cite[bspwm].
-It recommends sxhkd~\cite[sxhkd] (developed by the same author).
-Upon startup, bspwm runs its configuration file, {\em bspwmrc}, which is simply a shell script that calls bspc (and, possibly, other utilities)~\cite[bspwm].
-
-Since bspwm represents windows as the leaves of a full binary tree,
-each inner node has exactly two children and each leaf node holds exactly one window.
-Each inner node is responsible for splitting its screen space in two parts and this split is defined by two
-parameters: the type (horizontal or vertical) and the ratio (a real number from interval $(0,1)$)~\cite[bspwm].
-New windows are inserted into a window tree at the specified insertion point using specified insertion mode, which
-is configurable~\cite[bspwm].
-
-\midinsert
-\picw=12cm \cinspic img/bspwm.png
-\clabel[fig:bspwmdesktop]{Bspwm desktop}
-\caption/f Bspwm desktop with four open windows in its default layout with gaps defined in its default config.
-\endinsert
-
 \secc Dwm
 
 Dwm (Dynamic Window Manager) is a dynamic tiling window manager
@@ -288,6 +261,33 @@ Most of those plugins implement new types of layout (deck, fibonacci, grid) of m
 \picw=12cm \cinspic img/dwm.png
 \clabel[fig:dwmdesktop]{Dwm desktop}
 \caption/f Dwm desktop with the status bar and four open windows in its default layout.
+\endinsert
+
+\secc Bspwm
+
+Bspwm (binary space partitioning window manager) is a manual tiling window manager.
+It represents windows as the leaves of a full binary tree, supports multiple monitors and is configured and controlled through messages~\cite[bspwm, bspwmarch].
+It supports a subset of ICCCM and EWMH protocols, it does not state what is supported and what is not, though~\cite[bspwm].
+
+Bspwm is very minimalistic in terms of UI -- it only draws a simple solid color border around its windows and has no build-in taskbar or menus.
+Bspwm only responds to X events, and messages it receives on a dedicated socket.
+It comes with a standalone command line application called {\em bspc}, that writes messages on the bspwm's socket~\cite[bspwm].
+It also does not handle any keyboard or pointer inputs.
+For this it relies on a third party program that translates keyboard and pointer events to bspc invocations~\cite[bspwm].
+It recommends sxhkd~\cite[sxhkd] (developed by the same author).
+Upon startup, bspwm runs its configuration file, {\em bspwmrc}, which is simply a shell script that calls bspc (and, possibly, other utilities)~\cite[bspwm].
+
+Since bspwm represents windows as the leaves of a full binary tree,
+each inner node has exactly two children and each leaf node holds exactly one window.
+Each inner node is responsible for splitting its screen space in two parts and this split is defined by two
+parameters: the type (horizontal or vertical) and the ratio (a real number from interval $(0,1)$)~\cite[bspwm].
+New windows are inserted into a window tree at the specified insertion point using specified insertion mode, which
+is configurable~\cite[bspwm].
+
+\midinsert
+\picw=12cm \cinspic img/bspwm.png
+\clabel[fig:bspwmdesktop]{Bspwm desktop}
+\caption/f Bspwm desktop with four open windows in its default layout with gaps defined in its default config.
 \endinsert
 
 \secc Summary
