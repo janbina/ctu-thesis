@@ -340,7 +340,9 @@ previous window manager destroyed its window and then tries to register for subs
 This was also shown in code listing~\ref[code:selection].
 
 Unfortunately, many window managers do not support this selection mechanism.
-For example, cwm, i3, dwm, or bspwm do not support it.
+For example, out of the window managers that we discussed in section~\ref[sec:managers],
+only Openbox supports the selection mechanism and quits when another client sends the "SetSelectionOwner" request.
+Cwm, dwm, bspwm, and i3 do not support it.
 However, if such a window manager supports at least EWMH, there exists one last possibility for swm to replace it.
 EWMH requires supporting window managers to set "_NET_SUPPORTING_WM_CHECK" root window property to be the ID of a child
 window created by themselves, as described in the section~\ref[sec:ewmhrootprops].
