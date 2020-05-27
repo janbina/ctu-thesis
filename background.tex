@@ -321,9 +321,9 @@ On top of it are tabs representing the rest of the windows.
 \enditems
 All those layouts can be combined on the screen using so-called containers.
 This means that inside a container that is tabbed can be another container that is using a split layout, for example.
-An example is depicted in figure~\ref[fig:i3desktop2].
-There is a container split horizontally whose left child is a container that is using a tabbed layout with three windows,
-and its right child is a container that is using stacking with three windows as well.
+An example is depicted in figure~\ref[fig:i3desktop].
+The leftmost window is in fact a container that is using a tabbed layout and has two windows.
+Similarly, the container right next to it has two windows in a stacking layout.
 A window can be also completely removed from the tiling layout and managed as a floating window.
 
 i3 is highly configurable using its configuration file.
@@ -335,13 +335,7 @@ specific window will be in a floating state by default.
 \midinsert
 \picw=12cm \cinspic img/i3wm.png
 \clabel[fig:i3desktop]{i3 desktop}
-\caption/f Desktop of i3 with four open windows
-\endinsert
-
-\midinsert
-\picw=12cm \cinspic img/i3wm_2.png
-\clabel[fig:i3desktop2]{i3 desktop, tabs and stacks}
-\caption/f Desktop of i3 with tabs and stacks
+\caption/f Desktop of i3 with four containers and six open windows
 \endinsert
 
 \secc Summary
