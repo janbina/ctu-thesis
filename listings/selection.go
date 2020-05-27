@@ -31,7 +31,7 @@ X.RootWin().Listen(EventMaskSubstructureRedirect);
 // when another client sends the set selection owner request,
 // we will receive the SelectionClearEvent, and by the ICCCM,
 // we have to release managed resources and destroy the window
-// that owned the selection
+// that owned the selection - we just quit, which does the job
 xevent.SelectionClearFun(func (X *XUtil, e SelectionClearEvent)) {
     if e.Selection == "WM_S2" {
         xevent.Quit(X)
