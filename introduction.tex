@@ -1,18 +1,51 @@
 \chap Introduction
 
-Window manager, being a tool that controls the placement and appearance of windows on the screen,
-is probably one of the most important parts of a graphical user interface of today's personal computers.
+Window manager is a tool that controls the placement and appearance of windows on the screen.
+It is probably one of the most important parts of a graphical user interface of today's personal computers.
 Generally, we can divide window managers into two categories, stacking window managers and tiling window managers.
 Stacking window managers provide the traditional desktop metaphor and are the most widely used type.
 They allow users to stack windows on top of each other, move them around, and resize them freely.
-Tiling window managers, on the other hand, organize windows to some predefined, grid-like layouts.
-Windows are sized so they cover the whole screen, do not overlap, and can't be moved or resized freely.
-There are also window managers that combine both these approaches and are referred to as dynamic window managers.
+Tiling window managers, on the other hand, organize windows on the screen so they do not overlap and use all available screen space.
 
-While a lot of tiling window managers have been created in recent years, it is not the case for stacking window managers.
-Available stacking window managers are either outdated, written in an unmaintainable and inextensible style, or they are
-part of large desktop environments and with lots of dependencies.
-Therefore, we feel a need for a small, easy to use, stacking window manager, that will be easily extensible.
+The first computer shipped with a working WIMP (windows, icons, menus, pointer) GUI was the Xerox Alto in the 1970s,
+which used a stacking window management.
+Its successor, Xerox Star, was the first commercial personal computer using the desktop metaphor, and it used tiling for most main application windows~\cite[alto].
+The first window manager for X11 was the Ultrix Window Manager (uwm), which was released in 1985~\cite[mikes].
+It was soon replaced by the Tab Window Manager (twm)~\cite[twm], which is still standard with X.Org Server and is available as part of many X Window System implementations.
+The first desktop environment for the X Window System was KDE -- it started in 1996 with a goal of creating
+an environment in which users could expect things to look, feel, and work consistently~\cite[kdeanon].
+KDE was soon followed by GNOME~\cite[gnome] and Xfce~\cite[xfce], and those three are among the most popular desktop
+environments to this day.
+Desktop environments target a wide range of users, and provide lots of built-in applications and utilities,
+so they can be used without much configuration.
+They also come with stacking window managers, because those are controlled using a pointing device a thus easier for most users.
+Among power users thought, lightweight desktops are more and more popular lately,
+because they are light on system resources and thus fast.
+This also leads to the increasing popularity of tiling window managers, since they are keyboard-oriented and targets at power users.
+One of the first lightweight tiling window managers was dwm~\cite[dwm], which was created in 2006.
+
+While lots of lightweight tiling window managers have been created in recent years,
+lightweight and keyboard-oriented stacking window managers seem to be missing.
+Existing stacking window managers are either part of a desktop environment and thus not keyboard-oriented,
+or they are outdated, written in an unmaintainable and inextensible style, and lacking crucial features like EWMH support.
+Therefore, we feel a need for a lightweight, keyboard-oriented stacking window manager, that will be easy to use and extensible.
+
+
+%Although full desktop environment that comes with lots of built-in apps and utilities is probably the best choice for most
+%users, lot of users starts to prefer lightweight desktops or standalone window managers for their speed and lightness on system resources.
+
+%Ten uvod by mel byt delsi, zaradil bych tam kus historie. Od prvnich window systemu, ktery meli window manager - twm,
+% pres desktopy jako gnome a kde az k lightweight desktopum a rozmachu tiling manageru jako je dwm, i3, ...
+%Pak rict, ze zatim co je hodne lightweight tilingovych manageru, chybi lightweight, keyboard-oriented stackable.
+%
+%Pak bych zminil proc jste si vybral Go misto klasickyho C/C++/Rustu/....
+
+
+
+%While a lot of tiling window managers have been created in recent years, it is not the case for stacking window managers.
+%Available stacking window managers are either outdated, written in an unmaintainable and inextensible style, or they are
+%part of large desktop environments and with lots of dependencies.
+%Therefore, we feel a need for a small, easy to use, stacking window manager, that will be easily extensible.
 
 %TODO some more ideas...
 %While there are many tiling window managers
@@ -29,29 +62,30 @@ Therefore, we feel a need for a small, easy to use, stacking window manager, tha
 \nonum
 \sec Goals of the Thesis
 
-The primary goal of this thesis is to design and implement a stacking window manager for the X11 Window System.
+The goal of this thesis is to design and implement a stacking window manager for the X11 Window System,
+focusing on the Linux OS only.
 This window manager should be small, easy to use, and implemented in a modern system programming language.
 It should be also compliant with two standard protocols defined on top of the X Window System Protocol,
 Inter-Client Communication Conventions Manual (ICCCM), and Extended Window Manager Hints (EWMH).
 Its core features should include:
 \begitems
 * stacking window management,
+* virtual desktops,
 * basic window decorations,
 * basic tiling (moving windows to half/thirds of the screen),
 * extensibility,
 * scriptability.
 \enditems
-The implementation should be tested.
+The implementation should be easy to read, and tested.
 
 \nonum
 \sec Structure of the Thesis
 
-The rest of the thesis is organised as follows.
-In Chapter~\ref[chap:winman], we describe the windowing system, desktop environment, and window manager.
+The rest of the thesis is organized as follows.
+In Chapter~\ref[chap:background], we describe the windowing system, desktop environment, and window manager.
 Different types of window managers are discussed and some window managers are described in detail.
-In Chapter~\ref[chap:xsystem], we talk about the X Window System.
-We discuss its history, architecture, and the X protocol.
-In Chapter~\ref[chap:icccmewmh], two standard protocols defined on top of the X protocol, ICCCM and EWMH, are introduced.
-Chapter~\ref[chap:impl] is the core part of the thesis, describing the design and implementation process.
-Firstly, we go through the tools used to in the process.
-Then, we describe the design choices, some implementation details, and finally how was the window manager tested.
+We talk about the X Window System, its history, architecture, and the X protocol.
+We also discuss two standard protocols defined on top of the X protocol, ICCCM, and EWMH.
+Chapter~\ref[chap:design] is about the design and philosophy of the window manager.
+Finally, chapter~\ref[chap:impl] describes the implementation process.
+We go through the tools used in the process, discuss some implementation details, and how was the window manager tested.

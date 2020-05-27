@@ -18,15 +18,14 @@ and the user can choose any application that fits his needs instead of using the
 
 For example, there are many open source panel implementations,
 like polybar~\cite[polybar], lemonbar~\cite[lemonbar], or pypanel~\cite[pypanel], just to name a few.
-To mention some application launchers that could be used with swm, we can go with dmenu~\cite[dmenu] or rofi~\cite[rofi].
+To mention some application launchers that could be used with swm, we can name dmenu~\cite[dmenu] or rofi~\cite[rofi].
 
 In this chapter, we will discuss some of the design choices made during the development of swm into detail.
 
-% ######################################################################################################################
-\sec Requirements % ##################################################################################
-% ######################################################################################################################
+%% ######################################################################################################################
+%\sec Requirements % ##################################################################################
+%% ######################################################################################################################
 
-weweewdwed
 
 % ######################################################################################################################
 \sec Tools % ##########################################################################################################
@@ -192,7 +191,7 @@ Swmrc is just a script that is executed upon startup of swm.
 It is executed after all the initialization has been done, so the window manager is running and
 can accept any command (swmctl's one, EWMH message sent using xdotool), but right before all the existing windows
 are adopted by swm.
-This makes it ideal for all the configuration commands -- one can, for example, set the names of the groups, color of borders etc.
+This makes it ideal for all the configuration commands -- one can, for example, set the names of the groups, color of borders, etc.
 
 % ######################################################################################################################
 \sec Desktops -- Groups % #############################################################################################

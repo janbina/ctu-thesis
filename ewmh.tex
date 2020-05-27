@@ -167,13 +167,13 @@ and a value of zero if it is not in this mode.
 Pager can send request to enter or leave this mode by sending a client message.
 The window manager may decide to refuse the request.
 
-\heading Other
-We will not discuss into details these root window properties, as they are not relevant to our window manager use case.
-Details about those properties could be found in the specification~\cite[ewmh].
-\begitems
-* "NET_VIRTUAL_ROOTS"
-* "NET_DESKTOP_LAYOUT"
-\enditems
+%\heading Other
+%We will not discuss into details these root window properties, as they are not relevant to our window manager use case.
+%Details about those properties could be found in the specification~\cite[ewmh].
+%\begitems
+%* "NET_VIRTUAL_ROOTS"
+%* "NET_DESKTOP_LAYOUT"
+%\enditems
 
 \label[sec:ewmhrootmsg]
 \secc Other Root Window Messages
@@ -364,19 +364,19 @@ The window manager should take this reserved area into account when constraining
 This property must be set by the window manager to the extents of the window's frame.
 It has four integer values, "left", "right", "top" and "bottom", which specify widths of the respective borders added by the window manager.
 
-\heading Other
-We will not discuss into details these application window properties, as they are not relevant to our window manager use case.
-Details about those properties could be found in the specification~\cite[ewmh].
-\begitems
-* "_NET_WM_ICON_GEOMETRY"
-* "_NET_WM_ICON"
-* "_NET_WM_PID"
-* "_NET_WM_HANDLED_ICONS"
-* "_NET_WM_USER_TIME"
-* "_NET_WM_USER_TIME_WINDOW"
-* "_NET_WM_OPAQUE_REGION"
-* "_NET_WM_BYPASS_COMPOSITOR"
-\enditems
+%\heading Other
+%We will not discuss into details these application window properties, as they are not relevant to our window manager use case.
+%Details about those properties could be found in the specification~\cite[ewmh].
+%\begitems
+%* "_NET_WM_ICON_GEOMETRY"
+%* "_NET_WM_ICON"
+%* "_NET_WM_PID"
+%* "_NET_WM_HANDLED_ICONS"
+%* "_NET_WM_USER_TIME"
+%* "_NET_WM_USER_TIME_WINDOW"
+%* "_NET_WM_OPAQUE_REGION"
+%* "_NET_WM_BYPASS_COMPOSITOR"
+%\enditems
 
 \label[sec:stackingorder]
 \secc Stacking Order

@@ -2,16 +2,13 @@
 \chap Implementation
 
 In this chapter, we will describe the implementation process of swm.
-Firstly, we will go through the tools used for the implementation, as well as for testing and communication with the window manager.
-Then, we will discuss the implementation and testing process.
-Lastly, we will look on code management, publish and continuous integration.
+We will go through the tools used for the implementation and testing and describe the implementation and testing process.
+We will also look at code management, publishing, and continuous integration.
 
 % ######################################################################################################################
 \label[sec:tools]
 \sec Tools % ###########################################################################################################
 % ######################################################################################################################
-
-In this section, we will describe some tools used for development and testing.
 
 % ######################################################################################################################
 \secc Go % #############################################################################################################
@@ -31,7 +28,7 @@ There is no type hierarchy though, only interfaces.
 Interfaces are not implemented explicitly -- a type automatically satisfies any interface that specifies a subset of its methods.
 
 One of Go's most important features, and feature which puts it apart from other system programming languages (such as C, C++, Rust), is garbage collection.
-According to Go's authors, managing the lifetimes of allocated objects is one of the biggest sources of bookkeeping in system programs.
+According to authors of Go, managing the lifetimes of allocated objects is one of the biggest sources of bookkeeping in system programs.
 Manual memory management consumes a significant amount of programmer time and is often the cause of bugs.
 Go wants to eliminate such programmer overheads by garbage collection.
 Its introduction to go language was possible thanks to advances in its technology in the last few years prior to Go launch.
@@ -98,7 +95,7 @@ Example callbacks definition can be seen in the code example~\ref[code:xgbutilev
 Xgbutil also defines "xwindow.Window" structure which is a wrapper around standard X window identifier (unsigned integer).
 This structure contains several methods for easier manipulation with windows, such as "Move", "Resize", "Map", "Unmap" and much more.
 
-Xgbutil was a great help in implementation of SWM and its higher-level functions and mechanisms were used whenever it was possible/beneficial.
+Xgbutil was a great help in implementation of swm and its higher-level functions and mechanisms were used whenever it was possible/beneficial.
 There were a few usecases for which no high-level api was available and in those cases, XGB was used.
 One example is setting border width of the window, which is not possible using the "xwindow.Window.Configure" method, so
 "xproto.ConfigureWindowChecked" must have been used.
@@ -115,7 +112,7 @@ manage the Xephyrs display and see its debug log in the terminal right next to i
 \midinsert
 \picw=14cm \cinspic img/xephyr.png
 \clabel[fig:xephyr]{Xephyr running swm}
-\caption/f Swm running in xephyr which runs in another instance of swm.
+\caption/f Swm running in xephyr which runs in another instance of swm
 \endinsert
 
 % ######################################################################################################################
@@ -149,12 +146,12 @@ This structure is based on the structure of some popular Go projects, such as Do
 as well as on choices made by Go team in Go's standard library.
 
 \begitems
-* {\Blue cmd\Black} directory should contain main applications for the project -- in our case, that is {\em swm} and {\em swmctl}.
+* {\sbf cmd} directory should contain main applications for the project -- in our case, that is {\em swm} and {\em swmctl}.
 Common practice is to have small "main" function which imports and invokes the code from the {\em internal} and {\em pkg} directories.
-* {\Blue internal\Black} directory should contain private application and library code -- the code you don't want others importing in their applications or libraries.
+* {\sbf internal} directory should contain private application and library code -- the code you don't want others importing in their applications or libraries.
 Since swm is not a library and doesn't contain any code which could be reused in other applications, all of its code will reside inside this directory.
 As of Go version $1.14$, Go compiler itself prevents others from importing the code inside this directory~\cite[gointernal].
-* {\Blue pkg\Black} directory should contain code that's meant to be used by other applications.
+* {\sbf pkg} directory should contain code that's meant to be used by other applications.
 If the project is small, it is not necessary to put packages inside {\em pkg} directory -- unlike {\em internal}, it does not provide any
 extra value, so those packages could stay in root directory.
 It can be, however, useful for large projects or projects with lots of non-Go components.
@@ -455,7 +452,7 @@ The first two commands will just alter current position or size of the window --
 of pixels in a specified direction.
 The window ID argument is optional and the active (focused) window is used by default.
 The movement is specified by cardinal directions, {\sbf n}orth, {\sbf e}ast, {\sbf s}outh, and {\sbf w}est.
-It is possible to combine them, so to move the window 20 pixels north and 10 pixels east, one can issue a command:
+It is possible to combine them, so to move the window 20 pixels north and 10 pixels east, one can issue this command:
 \begtt swmctl move -n 20 -e 10 \endtt
 and to enlarge the window by 10 pixels in each direction, this command:
 \begtt swmctl resize -n 10 -e 10 -s 10 -w 10 \endtt
@@ -528,7 +525,7 @@ and thus not showing windows from all visible groups in swm, that makes it only 
 \midinsert
 \picw=8cm \cinspic img/cycling.png
 \clabel[fig:cycling]{Window cycling UI}
-\caption/f Window cycling UI in xfce.
+\caption/f Window cycling UI in xfce
 \endinsert
 
 % ######################################################################################################################
@@ -545,8 +542,8 @@ Firstly, the script makes use of two xdotool commands to get the id of the curre
 Then, it goes through those windows, taking maximally four of them, and moving them to different parts of the screen using swmctl's "moveresize" command.
 The only thing that has to be changed for each window is the origin, which determines the corner to which the window will be moved.
 
-With just a few more lines of code, we can create a script that will be able to organize arbitrary number of windows, not only four of them.
-We might also use different layout, based on the number of windows
+With just a few more lines of code, we can create a script that will organize an arbitrary number of windows, not only four of them.
+We might also use different layout based on the number of windows
 
 \codeblock{code:organize}{Script to organize windows on desktop}{organize.sh}
 
@@ -561,7 +558,7 @@ We might also use different layout, based on the number of windows
 \sec ICCCM and EWMH Compliance % ###################################################################################
 % ######################################################################################################################
 
-One of the goals of SWM was to be more ICCCM and EWMH compliant than cwm.
+One of the goals of swm was to be more ICCCM and EWMH compliant than cwm.
 
 As for ICCCM, swm tries to be fully compliant.
 It is not easy and straight-forward task though, because ICCCM is known for being ambiguous and difficult to correctly implement~\cite[icccmdifficulties].
@@ -600,7 +597,7 @@ For example, it would be possible to test "stack", "focus" and "groupmanager" pa
 They all maintain their internal state (e.g., stacking order), so we might call methods they provide and test that this internal state is updated accordingly.
 In the end though, we want to test that the window manager reacts to the respective X events and that the internal state
 is also applied to the X state anyway.
-Because of that, we went with integration testing to test SWM.
+Because of that, we went with integration testing to test swm.
 
 Martin Fl\"oser, former maintainer of KDE's window manager KWin, said in his article about window manager testing from 2012:
 ``Given that we would have to basically start the full-blown KWin to perform tests which interact with the X-Server,
@@ -610,7 +607,7 @@ He also described how could the setup for window manager testing look like:
 performs a test and shuts down both KWin and the X Server.
 A~framework which is decoupled from the running system.''~\cite[unittesting]
 
-In this chapter, we will describe how was the testing done for SWM, as well as what is tested.
+In this chapter, we will describe how was the testing done for swm, as well as what is tested.
 
 \secc Testing Architecture
 
@@ -641,7 +638,7 @@ long enough to be sure that the changes already took affect, but not very long a
 This leads to the state that the tests are both slow and can fail randomly at the same time.
 A~better solution is to wait for an appropriate X event, which is not as easy but is failproof and much faster.
 
-Example test case could be seen in code example~\ref[code:testexample].
+Example test case is shown in code example~\ref[code:testexample].
 It tests whether window size changes correctly after sending a request to make it horizontally maximized.
 Firstly, a dummy window is created, and both the window geometry and the root window geometry are retrieved.
 After that, a request to add "_NET_WM_STATE_MAXIMIZED_HORZ" state to the window is sent.
@@ -663,12 +660,12 @@ Tests are separated into eleven functions, their brief description follows:
 Issues swmctl commands to cycle windows back and forth and test that correct window gets activated.
 * Desktop names -- tests that desktop (group) names are set correctly (by EWMH conventions, see section \ref[sec:ewmhrootprops]) by the swmctl command.
 * Group basics -- tests basic group manipulations using EWMH properties. That is, that the number of groups could be changed
-by requests to change root window property "_NET_NUMBER_OF_DESKTOPS" and that current group could be changed by requests to change "_NET_CURRENT_DESKTOP" root window property.
+by requests to change root window property "_NET_NUMBER_OF_DESKTOPS", and that current group could be changed by requests to change "_NET_CURRENT_DESKTOP" root window property.
 * Group window creation -- test two swm's group modes, sticky and auto (see section \ref[sec:groupimpl]).
-Changes current group mode using swmctl command, creates some window and tests that they are assigned correct group.
+Changes current group mode using swmctl command, creates some windows, and tests that they were assigned the correct group.
 * Group window movement -- tests that windows could be moved to different group by requests to change their "_NET_WM_DESKTOP" property.
 Also tests that if some groups are removed, windows from those groups are moved to another group.
-* Group visibility -- makes different groups visible/hidden by issuing appropriate swmctl commands and tests that windows are
+* Group visibility -- makes different groups visible/hidden by issuing swmctl commands and tests that windows are
 appropriately mapped/unmapped based on their group membership.
 * Group membership -- tests that one window could be member of multiple groups. Adds/removes window from different groups
 and tests that correct groups are reported by swmctl command.
@@ -709,7 +706,7 @@ A short example of a well-formed Go code could be seen in listing~\ref[code:gofm
 Notice how the imports are split into two groups and sorted alphabetically, and how type names are aligned inside the structure declaration.
 Note that "gofmt" uses tabs for indentation.
 While tabs are usually displayed as 8 characters wide,
-we opted for 4 characters wide tabs in listings to save some horizontal space.
+we opted for 4 characters wide tabs in listings in this thesis to save some horizontal space.
 
 Although most IDEs that support Go already include those tools and format the code automatically upon file save,
 we want to be sure that no badly formatted code makes its way into our codebase.

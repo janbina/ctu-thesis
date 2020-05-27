@@ -157,8 +157,8 @@ keyboard shortcuts~\cite[cwm2].
 It could be even configured to move the mouse cursor using the keyboard so that one could use the computer without any pointing device.
 The user can either define custom shortcuts using cwm's configuration file or use the defaults.
 
-Cwm's interface is very minimal -- it only draws a one-pixel border around windows by default.
-The width of the border and its color can be configured though.
+Interface of cwm is very minimal -- it only draws a one-pixel border around windows by default,
+the width of the border and its color can be configured though.
 Cwm offers several menus, which can be used to launch applications or switch between running applications.
 The principle of these menus is that cwm shows a list of relevant content and user can search in it and finally pick one of the filtered options~\cite[cwm3].
 Windows are searched by their current title, old titles and by their label, which is a custom string user can assign to every window.
@@ -182,6 +182,7 @@ This menu lists all the managed top-level windows, there are various information
 
 All the cwm's configuration is done using configuration file ".cwmrc".
 The user may add, modify or remove shortcuts, change colors and other aspects of window management behavior~\cite[cwm3].
+One of the drawbacks of cwm is that it does not support most of the EWMH protocol.
 
 \midinsert
 \picw=12cm \cinspic img/cwm.png
@@ -290,14 +291,76 @@ is configurable~\cite[bspwm].
 \caption/f Bspwm desktop with four open windows in its default layout with gaps defined in its default config.
 \endinsert
 
+\secc i3
+
+i3 is a dynamic tiling window manager that is primarily targeted at developers and advanced users~\cite[i3].
+It uses a tree as a data structure for windows, which, according to its authors, allows for more flexible layouts
+than the column-based approach used by other window managers~\cite[i3].
+
+Unlike dwm, i3 does not try to be as minimal as possible, but it does not want to be bloated either.
+This is described in one of its initial goals like this: ``Don’t be bloated, don’t be fancy
+(simple borders are the most decoration we want to have).
+However, we do not enforce unnecessary limits such as a maximum amount of source lines of code.
+If it needs to be a bit bigger, it will be.''~\cite[i3]
+
+The default UI of i3wm is depicted in figure~\ref[fig:i3desktop].
+It is not that simple as UI of dwm or bspwm, but it is not very complex either.
+Windows have a simple border and also a title bar, that shows only the name of the window.
+It also comes with its panel called {\em i3bar}, which is used by default (see screenshot).
+Since i3 supports EWMH, any other standalone panel could be used, though.
+
+i3 offers three layouts for windows:
+\begitems
+* split vertically/horizontally -- windows are sized so that every window gets an equal amount of space.
+This can be done either vertically or horizontally.
+* stacking -- only focused window is displayed.
+On top of it is a list of the rest of the windows.
+* tabbed -- only focused window is displayed.
+On top of it are tabs representing the rest of the windows.
+\enditems
+All those layouts can be combined on the screen using so-called containers.
+This means that inside a container that is tabbed can be another container that is using a split layout, for example.
+An example is depicted in figure~\ref[fig:i3desktop2].
+There is a container split horizontally whose left child is a container that is using a tabbed layout with three windows,
+and its right child is a container that is using stacking with three windows as well.
+A window can be also completely removed from the tiling layout and managed as a floating window.
+
+i3 is highly configurable using its configuration file.
+User can configure the UI (border width and color for multiple window states, fonts, etc.),
+keyboard shortcuts, i3bar, and the behavior of the window manager overall.
+For example, the user can choose that windows will not be focused upon opening, or that
+specific window will be in a floating state by default.
+
+\midinsert
+\picw=12cm \cinspic img/i3wm.png
+\clabel[fig:i3desktop]{i3 desktop}
+\caption/f Desktop of i3 with four open windows
+\endinsert
+
+\midinsert
+\picw=12cm \cinspic img/i3wm_2.png
+\clabel[fig:i3desktop2]{i3 desktop, tabs and stacks}
+\caption/f Desktop of i3 with tabs and stacks
+\endinsert
+
 \secc Summary
 
-In this section, we discussed four window managers.
-We picked two from each category -- cwm and Openbox represented stacking window managers,
-dwm and bspwm represented tiling window managers.
+In this section, we discussed five window managers.
+We picked some from each category -- cwm and Openbox represented stacking window managers,
+dwm, bspwm, and i3 represented tiling window managers.
+In each category, we also showed different approaches.
+Cwm and dwm represent minimal window managers with very minimal UI, configuration, and no EWMH support.
+Bspwm stands somewhere in the middle, with its minimal UI, but quite advanced functionality and EWMH support.
+Finally, Openbox and i3 represent window managers with advanced UI (full-fledged themeable window decorations in Openbox,
+title bars and tabs in i3) and advanced configuration.
 
-
-dwm was one of the first?? awesome, scrotwm, xmonad
+There are many more window managers out there, both stacking and tiling, their functionalities are not much different from
+those presented here, though.
+To mention a few more window managers, we can name Xfmw~\cite[xfce] or Kwin~\cite[kde], which are both stacking window managers
+and both are developed as a part of a desktop environment, Xfce and KDE, respectively.
+For tiling window managers, we can mention awesome~\cite[awesome] or xmonad~\cite[xmonad], which were both inspired by dwm and they build upon it.
+Another popular tiling window managers are herbstluftwm~\cite[herst] or Qtile~\cite[qtile].
+For an extensive list of both stacking and tiling window managers, we can recommend Arch Linux Wiki~\cite[arch_wm].
 
 \input xsystem
 \input icccm
