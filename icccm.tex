@@ -61,7 +61,8 @@ we need some mechanism to inform the client that is currently registered for it 
 want to replace it.
 Selection provides this mechanism.
 
-To see this in practice, look at code listing~\ref[code:selection].
+To see this in practice, look at code listing~\ref[code:selection]
+(code is in Go, some of its constructs are explained in a comment where needed).
 Firstly, on line 2, we retrieve the owner of the selection we want to manage ("WM_S2").
 We then check if another client owns this selection, in which case we should get confirmation
 from the user that our application could replace it.
