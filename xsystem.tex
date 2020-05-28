@@ -53,8 +53,8 @@ This request is processed by the window manager, which sends the "ConfigureNotif
 how the size and location of the window was (or was not) changed.
 
 To receive events, the client must register for them.
-While doing so, the client must specify event types that it is interested in, only those will be sent to him by the X Server.
-After initialization, typical X Server client runs an event loop -- an infinite cycle that waits for events coming from
+When doing so, the client must specify event types that it is interested in, only those will be sent to him by the X Server.
+After initialization, typical X Server client runs an event loop -- an infinite loop that waits for events coming from
 the X Server and responds to them.
 
 \label[sec:propertiesatoms]
@@ -67,7 +67,7 @@ of some other client's windows -- only window managers and other special clients
 
 For example, Table~\ref[tab:properties] shows some of the properties retrieved from
 the top-level window of an application using the {\em xprop} utility~\cite[xprop].
-We can see for example property named "_NET_WM_DESKTOP" with type "CARDINAL" and value "1".
+We can see, for example, a property named "_NET_WM_DESKTOP" with type "CARDINAL" and value "1".
 This property is set by the window manager and tells other clients on which virtual desktop this window resides.
 We will discuss the meaning of some significant properties later on in more detail.
 
@@ -145,7 +145,7 @@ It was first released in 2001, after many years of experience with Xlib,
 learning from it, as well as from other protocol interface libraries.
 XCB makes the client-server nature of the protocol explicit in its design.
 The client decides when to flush the request buffer,
-when to read results and when to wait for the server to respond.\cite[XlibXCB]
+when to read results, and when to wait for the server to respond.\cite[XlibXCB]
 
 \heading Comparison
 In Listings~\ref[code:xlib] and~\ref[code:xcb] (both taken from the official developer's guide~\cite[XlibXCB]),

@@ -95,7 +95,7 @@ Window managers are usually divided into two classes, based on how windows are d
 Stacking window managers, also known as floating, provide the traditional desktop metaphor used in commercial operating systems like Windows and OS X~\cite[arch_wm].
 Windows act like pieces of paper on a desk -- they can be stacked on top of each other, moved around, and resized freely by the user.
 Moving or resizing one window does not affect the position or size of other windows, only their visible area.
-Window manager must maintain the stacking order of the windows and only the top window on the stack is guaranteed to be fully visible.
+Window manager must maintain the stacking order of windows and only the top window on the stack is guaranteed to be fully visible.
 A window is usually moved to the top of the stack by the window manager when the user starts to interact with it.
 Example layout of a stacking window manager is depicted in Figure~\ref[fig:stacking].
 Windows are overlapping and only focused window (highlighted in blue) is fully visible.
@@ -103,13 +103,13 @@ Windows are overlapping and only focused window (highlighted in blue) is fully v
 \midinsert
 \picw=8cm \cinspic img/stacking.pdf
 \clabel[fig:stacking]{Stacking window manager layout}
-\caption/f The layout of a stacking window manager with overlapping windows
+\caption/f The layout of a stacking window manager
 \endinsert
 
 \secc Tiling Window Managers
 
 Tiling window managers tile the windows so that none are overlapping and they usually use all the available screen space.
-They usually make very extensive use of keyboard shortcuts and have less or no reliance on the mouse~\cite[arch_wm].
+They typically make very extensive use of keyboard shortcuts and have less or no reliance on the mouse~\cite[arch_wm].
 It is not possible to move or resize windows freely -- enlarging a window shrinks its adjacent windows and vice versa,
 moving is typically done by swapping the window's position with another window.
 Some types of windows, such as dialogs and pop-up windows, are not suited for tiling though.
@@ -136,7 +136,6 @@ only a third of the existing window space.
 \picw=8cm \cinspic img/tiling.pdf
 \clabel[fig:tiling]{Tiling window manager layout}
 \caption/f The layout of a tiling window manager
-Windows cover the whole screen (with gaps), there are no overlaps.
 \endinsert
 
 \label[sec:managers]
@@ -207,10 +206,10 @@ It also includes a {\em root menu} on the desktop.
 Using this menu, one can launch applications, bring minimized windows up again, or start various Openbox configuration tools.
 Openbox does not come with a bundled taskbar, though, and advices its users to use one of many stand-alone EWMH compatible taskbars.
 
-Openbox is configured by two configuration files "rc.xml" and "menu.xml".
-The first one "rc.xml" is the main configuration file, responsible for determining the behavior and settings
+Openbox is configured by two configuration files, "rc.xml" and "menu.xml".
+The first one ("rc.xml") is the main configuration file, responsible for determining the behavior and settings
 of the overall session, including keyboard shortcuts, theming, virtual desktops settings etc.~\cite[openboxarch]
-The second one, "menu.xml", defines the type, behavior, and items of aforementioned desktop menu.
+The second one ("menu.xml") defines the type, behavior, and items of aforementioned desktop menu.
 Although the default provided is a static menu (it will not automatically update when new applications are installed),
 it is possible to employ the use of dynamic menus that will automatically update as well~\cite[openboxarch].
 
@@ -228,7 +227,7 @@ easily create new or modify existing theme using provided GUI application~\cite[
 
 \secc Dwm
 
-Dwm (Dynamic Window Manager) is a dynamic tiling window manager
+Dwm (Dynamic Window Manager) is a dynamic tiling window manager.
 It manages windows in tiled, monocle and floating layouts.
 All of the layouts can be applied dynamically, optimising the environment for the application in use and the task performed.~\cite[dwm]
 
@@ -256,7 +255,7 @@ Since the core dwm source code is very minimal and is kept under 2\,000 lines of
 a lot of functionality is missing, and so users started to create patches to add functionality they wanted.
 Those patches are in a form of simple git diff files\urlnote{https://git-scm.com/docs/git-diff},
 and could be found on dwm's project website~\cite[dwmpatch].
-Most of those plugins implement new types of layout (deck, fibonacci, grid), or modifies behavior or style of the status bar.
+Most of those plugins implement new types of layout (e.g., deck, fibonacci, grid), or modifies behavior or style of the status bar.
 
 \midinsert
 \picw=12cm \cinspic img/dwm.png
@@ -298,16 +297,16 @@ It uses a tree as a data structure for windows, which, according to its authors,
 than the column-based approach used by other window managers~\cite[i3].
 
 Unlike dwm, i3 does not try to be as minimal as possible, but it does not want to be bloated either.
-This is described in one of its initial goals like this: ``Don’t be bloated, don’t be fancy
+This is described in one of its initial goals~\cite[i3] like this: ``Don’t be bloated, don’t be fancy
 (simple borders are the most decoration we want to have).
 However, we do not enforce unnecessary limits such as a maximum amount of source lines of code.
-If it needs to be a bit bigger, it will be.''~\cite[i3]
+If it needs to be a bit bigger, it will be.''
 
 The default UI of i3wm is depicted in Figure~\ref[fig:i3desktop].
 It is not that simple as UI of dwm or bspwm, but it is not very complex either.
-Windows have a simple border and also a title bar, that shows only the name of the window.
+Windows have a simple border and also a title bar, that only shows the name of the window.
 It also comes with its panel called {\em i3bar}, which is used by default (see screenshot).
-Since i3 supports EWMH, any other standalone panel could be used, though.
+Since i3 supports EWMH, any other standalone panel could be used as well, though.
 
 i3 offers three layouts for windows:
 \begitems
@@ -350,7 +349,7 @@ title bars and tabs in i3) and advanced configuration.
 
 There are many more window managers out there, both stacking and tiling, their functionalities are not much different from
 those presented here, though.
-To mention a few more window managers, we can name Xfmw~\cite[xfce] or Kwin~\cite[kde], which are both stacking window managers
+To mention a few more window managers, we can name Xfwm~\cite[xfce] or Kwin~\cite[kde], which are both stacking window managers
 and both are developed as a part of a desktop environment, Xfce and KDE, respectively.
 For tiling window managers, we can mention awesome~\cite[awesome] or xmonad~\cite[xmonad], which were both inspired by dwm and they build upon it.
 Another popular tiling window managers are herbstluftwm~\cite[herbst] or Qtile~\cite[qtile].

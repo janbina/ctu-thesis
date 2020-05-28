@@ -8,7 +8,7 @@ They allow users to stack windows on top of each other, move them around, and re
 Tiling window managers, on the other hand, organize windows on the screen so they do not overlap and use all available screen space.
 
 The first computer shipped with a working WIMP (windows, icons, menus, pointer) GUI was the Xerox Alto in the 1970s,
-which used a stacking window management.
+which used a stacking window management~\cite[alto].
 Its successor, Xerox Star, was the first commercial personal computer using the desktop metaphor, and it used tiling for most main application windows~\cite[alto].
 The first window manager for X11 was the Ultrix Window Manager (uwm), which was released in 1985~\cite[mikes].
 It was soon replaced by the Tab Window Manager (twm)~\cite[twm], which is still standard with X.Org Server and is available as part of many X Window System implementations.
@@ -18,18 +18,18 @@ It was developed as a unified desktop environment for many commercial proprietar
 the workstation market: IBM's AIX, Digital’s Tru64, or Sun's Solaris~\cite[cdeParty].
 Then, KDE~\cite[kde] was announced in 1996 with a goal of creating an environment
 in which users could expect things to look, feel, and work consistently~\cite[kdeanon].
-Its first version were then released in 1998~\cite[desktopGrown].
+Its first version was then released in 1998~\cite[desktopGrown].
 By that time, other desktop environments were already released, such as Xfce~\cite[xfce] (1996),
 or Enlightenment~\cite[enlightment] (1997), and they were soon followed
 by GNOME~\cite[gnome] (1999)~\cite[desktopHistory].
 Xfce, Enlightenment, KDE, and GNOME are among the most popular desktop environments to this day~\cite[arch_de].
 
-Desktop environments target a wide range of users, and provide lots of built-in applications and utilities,
+Desktop environments target a wide range of users and provide lots of built-in applications and utilities,
 so they can be used without much configuration.
 They also come with stacking window managers, because those are controlled using a pointing device and thus easier for most users.
 Among power users though, lightweight desktops are becoming more and more popular lately,
 because they are light on system resources and thus fast.
-This leads to the increasing popularity of tiling window managers, which are keyboard-oriented and target power users.
+This leads to the increasing popularity of tiling window managers, which are keyboard-oriented and target power users as well.
 One of the first lightweight tiling window managers was dwm~\cite[dwm], which was created in 2006.
 This has sparked the development of dozens of other tiling managers.
 
@@ -73,7 +73,7 @@ Therefore, we feel a need for a lightweight, keyboard-oriented stacking window m
 
 The goal of this thesis is to design and implement a stacking window manager for the X11 Window System on Linux.
 This window manager should be small, easy to use, and implemented in a modern system programming language.
-It should be compliant with Inter-Client Communication Conventions Manual (ICCCM)~\cite[icccm],
+It should be compliant with the Inter-Client Communication Conventions Manual (ICCCM)~\cite[icccm],
 and Extended Window Manager Hints (EWMH)~\cite[ewmh],
 the two window manager standards for X defined by freedesktop~\cite[freedesktop].
 Its core features should include:
@@ -95,6 +95,6 @@ In Chapter~\ref[chap:background], we describe the windowing system, desktop envi
 Different types of window managers are discussed and some window managers are described in detail.
 We talk about the X Window System, its history, architecture, and the X protocol.
 We also discuss two standard protocols defined on top of the X protocol, ICCCM, and EWMH.
-Chapter~\ref[chap:design] is about the design and philosophy of the window manager.
+Chapter~\ref[chap:design] is about the design and philosophy of the proposed window manager.
 Finally, Chapter~\ref[chap:impl] describes the implementation process.
-We go through the tools used in the process, discuss some implementation details, and how was the window manager tested.
+We go through the tools used in the process, discuss some implementation details, and the testing process.
