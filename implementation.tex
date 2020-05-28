@@ -81,7 +81,7 @@ or stay with the XGB, optionally utilise those helper functions from xgbutil.
 \codeblock{code:xgbutil}{Xgbutil API showcase}{xgbutil.go}{GO}
 
 Xgbutil can help us also with event handling, core part of each application interacting with the X server using X protocol.
-Applications usually deal with X events using so called event loop, its typical implementation can be seen in Listing~\ref[code:xeventloop].
+Applications usually deal with X events using so-called event loop, its typical implementation can be seen in Listing~\ref[code:xeventloop].
 It is an infinite for loop, which starts by waiting for next X event and then branches based on the type of the event.
 Application will usually have to handle much more than three events and there will also be another branching for each of them,
 because, for example, events on root window are handled differently than events on application's top level windows.
@@ -100,8 +100,8 @@ This structure contains several methods for easier manipulation with windows, su
 
 Xgbutil was a great help in implementation of swm and its higher-level functions and mechanisms were used whenever it was possible/beneficial.
 There were a few usecases for which no high-level api was available and in those cases, XGB was used.
-One example is setting border width of the window, which is not possible using the "xwindow.Window.Configure" method, so
-"xproto.ConfigureWindowChecked" must have been used.
+One example is setting border width of the window, which is not possible using the "xwindow.Window.Configure" method from Xgbutil, so
+XGB's "xproto.ConfigureWindowChecked" must have been used.
 
 % ######################################################################################################################
 \label[sec:xephyr] % ###################################################################################################
@@ -111,11 +111,12 @@ One example is setting border width of the window, which is not possible using t
 Xephyr is a nested X server that runs as an X application~\cite[xephyr].
 This is very useful for testing the window manager during the development, because one can make the window manager
 manage the Xephyrs display and see its debug log in the terminal right next to it.
+This is depicted in Figure~\ref[fig:xephyr].
 
 \midinsert
 \picw=14cm \cinspic img/xephyr.png
 \clabel[fig:xephyr]{Xephyr running swm}
-\caption/f Swm running in xephyr which runs in another instance of swm
+\caption/f Swm running in Xephyr which runs in another instance of swm
 \endinsert
 
 % ######################################################################################################################
