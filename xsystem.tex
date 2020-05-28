@@ -113,7 +113,7 @@ The application sets properties on its top−level window to specify for example
 its top−level window and other information.
 Properties also communicate the other way; for example, the window manager specifies what sizes of icon pixmaps it prefers.~\cite[xguide1]
 
-The table~\ref[tab:properties] shows some of the properties retrieved from
+Table~\ref[tab:properties] shows some of the properties retrieved from
 the top-level window of an application using the {\em xprop} utility~\cite[xprop].
 While properties like "WM_CLASS" and "WM_NAME" were set by the application itself,
 property "_NET_WM_ALLOWED_ACTIONS" is set exclusively by the window manager and
@@ -210,7 +210,7 @@ The client is in charge of deciding when to flush the request buffer,
 when to read results and when to wait for the server to respond.\cite[XlibXCB]
 
 \heading Comparison
-In code listings~\ref[code:xlib] and~\ref[code:xcb], we can see comparison of those two libraries on the task of looking up a window property.
+In Listings~\ref[code:xlib] and~\ref[code:xcb], we can see comparison of those two libraries on the task of looking up a window property.
 Xlib generates the request to the X server to retrieve the property and appends it to its buffer of requests.
 Since this is a request that requires a response, Xlib then flushes the buffer, sending the contents to the X server.
 Next, Xlib waits until the X server processes all the requests preceding the property retrieve request, and sends the property retrieve reply.
@@ -235,4 +235,4 @@ However, sometimes applications will find themselves needing to make calls to th
 For example, an application might need to make calls to X extension API's not covered in the current version of the toolkit's programming model.\cite[XlibXCB]
 
 For the implementation of swm, we used the X Go Binding library~\cite[xgb], which is based on XCB.
-We will talk about it in more detail in chapter~\ref[chap:impl].
+We will talk about it in more detail in Chapter~\ref[chap:impl].

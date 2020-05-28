@@ -89,7 +89,7 @@ Thus, activating a window may involve additional steps like moving it to the cur
 
 \label[sec:ewmhrootprops]
 \secc Root Window Properties
-As stated in section~\ref[sec:propertiesatoms], clients of X Server are communicating with each other using properties.
+As stated in Section~\ref[sec:propertiesatoms], clients of X Server are communicating with each other using properties.
 EWMH defines many new properties and in this section, we will take a look at those which are set on root window.
 Root window properties are useful for communication between window manager and pagers.
 
@@ -221,7 +221,7 @@ for these changes and update accordingly.
 
 \heading \uns NET\uns WM\uns NAME
 The client should set this to the title of the window in UTF-8 encoding.
-If set, the window manager should use this in preference to "WM_NAME" (see section~\ref[sec:clientproperties]).
+If set, the window manager should use this in preference to "WM_NAME" (see Section~\ref[sec:clientproperties]).
 
 \heading \uns NET\uns WM\uns VISIBLE\uns NAME
 If the window manager displays a window name other than "_NET_WM_NAME", it must set this to the title displayed in UTF-8 encoding.
@@ -229,7 +229,7 @@ It allows pagers to display the same title as the window manager does.
 
 \heading \uns NET\uns WM\uns ICON\uns NAME
 The client should set this to the title of the icon for this window in UTF-8 encoding.
-If set, the window manager should use this in preference to "WM_ICON_NAME" (see section~\ref[sec:clientproperties]).
+If set, the window manager should use this in preference to "WM_ICON_NAME" (see Section~\ref[sec:clientproperties]).
 
 \heading \uns NET\uns WM\uns VISIBLE\uns ICON\uns NAME
 If the window manager displays an icon name other than "_NET_WM_ICON_NAME" the window manager must set this to the title displayed in UTF-8 encoding.
@@ -290,7 +290,7 @@ Pagers and similar applications should use this state instead of "WM_STATE" to d
 * "FULLSCREEN" -- indicates that the window should fill the entire screen and have no window decorations.
 Additionally the window manager is responsible for restoring the original geometry after a switch from fullscreen back to normal window.
 * "ABOVE", "BELOW" -- indicates that the window should be on top of/below most windows.
-See the section~\ref[sec:stackingorder] for details.
+See Section~\ref[sec:stackingorder] for details.
 They are mainly meant for user preferences and should not be used by applications.
 * "DEMANDS_ATTENTION" -- indicates that some action in or with the window happened.
 For example, it may be set by the window manager if the window requested activation but the window manager refused it, or the application may set it if it finished some work.

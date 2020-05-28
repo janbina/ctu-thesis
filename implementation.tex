@@ -49,8 +49,8 @@ the core X protocol and many of the X extensions (such as ICCCM, EWMH or Xineram
 It claims to be thread safe and according to benchmarks, it gets immediate improvement from parallelism~\cite[xgb].
 
 To compare XGB with XCB, we will use the example of window property lookup.
-Window property lookup using XCB was shown in code listing~\ref[code:xcb],
-the same call implemented using XGB can be seen in code listing ~\ref[code:xgb].
+Window property lookup using XCB was shown in Listing~\ref[code:xcb],
+the same call implemented using XGB can be seen in Listing ~\ref[code:xgb].
 As expected, both versions are very similar, the only difference is that in XGB, we can simply
 call "Reply" method on the cookie object returned from "GetProperty" function, instead of passing the cookie to
 another function.
@@ -67,7 +67,7 @@ Those are, for example:
 * assigning function callbacks to particular events, and others.
 \enditems
 
-To get an idea about the design of xgbutil, we can have a look at some functions in code listing~\ref[code:xgbutil].
+To get an idea about the design of xgbutil, we can have a look at some functions in Listing~\ref[code:xgbutil].
 Functions like "icccm.WmNormalHintsGet" could be used to get specific window property ("WM_NORMAL_HINTS" in this example).
 Internally, it calls "xprop.GetProperty", which is a wrapper for "xproto.GetProperty" from XGB.
 It has no cookie/reply mechanism though, so we are losing the asynchronicity of XCB here.
@@ -81,7 +81,7 @@ or stay with the XGB, optionally utilise those helper functions from xgbutil.
 \codeblock{code:xgbutil}{Xgbutil API showcase}{xgbutil.go}{GO}
 
 Xgbutil can help us also with event handling, core part of each application interacting with the X server using X protocol.
-Applications usually deal with X events using so called event loop, its typical implementation can be seen in code listing~\ref[code:xeventloop].
+Applications usually deal with X events using so called event loop, its typical implementation can be seen in Listing~\ref[code:xeventloop].
 It is an infinite for loop, which starts by waiting for next X event and then branches based on the type of the event.
 Application will usually have to handle much more than three events and there will also be another branching for each of them,
 because, for example, events on root window are handled differently than events on application's top level windows.
@@ -89,7 +89,7 @@ Because of multiple branching and many possible cases, this will quickly become 
 Xgbutil offers callback mechanism to handle X events.
 You can simply define functions (callbacks) and specify the event type and window for which that callback will be executed.
 Whole event loop is then implemented inside xgbutil's "xevent.Main" function, which calls appropriate callbacks for each event type and window.
-Example callbacks definition can be seen in the code example~\ref[code:xgbutilevents].
+Example callbacks definition can be seen in Listing~\ref[code:xgbutilevents].
 
 \codeblock{code:xeventloop}{X event loop}{x_eventloop.go}{GO}
 
@@ -136,7 +136,7 @@ The project structure is based on Go modules.
 Go modules were first introduced in Go version $1.11$ and became the default in version $1.13$~\cite[gomodules].
 It is basically a dependency management system which makes dependency version information explicit and easier to manage~\cite[gomodules].
 A~module is a collection of Go packages stored in a file tree, backed by "go.mod" file.
-In the code example~\ref[code:gomod], you can see excerpt of swm's "go.mod" file.
+In Listing~\ref[code:gomod], you can see excerpt of swm's "go.mod" file.
 It defines the module path, which is also the import path used for the root directory,
 version of Go, which should be used for compilation,
 and dependency requirements, which are the other modules needed for a successful build~\cite[gomodules].
@@ -160,7 +160,7 @@ extra value, so those packages could stay in root directory.
 It can be, however, useful for large projects or projects with lots of non-Go components.
 \enditems
 
-Complete project structure with all the packages, helper files and directories could be seen in figure~\ref[fig:structure].
+Complete project structure with all the packages, helper files and directories could be seen in Figure~\ref[fig:structure].
 All the source code for swm and swmctl is in directories {\em cmd} and {\em internal}.
 According to recommendation, "main" functions of both swm and swmctl are very minimal and they basically only invoke the code from the {\em internal} directory.
 Then, there is directory with examples, which contain example configuration file for {\em sxhkd} and example {\em swmrc} startup script.
@@ -239,7 +239,7 @@ Request to change the current desktop are honored by making the group of corresp
 * Root window property "_NET_DESKTOP_NAMES" is fully supported. It is updated by swm to the names user sets using swmctl
 and request to change it are honored and names reported by swm updated accordingly.
 * Client property "_NET_WM_DESKTOP" is supported and is set to list of IDs in ascending order of all groups the window is part of.
-Even though ewmh states that ``clients may be allowed to occupy more than one desktop simultaneously'' (see section~\ref[sec:ewmhdesktops]),
+Even though ewmh states that ``clients may be allowed to occupy more than one desktop simultaneously'' (see Section~\ref[sec:ewmhdesktops]),
 it is not very common and most tools treat "_NET_WM_DESKTOP" as a single integer.
 To address this issue, swmctl provides a command to retrieve all the groups the window is part of.
 \enditems
@@ -285,7 +285,7 @@ Swm also indicates the group membership of window in its UI.
 Every time the group membership changes, either using swmctl command or EWMH client message,
 small info box in the top left corner of the window is shown for three seconds.
 This info box lists names of all the groups the window is member of.
-Example can be seen in figure~\ref[fig:groupinfo].
+Example can be seen in Figure~\ref[fig:groupinfo].
 The window in the example is member of groups named "5", "G.14" and "S", where "S" is the name used for the sticky group.
 This info box is also shown upon execution of "swmctl group get" command.
 
@@ -300,7 +300,7 @@ This info box is also shown upon execution of "swmctl group get" command.
 \sec Becoming a Window Manager % ######################################################################################
 % ######################################################################################################################
 
-In the section~\ref[sec:xarch], it was already said that ``window manager is a client that has authority over the layout of windows on the
+In Section~\ref[sec:xarch], it was already said that ``window manager is a client that has authority over the layout of windows on the
 screen'' and that ``certain X protocol features are used only by the window manager to enforce this authority''~\cite[xguide0].
 In this section, we will look at this mechanism in more detail and discuss how can X client become a window manager.
 
@@ -330,22 +330,22 @@ There is, however, an option for swm to replace the running window manager.
 To do that, the user has to run swm with "--replace" flag.
 
 To replace running window manager, swm makes use of mechanism called {\em selection},
-which is part of the ICCCM specification and was discussed in the section~\ref[sec:icccmselection].
+which is part of the ICCCM specification and was discussed in Section~\ref[sec:icccmselection].
 Swm sends the "SetSelectionOwner" request, resulting in running window manager receiving the "SelectionClear" event.
 It must react to it by releasing all resources it has managed and must then destroy the window that owned the selection.
 ICCCM specifically says: ``For example, a window manager losing ownership of "WM_S2" must deselect from "SubstructureRedirect"
 on the root window of screen 2 before destroying the window that owned "WM_S2".''
 Swm is therefore, after sending the "SetSelectionOwner" request, waiting for "DestroyNotify" event, indicating that
 previous window manager destroyed its window and then tries to register for substructure redirection again -- this time it should succeed.
-This was also shown in code listing~\ref[code:selection].
+This was also shown in Listing~\ref[code:selection].
 
 Unfortunately, many window managers do not support this selection mechanism.
-For example, out of the window managers that we discussed in section~\ref[sec:managers],
+For example, out of the window managers that we discussed in Section~\ref[sec:managers],
 only Openbox supports the selection mechanism and quits when another client sends the "SetSelectionOwner" request.
 Cwm, dwm, bspwm, and i3 do not support it.
 However, if such a window manager supports at least EWMH, there exists one last possibility for swm to replace it.
 EWMH requires supporting window managers to set "_NET_SUPPORTING_WM_CHECK" root window property to be the ID of a child
-window created by themselves, as described in the section~\ref[sec:ewmhrootprops].
+window created by themselves, as described in Section~\ref[sec:ewmhrootprops].
 Swm could obtain this ID, forcibly kill that window, and take the substructure redirection for itself.
 
 % ######################################################################################################################
@@ -355,7 +355,7 @@ Swm could obtain this ID, forcibly kill that window, and take the substructure r
 Window manager usually adds its own graphical elements to top-level windows, called window decorations.
 Window decoration could be anything -- from simple one-pixel border to a title bar with window name
 and buttons to manipulate it.
-An example of such a window decoration is shown in figure~\ref[fig:windecor].
+An example of such a window decoration is shown in Figure~\ref[fig:windecor].
 It depicts a window with a blue border and a title bar with three buttons -- those buttons are typically used to
 minimize, (de)maximize, and close the window.
 Another common functionality of window decorations is moving and resizing the window using a pointing device -- by dragging its borders or title bar.
@@ -363,11 +363,11 @@ Another common functionality of window decorations is moving and resizing the wi
 Window decorations are usually created and managed by the window manager, mainly to unify the looks across all applications.
 However, some applications opt for custom implementation.
 In this case, they need to give a hint to the window manager not to draw any other decorations.
-To implement the moving and resizing functionality, they can use the "_NET_WM_MOVERESIZE" EWMH client message (see section~\ref[sec:ewmhrootmsg]),
+To implement the moving and resizing functionality, they can use the "_NET_WM_MOVERESIZE" EWMH client message (see Section~\ref[sec:ewmhrootmsg]),
 minimizing, maximizing, and closing the window is also possible through EWMH protocol.
 This might be beneficial for applications that need to show some kind of toolbar in their UI anyway, so they include window manipulating
 buttons and borders as well for better integration.
-For example, figure~\ref[fig:customdecor] shows windows of document viewer Evince and web browser Google Chrome, that come with custom window decorations.
+For example, Figure~\ref[fig:customdecor] shows windows of document viewer Evince and web browser Google Chrome, that come with custom window decorations.
 
 \midinsert
 \picw=12.5cm \cinspic img/decor.pdf
@@ -382,7 +382,7 @@ For example, figure~\ref[fig:customdecor] shows windows of document viewer Evinc
 \endinsert
 
 Swm's window decorations are pretty minimal, but configurable.
-There is no title bar with buttons, just a simple solid color border around the window and rectangle box indicating group membership -- see figure~\ref[fig:groupinfo].
+There is no title bar with buttons, just a simple solid color border around the window and rectangle box indicating group membership -- see Figure~\ref[fig:groupinfo].
 All the colors, the width of the borders, as well as the font and color used for group names, are customizable using following swmctl's commands:
 \begtt
 swmctl config border 2 B0BEC5 00BCD4 F44336
@@ -400,11 +400,11 @@ There are three colors for each border -- they are used to indicate one of three
 \begitems
 * normal,
 * active (focused),
-* attention (see state "_NET_WM_STATE_DEMANDS_ATTENTION" in section~\ref[sec:ewmhrootmsg]).
+* attention (see state "_NET_WM_STATE_DEMANDS_ATTENTION" in Section~\ref[sec:ewmhrootmsg]).
 \enditems
 
 When it comes to window decorations, an important topic is {\em reparenting}.
-As mentioned in section~\ref[sec:xwinhierarchy], X window hierarchy is tree-based,
+As mentioned in Section~\ref[sec:xwinhierarchy], X window hierarchy is tree-based,
 and all top-level application windows are created as direct children of so-called root window.
 Window manager might step into that and, before it maps the application window, create a new window (child of the root),
 and {\em reparent} application's top-level window, using the newly created window as its parent.
@@ -479,7 +479,7 @@ For example, to make the window half the width and half the height of the screen
 \sec Stacking % #######################################################################################################
 % ######################################################################################################################
 
-The stacking is done in the way recommended by the EWMH -- see the section~\ref[sec:stackingorder].
+The stacking is done in the way recommended by the EWMH -- see Section~\ref[sec:stackingorder].
 Each window belongs to some layer, based on its "_NET_WM_WINDOW_TYPE" property,
 and within each layers, windows are ordered chronologically -- window {\em raised} earlier will be below those raised later
 Window can be also brought layer up or down using "_NET_WM_STATE_ABOVE" or "_NET_WM_STATE_BELOW" states, as well as.
@@ -505,12 +505,12 @@ previous raise time -- the stacking order within the group stays the same.
 
 Window cycling is another common window manager feature.
 It is directly tight to keyboard shortcut, usually "alt + Tab" and it provides simple and fast way to switch between recently active windows.
-Most window managers comes with UI that lists all the windows user can cycle to, highlighting currently chosen window -- see figure~\ref[fig:cycling].
+Most window managers comes with UI that lists all the windows user can cycle to, highlighting currently chosen window -- see Figure~\ref[fig:cycling].
 In minimalistic window managers, this UI is usually missing, though.
 This is the case for cwm, for example.
 
 Swm provides very simple window cycling functionality as well.
-It is controlled via three swmctl commands -- example sxhkd mapping could be seen in code listing~\ref[code:cyclingshortcuts].
+It is controlled via three swmctl commands -- example sxhkd mapping could be seen in Listing~\ref[code:cyclingshortcuts].
 Swm does not come with any window cycling UI, it just temporarily raises particular window to the very top of the stack -- even above fullscreen windows,
 so it can always be seen.
 User can cycle in both directions, using commands "swmctl cycle-win" and "swmctl cycle-win-rev".
@@ -538,11 +538,11 @@ and thus not showing windows from all visible groups in swm, that makes it only 
 % ######################################################################################################################
 
 One of the requirements for swm was scriptability.
-Scriptability is possible thanks to swm's compliance with EWMH and tools like xdotool and wmctrl (see sections~\ref[sec:xdotool] and~\ref[sec:wmctrl]),
+Scriptability is possible thanks to swm's compliance with EWMH and tools like xdotool and wmctrl (see Sections~\ref[sec:xdotool] and~\ref[sec:wmctrl]),
 and also thanks to swmctl.
 Commands provided by swmctl, xdotool, and wmctrl were showed earlier in this chapter, now we can have a look at a more complex example.
-In listing~\ref[code:organize], we can see a script that can organize four windows from the current desktop in a grid-like layout -- the outcome
-is depicted in figure~\ref[fig:swmtiled].
+In Listing~\ref[code:organize], we can see a script that can organize four windows from the current desktop in a grid-like layout -- the outcome
+is depicted in Figure~\ref[fig:swmtiled].
 Firstly, the script makes use of two xdotool commands to get the id of the current desktop and to get a list of windows from that desktop.
 Then, it goes through those windows, taking maximally four of them, and moving them to different parts of the screen using swmctl's "moveresize" command.
 The only thing that has to be changed for each window is the origin, which determines the corner to which the window will be moved.
@@ -555,7 +555,7 @@ We might also use different layout based on the number of windows
 \midinsert
 \picw=10cm \cinspic img/swm_tiled.png
 \clabel[fig:swmtiled]{Windows in a grid layout}
-\caption/f Windows in a grid layout produced by the script from listing~\ref[code:organize]
+\caption/f Windows in a grid layout produced by the script from Listing~\ref[code:organize]
 \endinsert
 
 
@@ -568,7 +568,7 @@ One of the goals of swm was to be more ICCCM and EWMH compliant than cwm.
 As for ICCCM, swm tries to be fully compliant.
 It is not easy and straight-forward task though, because ICCCM is known for being ambiguous and difficult to correctly implement~\cite[icccmdifficulties].
 With swm, we tried hard and implemented even selection atoms that are not essential
-for the window manager to work and are usually left out (see section~\ref[sec:becomingwm]).
+for the window manager to work and are usually left out (see Section~\ref[sec:becomingwm]).
 There are some ICCCM properties that are not used by swm, though.
 For example, swm does not make any use of "WM_ICON_NAME", because it does not show anything when the window is
 in iconified state -- that is left for third party task bars and pagers.
@@ -576,7 +576,7 @@ It does not mean that "WM_ICON_NAME" is not supported, though -- it just is not 
 
 As for EWMH, swm tries to be fully compliant as well.
 Swm groups differ a bit from EWMH's virtual desktop interpretation, which also affects some desktop related properties
-defined by EWMH -- this was described in section~\ref[sec:groupimpl].
+defined by EWMH -- this was described in Section~\ref[sec:groupimpl].
 Finally, following EWMH properties are not supported, because they do not make sense for swm for some reason:
 \begitems
 * "_NET_DESKTOP_VIEWPORT" -- swm desktops (groups) do not have viewports.
@@ -616,18 +616,18 @@ In this chapter, we will describe how was the testing done for swm, as well as w
 
 \secc Testing Architecture
 
-In section~\ref[sec:tools], we described two tools that can run nested X Server, Xephyr (\ref[sec:xephyr]), and Xvfb (\ref[sec:xvfb]).
+In Section~\ref[sec:tools], we described two tools that can run nested X Server, Xephyr (\ref[sec:xephyr]), and Xvfb (\ref[sec:xvfb]).
 Both of them would be usable for testing purposes, Xvfb is much better though -- we do not need any graphical output for testing,
 and Xvfb does just that.
 This allows us to run tests even on machines with no display hardware, like test servers.
 
 Tests are, as well as swm itself, written in Go, and same helper libraries were used -- XGB and xgbutil (\ref[sec:xgbutil]).
-To run the tests, there is single shell script that could be seen in code listing~\ref[code:testrunner].
+To run the tests, there is single shell script that could be seen in Listing~\ref[code:testrunner].
 It compiles swm, swmctl and test app, starts Xvfb with swm and runs the test application on it.
 
 The testing application runs various tests, outputting the test name and whether it finished correctly or with some errors,
 in which case those errors are printed to the output as well.
-Example output could be seen in listing~\ref[code:testresult].
+Example output could be seen in Listing~\ref[code:testresult].
 
 \codeblock{code:testrunner}{Testing script}{testscript.sh}
 \codeblock{code:testresult}{Test output}{testresult.txt}
@@ -643,7 +643,7 @@ long enough to be sure that the changes already took affect, but not very long a
 This leads to the state that the tests are both slow and can fail randomly at the same time.
 A~better solution is to wait for an appropriate X event, which is not as easy but is failproof and much faster.
 
-Example test case is shown in code example~\ref[code:testexample].
+Example test case is shown in Listing~\ref[code:testexample].
 It tests whether window size changes correctly after sending a request to make it horizontally maximized.
 Firstly, a dummy window is created, and both the window geometry and the root window geometry are retrieved.
 After that, a request to add "_NET_WM_STATE_MAXIMIZED_HORZ" state to the window is sent.
@@ -707,7 +707,7 @@ In addition to fixing imports, "goimports" also formats code in the same style a
 * "govet" examines source code and reports suspicious constructs.
 For example, useless assignments, unreachable code, or unused results of calls to some functions.
 \enditems
-A short example of a well-formed Go code could be seen in listing~\ref[code:gofmt].
+A short example of a well-formed Go code could be seen in Listing~\ref[code:gofmt].
 Notice how the imports are split into two groups and sorted alphabetically, and how type names are aligned inside the structure declaration.
 Note that "gofmt" uses tabs for indentation.
 While tabs are usually displayed as 8 characters wide,

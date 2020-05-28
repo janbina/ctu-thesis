@@ -63,7 +63,7 @@ Various filters are available, you can, for example, limit the search only to wi
 \enditems
 
 Xdotool can chain commands, so you can use one command to get a window ID first and then perform an action on it.
-See listing~\ref[code:xdotool] for some examples of xdotool commands.
+See Listing~\ref[code:xdotool] for some examples of xdotool commands.
 
 \codeblock{code:xdotool}{Xdotool commands}{xdotool.txt}
 
@@ -106,7 +106,7 @@ The window, on which the action should be performed, could be specified in one o
 \enditems
 
 Wmctrl can be used to, for example, close the window or toggle its maximized state.
-See listing~\ref[code:wmctrl] for some examples of wmctrl commands.
+See Listing~\ref[code:wmctrl] for some examples of wmctrl commands.
 
 \codeblock{code:wmctrl}{Wmctrl commands}{wmctrl.txt}
 
@@ -118,7 +118,7 @@ See listing~\ref[code:wmctrl] for some examples of wmctrl commands.
 Sxhkd, standing for {\em Simple X hotkey daemon}, is an X daemon that reacts to input events by executing commands~\cite[sxhkd].
 You provide it with one or more configuration files, which define the associations between the input events and the commands.
 
-Example configuration file can be seen in code listing~\ref[code:sxhkd].
+Example configuration file can be seen in Listing~\ref[code:sxhkd].
 It demonstrates how sxhkd makes it very easy to map multiple shortcuts to multiple commands at once.
 It is done using syntax "{_,A,B} + X", which will define three shortcuts -- "X", "A + X", and "B + X".
 Underscore is representing an empty sequence element -- this is useful if we want to have different variants of command
@@ -160,7 +160,7 @@ It is primarily meant to be used in combination with sxhkd to invoke the command
 but it can also be used directly from the command line.
 This makes it easy to test the command first and edit the configuration file only after it works exactly how one wants it to.
 
-All the swmctl's commands will be discussed one by one in chapter~\ref[chap:impl] later,
+All the swmctl's commands will be discussed one by one in Chapter~\ref[chap:impl] later,
 but to get an idea of how swmctl works and why it is better than simple configuration file, lets have a look at
 following example.
 
@@ -213,7 +213,7 @@ Firstly, lets briefly summarize what EWMH tells us about virtual desktops~\cite[
 * window manager offers a way for the user to move clients between desktops,
 * clients may be allowed to occupy more than one desktop simultaneously.
 \enditems
-For more detailed description, see section~\ref[sec:ewmhdesktops].
+For more detailed description, see Section~\ref[sec:ewmhdesktops].
 
 For swm, we decided to build on cwm's group model and design it in a similar way.
 There is an unlimited amount of standard groups (cwm has a fixed amount of nine groups),
@@ -223,5 +223,5 @@ A window is visible if any of its group is visible, otherwise hidden.
 
 Although this group model violates EWMH specification (``only one desktop can be shown on the screen at a time''),
 it is the most versatile solution and, in a way, a superset of all others.
-Depending on the implementation (which will be discussed in section~\ref[sec:groupimpl]),
+Depending on the implementation (which will be discussed in Section~\ref[sec:groupimpl]),
 the user can always opt to have only one group visible at a time and each window assigned to exactly one group.

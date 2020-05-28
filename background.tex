@@ -18,7 +18,7 @@ Wayland started in 2008 and comes with different architecture, trying to solve p
 The main problem in X's approach that Wayland aims to solve, is that it does not isolate applications from each other.
 As a result, all X applications have access to everything on the screen, all can register to receive every keystroke,
 even if they do not have input focus, and they can even inject keystrokes into other windows~\cite[xproblems].
-The architecture schemes of X and Wayland are depicted in figures~\ref[fig:xarch] and~\ref[fig:wayarch].
+The architecture schemes of X and Wayland are depicted in Figures~\ref[fig:xarch] and~\ref[fig:wayarch].
 The numbers show the flow of the events from the input device to the point where the change it affects appears on the screen.
 The only difference between those two schemes is the compositor,
 which is responsible for rendering the entire screen contents.
@@ -82,7 +82,7 @@ Some window managers are specifically developed to be part of a desktop environm
 Using a standalone window manager allows the user to create a more lightweight and customized environment, tailored to his own specific needs~\cite[arch_wm].
 There is a great offer of window managers for Linux.
 For example, Arch Wiki provides a list of window managers categorized by type~\cite[arch_wm], that lists more than 60 of them.
-In section~\ref[sec:managers], we will pick some of them and discuss them in more detail.
+In Section~\ref[sec:managers], we will pick some of them and discuss them in more detail.
 
 %TODO: describe the difference between DE and lightweight desktops with just wm
 
@@ -97,7 +97,7 @@ Windows act like pieces of paper on a desk -- they can be stacked on top of each
 Moving or resizing one window does not affect the position or size of other windows, only their visible area.
 Window manager must maintain the stacking order of the windows and only the top window on the stack is guaranteed to be fully visible.
 A window is usually moved to the top of the stack by the window manager when the user starts to interact with it.
-Example layout of a stacking window manager is depicted in figure~\ref[fig:stacking].
+Example layout of a stacking window manager is depicted in Figure~\ref[fig:stacking].
 Windows are overlapping and only focused window (highlighted in blue) is fully visible.
 
 \midinsert
@@ -115,7 +115,7 @@ moving is typically done by swapping the window's position with another window.
 Some types of windows, such as dialogs and pop-up windows, are not suited for tiling though.
 Most tiling window managers detect those windows and leave them in a floating state, keeping them above
 the windows that are tiled.
-Example layout of a tiling window manager is depicted in figure~\ref[fig:tiling].
+Example layout of a tiling window manager is depicted in Figure~\ref[fig:tiling].
 
 Tiling window managers could be split into two more categories:
 \begitems
@@ -200,7 +200,7 @@ and it is also offered as one of the options for default window manager in many 
 for example Lubuntu~\cite[lubuntu] and Manjaro~\cite[manjaro].
 
 Although Openbox claims to be minimalistic, it is much more advanced than cwm.
-Its default UI could be seen in figure~\ref[fig:openbox].
+Its default UI could be seen in Figure~\ref[fig:openbox].
 It comes with full-featured window decorations that include a border around the window and title bar with window title
 and buttons to minimize, maximize, and close the window.
 It also includes a {\em root menu} on the desktop.
@@ -303,7 +303,7 @@ This is described in one of its initial goals like this: ``Don’t be bloated, d
 However, we do not enforce unnecessary limits such as a maximum amount of source lines of code.
 If it needs to be a bit bigger, it will be.''~\cite[i3]
 
-The default UI of i3wm is depicted in figure~\ref[fig:i3desktop].
+The default UI of i3wm is depicted in Figure~\ref[fig:i3desktop].
 It is not that simple as UI of dwm or bspwm, but it is not very complex either.
 Windows have a simple border and also a title bar, that shows only the name of the window.
 It also comes with its panel called {\em i3bar}, which is used by default (see screenshot).
@@ -320,7 +320,7 @@ On top of it are tabs representing the rest of the windows.
 \enditems
 All those layouts can be combined on the screen using so-called containers.
 This means that inside a container that is tabbed can be another container that is using a split layout, for example.
-An example is depicted in figure~\ref[fig:i3desktop].
+An example is depicted in Figure~\ref[fig:i3desktop].
 The leftmost window is in fact a container that is using a tabbed layout and has two windows.
 Similarly, the container right next to it has two windows in a stacking layout.
 A window can be also completely removed from the tiling layout and managed as a floating window.

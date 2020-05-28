@@ -6,7 +6,7 @@
 %\chap ICCCM and EWMH
 %It was an explicit design goal of X Version 11 to specify mechanism, not policy.
 %Because of that, a client that communicates with the server using the protocol defined by
-%the X Window System Protocol (discussed in chapter~\ref[chap:xsystem])
+%the X Window System Protocol (discussed in Chapter~\ref[chap:xsystem])
 %may operate correctly in isolation but may not coexist properly with others sharing the same server.~\cite[icccm]
 %
 %Standardized communication is important especially for window managers and other special clients like docks, toolbars or pagers,
@@ -21,7 +21,7 @@
 \sec ICCCM
 It was an explicit design goal of X Version 11 to specify a mechanism, not a policy.
 Because of that, a client that communicates with an X11 server using the protocol defined by
-the X Window System Protocol (discussed in previous section~\ref[sec:xsystem])
+the X Window System Protocol (discussed in Section~\ref[sec:xsystem])
 may operate correctly in isolation but may not coexist properly with others sharing the same server.~\cite[icccm]
 
 Standardized communication is important especially for window managers and other special clients like docks, toolbars or pagers,
@@ -55,13 +55,13 @@ Each selection can be owned by some client and attached to a window created by t
 
 For our window manager use case, we will be concerned about ownership of a selection named "WM_Sn", where "n" is the screen number.
 To do its job, the window manager needs to register for "SubstructureRedirect" events on the root window of the screen it wants to manage
-(we will discuss this in more detail in section~\ref[sec:becomingwm]).
+(we will discuss this in more detail in Section~\ref[sec:becomingwm]).
 Since only one client can be registered for substructure redirection on any given window at any given time,
 we need some mechanism to inform the client that is currently registered for it that we (on behalf of the user)
 want to replace it.
 Selection provides this mechanism.
 
-To see this in practice, look at code listing~\ref[code:selection]
+To see this in practice, look at Listing~\ref[code:selection]
 (code is in Go, some of its constructs are explained in a comment where needed).
 Firstly, on line 2, we retrieve the owner of the selection we want to manage ("WM_S2").
 We then check if another client owns this selection, in which case we should get confirmation
@@ -136,7 +136,7 @@ Newly created windows start in the Withdrawn state.
 Transitions between states happen when the top-level window is {\em mapped} and {\em unmapped} and when the window manager receives certain messages.
 For historical reasons related to some initial implementations, showing a window in the X11 protocol is called mapping a window,
 and hiding a window is called unmapping~\cite[xBasics].
-Transitions between those states will be described in section~\ref[sec:changingstate].
+Transitions between those states will be described in Section~\ref[sec:changingstate].
 
 \label[sec:clientproperties]
 \secc Client Properties
@@ -156,7 +156,7 @@ Extending these properties is reserved to the X Consortium; private extensions t
 Private additional communication between clients and window managers should take place using separate properties.
 The only exception to this rule is the "WM_PROTOCOLS" property, which may be of arbitrary length and which may contain atoms representing private protocols.
 
-In table~\ref[tab:propsummary], we can see a summary of all client properties defined by ICCCM.
+In Table~\ref[tab:propsummary], we can see a summary of all client properties defined by ICCCM.
 Some of them will be covered in detail.
 
 \midinsert \clabel[tab:propsummary]{Summary of Window Manager Property Types}
@@ -182,7 +182,7 @@ The "WM_CLASS" property contains two consecutive null-terminated strings.
 These specify the Instance and Class names to be used by both the client and the window manager for looking up resources for the application or as identifying information.
 This property must be present when the window leaves the "Withdrawn" state and may be changed only while the window is in the "Withdrawn" state.
 Window managers may examine the property only when they start up and when the window leaves the "Withdrawn" state, but there should be no need for a client to change its state dynamically.
-For example, in table~\ref[tab:properties], we have seen a window with "WM_CLASS" set to {\em ``jetbrains-goland, jetbrains-goland''}.
+For example, in Table~\ref[tab:properties], we have seen a window with "WM_CLASS" set to {\em ``jetbrains-goland, jetbrains-goland''}.
 
 %{\sbf WM\_CLIENT\_MACHINE} property should be set by the client to a string that forms the name of the machine running the client as seen from the machine running the server.
 %It is not really useful for window managers.
@@ -194,13 +194,13 @@ For example, in table~\ref[tab:properties], we have seen a window with "WM_CLASS
 \heading WM\uns HINTS
 The "WM_HINTS" property is used to communicate information that does not need separate properties (such as "WM_CLASS")
 to the window manager.
-Its fields could be seen in table~\ref[tab:hints].
+Its fields could be seen in Table~\ref[tab:hints].
 Window managers are free to assume convenient values for all fields of the "WM_HINTS" property if a window is mapped without one.
 For our use case, particularly useful fields would be "flags", "initial_state", and "window_group".
 Field "flags", apart from presence of all the other fields, contains boolean value for "UrgencyHint",
 which is set to "true" when the window needs user attention.
 The value of the "initial_state" field determines the state the client wishes to be in at the time the top-level window is mapped from the "Withdrawn" state,
-that could be either "NormalState" (window is visible) or "IconicState" (icon is visible) -- see section~\ref[sec:toplevelwindow].
+that could be either "NormalState" (window is visible) or "IconicState" (icon is visible) -- see Section~\ref[sec:toplevelwindow].
 The "window_group" field lets the client specify that this window belongs to a group of windows.
 Window manager can use this hint to manipulate the group as a whole.
 
@@ -252,8 +252,8 @@ For obvious geometric reasons, fewer characters will normally be visible in "WM_
 %\endinsert
 
 \heading WM\uns NORMAL\uns HINTS
-The "WM_NORMAL_HINTS" property is of type "WM_SIZE_HINTS", its contents are displayed in table~\ref[tab:normalhints],
-definitions of the "flags" field in table~\ref[tab:sizeflags].
+The "WM_NORMAL_HINTS" property is of type "WM_SIZE_HINTS", its contents are displayed in Table~\ref[tab:normalhints],
+definitions of the "flags" field in Table~\ref[tab:sizeflags].
 To indicate that the size and position of the window (when a transition from the "Withdrawn" state occurs) was specified by the user,
 the client should set the "USPosition" and "USSize" flags, which allow a window manager to know that the user specifically asked where
 the window should be placed or how the window should be sized and that further interaction is superfluous.
@@ -336,7 +336,7 @@ need to find a top-level window by pointer location (user clicking on window).
 They can do it by searching the window hierarchy beneath the selected location for a window with the "WM_STATE" property.
 This search must be recursive in order to cover all window manager reparenting possibilities.
 
-The contents of the "WM_STATE" property are displayed in table~\ref[tab:wmstate]
+The contents of the "WM_STATE" property are displayed in Table~\ref[tab:wmstate]
 \midinsert \clabel[tab:wmstate]{Contents of window state property}
 \ctable{ll}{
     Field & Value \crl\tskip4pt
@@ -356,7 +356,7 @@ Dialogue boxes, for example, are an example of windows that should have "WM_TRAN
 
 \label[sec:changingstate]
 \secc Changing Window State
-As already mentioned in section~\ref[sec:toplevelwindow], window manager will assign each top-level window one of three states:
+As already mentioned in Section~\ref[sec:toplevelwindow], window manager will assign each top-level window one of three states:
 \begitems
 * "NormalState" -- top-level window is visible.
 * "IconicState" -- top-level window is iconic.
