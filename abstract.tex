@@ -3,21 +3,22 @@
     A window manager is the core component of any modern graphical desktop -- it is responsible
     for the placement and appearance of application windows on the screen.
     While there is a plethora of window managers, especially on the X Window System,
-    most of them are either heavyweight WMs as part of a desktop environment or lightweight tiling managers.
-    In this thesis, we try to fill the gap by developing a lightweight stackable WM that complies with the freedesktop
-    standards such as ICCCM and EWMH, and that follows the UNIX philosophy of doing one thing and doing it well.
-    The focus has been on simplicity, making it easy to use, easy to extend and easy to test.
-    The focus was on code readability, testability, making it easy to hack.
-%   TODO: Unify last two lines and check once again
-%    While there is a plethora of window managers, especially on the X Window System, this thesis aims at creating yet another one.
-%    The window manager designed and implemented as part of this thesis is ICCCM and EWMH compliant,
-%    lightweight, easy to use, extensible, and scriptable.
-%    It was designed with the Unix philosophy of doing one thing well in mind.
-%    The code is easy to read, hackable, and tested.
+    most of them are either heavyweight window managers that are part of a desktop environment or lightweight tiling managers.
+    In this thesis, we try to fill the gap by developing a lightweight stackable window manager that complies with the freedesktop
+    standards such as ICCCM and EWMH, and that follows the {\sc unix} philosophy of doing one thing and doing it well.
+    The focus has been on simplicity, code readability, testability, and making it easy to use and extend.
 }
 
 \abstractCZ {
-    % TODO
+    Tato práce se zabývá návrhem a implementací klasického (nedlaždicového) správce oken pro X Window System.
+    Správce oken se stará o rozmístění a vzhled oken jednotlivých aplikací na obrazovce a je tedy klíčovou součástí
+    jakéhokoliv moderního počítače s grafickým rozhraním.
+    Ačkoliv již existuje mnoho správců oken, zejména pro X Window System, chybí zde jednoduchý nedlaždicový.
+    Tato práce se snaží jeden takový vytvořit.
+    Cílem bylo, aby splňoval freedesktop standardy ICCCM a EWMH
+    a držel se {\sc unix}ové filozofie dělat jednu věc a dělat ji dobře.
+    Důraz byl také kladen na jednoduchost, čitelný a testovatelný kód, a na to,
+    aby byl správce oken snadno použitelný a rozšiřitelný.
 }
 
 \keywordsEN {
