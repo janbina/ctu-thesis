@@ -59,7 +59,7 @@ use one of those three commands to obtain it:
 * "getactivewindow" -- get an ID of active window.
 * "selectwindow" -- get an ID of a window by clicking on it.
 * "search" -- get IDs of windows whose name or class is matching the search term.
-Various filters are available, you can, for example, limit the search only to windows located on the specified desktop.
+Various filters are available, one can, for example, limit the search only to windows located on the specified desktop.
 \enditems
 
 Xdotool can chain commands, so you can use one command to get a window ID first and then perform an action on it.
@@ -145,10 +145,10 @@ With swm, we decided to take a different approach:
 and there are tools for sending EWMH messages (xdotool, wmctrl), we can just make use of them.
 * There is no need to handle keyboard shortcuts -- users can use sxhkd that does it better than we could ever do.
 \enditems
-This means that to maximize and minimize the window, as well as to do many more actions, user can use sxhkd in combination
-with xdotool or wmctrl and swm does not have to be involved at all (apart from implementing EWMH protocol).
+This means that to maximize and minimize the window, as well as to do many more actions, the user can use sxhkd in combination
+with xdotool or wmctrl and swm does not have to be involved at all (apart from implementing the EWMH protocol).
 
-Not everything could be done through EWMH and third party tools, though.
+Not everything could be done through the EWMH and third party tools, though.
 To address those cases, swm comes with two tools -- swmctl and swmrc -- that will be discussed in the next section.
 
 % ######################################################################################################################
