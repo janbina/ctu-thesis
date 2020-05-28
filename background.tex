@@ -44,14 +44,14 @@ the client send the response directly to the compositor.~\cite[wayarch]
 \endinsert
 
 Even though Wayland is meant to replace X in the future, it is not happening quite yet.
-One of its problems is apps compatibility -- Samuel Walladge said in his article called {\em Are we Wayland yet?}
-from the end of 2019: ``I soon discovered that many many apps either only supported X11, or crashed on Wayland.''~\cite[arewewayland]
+One of its problems is apps compatibility -- software engineer Samuel Walladge said in his 2019 article
+``Are we Wayland yet?''~\cite[arewewayland]: ``I soon discovered that many many apps either only supported X11, or crashed on Wayland.''
 Those apps then require XWayland, which provides an embedded X server for apps that do not support Wayland yet.
 Another problem is that ``screen recording or sharing apps just do not work''~\cite[arewewayland],
 which is caused by the Wayland architecture that isolates each client.
 Walladge also mentions stability issues and concludes that the time for switching to Wayland did not come yet.
-Similar problems and conclusions are also outlined in articles {\em X11 Sucks… So What's Up With Wayland?}~\cite[x11sucks]
-and {\em Wayland v/s Xorg : How Are They Similar \& How Are They Different}~\cite[wayvsxorg].
+Similar problems and conclusions are also outlined in articles ``X11 Sucks… So What's Up With Wayland?''~\cite[x11sucks]
+and ``Wayland v/s Xorg : How Are They Similar \& How Are They Different''~\cite[wayvsxorg].
 Because of that, we decided to build swm for the X Window System.
 
 \sec Desktop Environment and Window Manager
