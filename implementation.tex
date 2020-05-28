@@ -213,7 +213,7 @@ This guarantees that multiple swm instances can run on different X screens simul
 and they all have different communication channel.
 
 Communication is done by sending null-terminated strings back and forth over the socket.
-Swmctl is designed to be as simple as possible -- it only collects its command line arguments, sends them to the socket and waits for reply.
+Swmctl is designed to be as simple as possible -- it only collects its command-line arguments, sends them to the socket and waits for reply.
 All the heavy lifting is done inside swm itself -- it listens on the socket for command, parses it, and sends back a reply.
 Reply is just an arbitrary null-terminated string which is then written to the standard output by swmctl.
 

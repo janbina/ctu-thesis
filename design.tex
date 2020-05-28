@@ -38,17 +38,17 @@ In this section, we will describe some tools that can be used to control swm.
 \secc Xdotool % ########################################################################################################
 % ######################################################################################################################
 
-Xdotool is a simple command line tool for communication with X server.
+Xdotool is a simple command-line tool for communication with the X server.
 While its main use case is to fake input from the mouse and keyboard, it also supports some parts of EWMH protocol,
 and thus lets you perform various window manager actions~\cite[xdotool].
-Actions important for out usecase are:
+Actions important for our use-case are:
 \begitems
 * "(get|set)_desktop" -- get and set the current desktop.
 * "(get|set)_num_desktops" -- get and set number of desktops.
 * "(get|set)_desktop_for_window" -- get and set the desktop for window.
 * "windowactivate" -- activate a window.
 Sends "_NET_ACTIVE_WINDOW", window manager should do necessary changes so that specified window could be shown,
-for example switch to desktop the window is on, and then activate it (give it input focus).
+for example, switch to the desktop the window is on, and then activate it (give it input focus).
 * "windowminimize" -- minimize a window.
 \enditems
 
@@ -72,7 +72,7 @@ See Listing~\ref[code:xdotool] for some examples of xdotool commands.
 \secc Wmctrl % #########################################################################################################
 % ######################################################################################################################
 
-Wmctrl is, as well as xdotool, a command line tool for communication with X server.
+Wmctrl is a command-line tool for communication with the X server, similar to xdotool.
 Unlike xdotool, wmctrl is specialized directly on interaction with EWMH compatible window manager, though.
 It is a bit more complex than xdotool, because, as stated in its documentation, it provides access to almost all the features defined in the EWMH specification~\cite[wmctrl].
 This means that it can do all the window manager related tasks xdotool can do and much more, but the commands are usually not as straightforward.
@@ -155,9 +155,9 @@ To address those cases, swm comes with two tools -- swmctl and swmrc -- that wil
 \sec Swmctl and Swmrc % ###############################################################################################
 % ######################################################################################################################
 
-Swmctl is a simple command line utility that can be used to send commands to swm.
+Swmctl is a simple command-line utility that can be used to send commands to swm.
 It is primarily meant to be used in combination with sxhkd to invoke the commands with keyboard shortcuts,
-but it can also be used directly from the command line.
+but it can also be used directly from the command-line.
 This makes it easy to test the command first and edit the configuration file only after it works exactly how one wants it to.
 
 All the swmctl's commands will be discussed one by one in Chapter~\ref[chap:impl] later,
