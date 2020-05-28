@@ -220,8 +220,8 @@ XCB functions map directly onto the protocol, with separate functions to put req
 The power of XCB is in allowing those two steps to have as much code as you want between them.
 The programmer decides when to wait for data, instead of being forced to wait for the data returned by a request at the time the request is issued.\cite[XlibXCB]
 
-\codeblock{code:xlib}{Window property lookup using Xlib}{winproperty_xlib.c}
-\codeblock{code:xcb}{Window property lookup using XCB}{winproperty_xcb.c}
+\codeblock{code:xlib}{Window property lookup using Xlib}{winproperty_xlib.c}{GO}
+\codeblock{code:xcb}{Window property lookup using XCB}{winproperty_xcb.c}{GO}
 
 Xlib and XCB are compatible, meaning that one can mix calls to the first with calls to the other.
 This compatibility was achieved by rebuilding libX11 as a layer on top of libxcb.

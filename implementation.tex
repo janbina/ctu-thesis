@@ -55,7 +55,7 @@ As expected, both versions are very similar, the only difference is that in XGB,
 call "Reply" method on the cookie object returned from "GetProperty" function, instead of passing the cookie to
 another function.
 
-\codeblock{code:xgb}{Window property lookup using XGB}{winproperty_go.go}
+\codeblock{code:xgb}{Window property lookup using XGB}{winproperty_go.go}{GO}
 
 Xgbutil, on the other hand, is higher level utility library working on top of the XGB.
 Its main goal is to make various X related tasks easier~\cite[xgbutil].
@@ -78,7 +78,7 @@ These extract slice of integers or slice of window identifiers, respectively, ou
 Users of the xgbutil library have the possibility to either use high-level functions like "icccm.WmNormalHintsGet",
 or stay with the XGB, optionally utilise those helper functions from xgbutil.
 
-\codeblock{code:xgbutil}{Xgbutil API showcase}{xgbutil.go}
+\codeblock{code:xgbutil}{Xgbutil API showcase}{xgbutil.go}{GO}
 
 Xgbutil can help us also with event handling, core part of each application interacting with the X server using X protocol.
 Applications usually deal with X events using so called event loop, its typical implementation can be seen in code listing~\ref[code:xeventloop].
@@ -91,9 +91,9 @@ You can simply define functions (callbacks) and specify the event type and windo
 Whole event loop is then implemented inside xgbutil's "xevent.Main" function, which calls appropriate callbacks for each event type and window.
 Example callbacks definition can be seen in the code example~\ref[code:xgbutilevents].
 
-\codeblock{code:xeventloop}{X event loop}{x_eventloop.go}
+\codeblock{code:xeventloop}{X event loop}{x_eventloop.go}{GO}
 
-\codeblock{code:xgbutilevents}{Xgbutil event handling}{xgbutil_events.go}
+\codeblock{code:xgbutilevents}{Xgbutil event handling}{xgbutil_events.go}{GO}
 
 Xgbutil also defines "xwindow.Window" structure which is a wrapper around standard X window identifier (unsigned integer).
 This structure contains several methods for easier manipulation with windows, such as "Move", "Resize", "Map", "Unmap" and much more.
@@ -652,7 +652,7 @@ After that, window geometry (supposedly changed) is retrieved again and compared
 the correct geometry in the horizontally maximized state -- window height and "y" coordinate stay the same, while
 the "x" coordinate and width are those of root window.
 
-\codeblock{code:testexample}{Test case example}{test_example.go}
+\codeblock{code:testexample}{Test case example}{test_example.go}{GO}
 
 \secc Test Coverage
 
@@ -725,6 +725,7 @@ Since "goimports" is also able to automatically fix all the issues it finds, the
 add them to the commit. Issues reported by "govet" have to be fixed manually.
 
 \midinsert
+\hisyntax{GO}
 \verbinput (-) listings/gofmt.go
 \clabel[code:gofmt]{Example of a well-formed Go code}
 \caption/l Example of a well-formed Go code
