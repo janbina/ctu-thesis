@@ -62,18 +62,18 @@ Therefore, we feel a need for a lightweight, keyboard-oriented stacking window m
 \nonum
 \sec Goals of the Thesis
 
-The goal of this thesis is to design and implement a stacking window manager for the X11 Window System,
-focusing on the Linux OS only.
+The goal of this thesis is to design and implement a stacking window manager for the X11 Window System on Linux.
 This window manager should be small, easy to use, and implemented in a modern system programming language.
-It should be also compliant with two standard protocols defined on top of the X Window System Protocol,
-Inter-Client Communication Conventions Manual (ICCCM), and Extended Window Manager Hints (EWMH).
+It should be compliant with Inter-Client Communication Conventions Manual (ICCCM)~\cite[ICCCM],
+and Extended Window Manager Hints (EWMH)~\cite[EWMH],
+the two window manager standards for X defined by freedesktop~\cite[freedesktop].
 Its core features should include:
 \begitems
 * stacking window management,
 * virtual desktops,
 * basic window decorations,
 * basic tiling (moving windows to half/thirds of the screen),
-* extensibility,
+* extensibility, and
 * scriptability.
 \enditems
 The implementation should be easy to read, and tested.
