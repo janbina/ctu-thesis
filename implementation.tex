@@ -163,7 +163,7 @@ It can be, however, useful for large projects or projects with lots of non-Go co
 
 Complete project structure with all the packages, helper files and directories could be seen in Figure~\ref[fig:structure].
 All the source code for swm and swmctl is in directories {\em cmd} and {\em internal}.
-According to recommendation, "main" functions of both swm and swmctl are very minimal and they basically only invoke the code from the {\em internal} directory.
+According to the recommendation, "main" functions of both swm and swmctl are very minimal and they basically only invoke the code from the {\em internal} directory.
 Then, there is directory with examples, which contain example configuration file for {\em sxhkd} and example {\em swmrc} startup script.
 They are useful for newcomers, to show them what is possible to do and provide them with some basic usable configuration.
 Directory {\em test} contains tests, which are written in Go as well, with an accompanying shell script which does the compilation and prepares the testing environment.
@@ -317,10 +317,10 @@ Substructure redirection allows a window manager to intercept any request by an 
 or stacking order of its top-level windows on the screen.~\cite[xguide1]
 
 This means that to become a window manager, client has to register for substructure redirection on the root window.
-Xlib programming manual says: ``When the window manager selects SubstructureRedirectMask on the root window,
+Xlib programming manual says~\cite[xguide1]: ``When the window manager selects SubstructureRedirectMask on the root window,
 an attempt by any other client to change the configuration of any child of the root window will fail.
 Instead an event describing the layout change request will be sent to the window manager.
-The window manager then reads the event and determines whether to honor the request, modify it, or deny it completely.''~\cite[xguide1]
+The window manager then reads the event and determines whether to honor the request, modify it, or deny it completely.''
 For this to work, the X server only allows one running program to register for substructure redirection on any given window at any given time~\cite[chuanji].
 If there is already a window manager running, attempts to register for substructure redirection on the root window will fail.
 
@@ -414,7 +414,7 @@ If we do not do reparenting, we will then have to manipulate all those decoratio
 If we, on the other hand, reparent the application's top-level window, as well as all the decoration windows, we can manipulate just their parent window.
 
 Reparenting is quite complicated, though.
-As stated by Peter Hofmann, the author of window manager called katriawm:~\cite[katriawm]
+As stated by Peter Hofmann, the author of window manager called katriawm~\cite[katriawm]:
 ``Reparenting is not as easy as you might think.
 Reparenting adds an additional layer of complexity -- or maybe even more than one layer.
 Plus, reparenting does not magically fix all your problems. For example, Java expects to run under a reparenting window manager by default.
@@ -539,7 +539,7 @@ and thus not showing windows from all visible groups in swm, that makes it only 
 % ######################################################################################################################
 
 One of the requirements for swm was scriptability.
-Scriptability is possible thanks to swm's compliance with EWMH and tools like xdotool and wmctrl (see Sections~\ref[sec:xdotool] and~\ref[sec:wmctrl]),
+Scriptability is possible thanks to swm's compliance with EWMH and tools like xdotool and wmctrl,
 and also thanks to swmctl.
 Commands provided by swmctl, xdotool, and wmctrl were showed earlier in this chapter, now we can have a look at a more complex example.
 In Listing~\ref[code:organize], we can see a script that can organize four windows from the current desktop in a grid-like layout -- the outcome
@@ -605,13 +605,13 @@ In the end though, we want to test that the window manager reacts to the respect
 is also applied to the X state anyway.
 Because of that, we went with integration testing to test swm.
 
-Martin Fl\"oser, former maintainer of KDE's window manager KWin, said in his article about window manager testing from 2012:
+Martin Fl\"oser, former maintainer of KDE's window manager KWin, said in his 2012 article~\cite[unittesting] about window manager testing:
 ``Given that we would have to basically start the full-blown KWin to perform tests which interact with the X-Server,
-unit tests are out of scope and only integration tests seem feasible.''~\cite[unittesting]
-He also described how could the setup for window manager testing look like:
+unit tests are out of scope and only integration tests seem feasible.''
+He also described how could the setup for window manager testing look like~\cite[unittesting]:
 ``We basically need a dedicated testing framework which starts a (nested) X Server, starts KWin,
 performs a test and shuts down both KWin and the X Server.
-A~framework which is decoupled from the running system.''~\cite[unittesting]
+A~framework which is decoupled from the running system.''
 
 In this chapter, we will describe how was the testing done for swm, as well as what is tested.
 
@@ -662,12 +662,12 @@ mainly those defined by EWMH.
 Tests are separated into eleven functions, their brief description follows:
 
 \begitems
-* Cycling -- tests that the window cycling (see \ref[sec:cycling]) works correctly.
+* Cycling -- tests that the window cycling works correctly.
 Issues swmctl commands to cycle windows back and forth and test that correct window gets activated.
-* Desktop names -- tests that desktop (group) names are set correctly (by EWMH conventions, see section \ref[sec:ewmhrootprops]) by the swmctl command.
+* Desktop names -- tests that desktop (group) names are set correctly (by EWMH conventions, see Section~\ref[sec:ewmhrootprops]) by the swmctl command.
 * Group basics -- tests basic group manipulations using EWMH properties. That is, that the number of groups could be changed
 by requests to change root window property "_NET_NUMBER_OF_DESKTOPS", and that current group could be changed by requests to change "_NET_CURRENT_DESKTOP" root window property.
-* Group window creation -- test two swm's group modes, sticky and auto (see section \ref[sec:groupimpl]).
+* Group window creation -- test two swm's group modes, sticky and auto.
 Changes current group mode using swmctl command, creates some windows, and tests that they were assigned the correct group.
 * Group window movement -- tests that windows could be moved to different group by requests to change their "_NET_WM_DESKTOP" property.
 Also tests that if some groups are removed, windows from those groups are moved to another group.
@@ -675,13 +675,13 @@ Also tests that if some groups are removed, windows from those groups are moved 
 appropriately mapped/unmapped based on their group membership.
 * Group membership -- tests that one window could be member of multiple groups. Adds/removes window from different groups
 and tests that correct groups are reported by swmctl command.
-* Moving command -- tests swmctl move command (see section \ref[sec:moveresize]).
+* Moving command -- tests swmctl move command.
 Issues the command with different set of arguments and tests that window geometry changed appropriately.
-* Resizing command -- tests swmctl resize command (see section \ref[sec:moveresize]).
+* Resizing command -- tests swmctl resize command.
 Issues the command with different set of arguments and tests that window geometry changed appropriately.
-* Move-resize command -- tests swmctl moveresize command (see section \ref[sec:moveresize]).
+* Move-resize command -- tests swmctl moveresize command.
 Issues the command with different set of arguments and tests that window geometry changed appropriately.
-* Window states -- tests that windows react properly to requests to change their "_NET_WM_STATE" EWMH property (see section \ref[sec:ewmhappprops]).
+* Window states -- tests that windows react properly to requests to change their "_NET_WM_STATE" EWMH property (see Section~\ref[sec:ewmhappprops]).
 For example, making the window maximized, fullscreen, hidden, focused, etc.
 \enditems
 
