@@ -1,0 +1,360 @@
+\label[chap:background]
+\chap Background
+
+\sec Windowing System
+
+A~windowing system is a collection of software that creates the basic GUI (graphical user interface)
+on computer display screens, including the drawing of windows and other graphics primitives for application programs~\cite[winsys].
+From a programmer's point of view, a windowing system implements graphical primitives such as rendering fonts
+or drawing a line on the screen, effectively providing an abstraction of the graphics hardware from higher-level
+elements of the graphical interface like window managers~\cite[winsys2].
+
+The most popular windowing system among Linux users is the {\em X Window System}~\cite[arch_xorg],
+and its reference open-source implementation {\em X.Org Server} provided by the X.Org Foundation~\cite[xorg].
+The X Window System (also referred to as X or X11) originated at MIT in 1984~\cite[xman2].
+Another windowing system is {\em Wayland}, which is intended as a simpler replacement for X~\cite[wayland].
+Wayland started in 2008 and comes with different architecture, trying to solve problems in X's approach.
+
+The main problem in X's approach that Wayland aims to solve, is that it does not isolate applications from each other.
+As a result, all X applications have access to everything on the screen, all can register to receive every keystroke,
+even if they do not have input focus, and they can even inject keystrokes into other windows~\cite[xproblems].
+The architecture schemes of X and Wayland are depicted in Figures~\ref[fig:xarch] and~\ref[fig:wayarch].
+The numbers show the flow of the events from the input device to the point where the change it affects appears on the screen.
+The only difference between those two schemes is the compositor,
+which is responsible for rendering the entire screen contents.
+Since the window location on the screen is controlled by the compositor and may be transformed
+in several ways (e.g., scaled-down, rotated), the X server does not have the information to decide which client
+should receive the event.
+The X server acts as a middleman that introduces an extra step between applications and the compositor
+and an extra step between the compositor and the hardware.
+In Wayland, on the other hand, the compositor is part of the display server.
+The Wayland protocol lets the compositor send the input events directly to the clients and lets
+the client send the response directly to the compositor~\cite[wayarch].
+
+\midinsert
+\line{\hsize=.5\hsize \vtop{%
+    \clabel[fig:xarch]{X architecture scheme}
+    \picw=7.7cm \cinspic img/xarch.pdf
+    \caption/f X architecture scheme
+    \par}\vtop{%
+    \clabel[fig:wayarch]{Wayland architecture scheme}
+    \picw=6.6cm \cinspic img/wayarch.pdf
+    \caption/f Wayland architecture scheme
+    \par}}
+\endinsert
+
+Even though Wayland is meant to replace X in the future, it is not happening quite yet.
+One of its problems is apps compatibility -- software engineer Samuel Walladge said in his 2019 article
+``Are we Wayland yet?''~\cite[arewewayland]: ``I soon discovered that many many apps either only supported X11, or crashed on Wayland.''
+Those apps then require XWayland, which provides an embedded X server for apps that do not support Wayland yet.
+Another problem is that ``screen recording or sharing apps just do not work''~\cite[arewewayland],
+which is caused by the Wayland architecture that isolates each client.
+Walladge also mentions stability issues and concludes that the time for switching to Wayland did not come yet.
+Similar problems and conclusions are also outlined in articles ``X11 Sucks… So What's Up With Wayland?''~\cite[x11sucks]
+and ``Wayland v/s Xorg : How Are They Similar \& How Are They Different''~\cite[wayvsxorg].
+Because of that, we decided to build swm for the X Window System.
+
+\sec Desktop Environment and Window Manager
+
+A~desktop environment is an implementation of the desktop metaphor,
+which was introduced by Alan Kay at Xerox PARC in 1970 to help users interact with the computer more easily~\cite[graphics].
+The first commercial personal computer to use the desktop metaphor was the Xerox Star~\cite[alto].
+The developer of its interface, David Smith, described it in 1982 article~\cite[smith]:
+``Every user’s initial view of the Star is the desktop, which resembles the top of an office desk,
+together with surrounding furniture and equipment.
+It represents a working environment, where projects and accessible resources reside.
+On the screen are displayed pictures of familiar office objects, such as documents, folders, file drawers, in-baskets, and out-baskets.
+These objects are displayed as small pictures, or icons.''
+
+A~desktop environment, as we know it today, bundles together a variety of components to provide common
+graphical user interface elements such as icons, panels, wallpapers, and desktop widgets~\cite[arch_de].
+Most desktop environments also include a set of integrated applications and utilities, such as text editor, file manager, or web browser.
+One of the most important parts of a desktop environment is a window manager.
+While the desktop environment provides its own window manager, it can be usually replaced with another compatible one~\cite[arch_de].
+There is a great offer of desktop environments for Linux, for example, Arch Wiki~\cite[arch_de] lists more than 20 of them.
+Some of the most popular are KDE~\cite[kde], GNOME~\cite[gnome], or Xfce~\cite[xfce].
+
+A~window manager is system software that manages windows.
+That means, it controls the placement and appearance of windows within a windowing system in GUI~\cite[arch_wm].
+It allows windows to be opened, closed, resized, moved, maximized, minimized, and more.
+The window manager is also responsible for tracking which window is currently active and thus receiving the user's input.
+Some window managers are specifically developed to be part of a desktop environment, others are instead designed to be used standalone.
+Using a standalone window manager allows the user to create a more lightweight and customized environment, tailored to his own specific needs~\cite[arch_wm].
+There is a great offer of window managers for Linux.
+For example, Arch Wiki provides a list of window managers categorized by type~\cite[arch_wm], that lists more than 60 of them.
+In Section~\ref[sec:managers], we will pick some of them and discuss them in more detail.
+
+%TODO: describe the difference between DE and lightweight desktops with just wm
+
+\sec Types of Window Managers
+
+Window managers are usually divided into two classes, based on how windows are drawn on the screen.
+
+\secc Stacking Window Managers
+
+Stacking window managers, also known as floating, provide the traditional desktop metaphor used in commercial operating systems like Windows and OS X~\cite[arch_wm].
+Windows act like pieces of paper on a desk -- they can be stacked on top of each other, moved around, and resized freely by the user.
+Moving or resizing one window does not affect the position or size of other windows, only their visible area.
+Window manager must maintain the stacking order of windows and only the top window on the stack is guaranteed to be fully visible.
+A window is usually moved to the top of the stack by the window manager when the user starts to interact with it.
+Example layout of a stacking window manager is depicted in Figure~\ref[fig:stacking].
+Windows are overlapping and only focused window (highlighted in blue) is fully visible.
+
+\midinsert
+\picw=8cm \cinspic img/stacking.pdf
+\clabel[fig:stacking]{Stacking window manager layout}
+\caption/f The layout of a stacking window manager
+\endinsert
+
+\secc Tiling Window Managers
+
+Tiling window managers tile the windows so that none are overlapping and they usually use all the available screen space.
+They typically make very extensive use of keyboard shortcuts and have less or no reliance on the mouse~\cite[arch_wm].
+It is not possible to move or resize windows freely -- enlarging a window shrinks its adjacent windows and vice versa,
+moving is typically done by swapping the window's position with another window.
+Some types of windows, such as dialogs and pop-up windows, are not suited for tiling though.
+Most tiling window managers detect those windows and leave them in a floating state, keeping them above
+the windows that are tiled.
+Example layout of a tiling window manager is depicted in Figure~\ref[fig:tiling].
+
+Tiling window managers could be split into two more categories:
+\begitems
+* {\sbf Dynamic} tiling window managers tile windows based on preset layouts.
+They usually offer many different layouts of window placement and the user can dynamically switch between them.
+For example, one of the most common tiling layouts is called {\em master-stack} layout,
+in which one window (master) is considered the most important and has dedicated half of the screen space,
+while the rest of the windows are displayed one below the other on the second half of the screen.
+* {\sbf Static (manual)} tiling window managers do not use layouts.
+They let the user decide where windows should be placed.
+Most typically, when a new window is created, one of the existing windows is shrunk to half its width/height and the new window takes freed up space.
+The user can choose the window that will be shrunk and also the direction (vertical or horizontal).
+Sometimes, the user can also choose the default split ratio, so that the new window does not take half, but, for example,
+only a third of the existing window space.
+\enditems
+
+\midinsert
+\picw=8cm \cinspic img/tiling.pdf
+\clabel[fig:tiling]{Tiling window manager layout}
+\caption/f The layout of a tiling window manager
+\endinsert
+
+\label[sec:managers]
+\sec Window Managers
+
+As mentioned before, there is a great offer of window managers for Linux.
+In this section, we will go through some of them, mainly those that inspired swm in some way.
+
+\secc Cwm
+
+Cwm (Calm Window Manager) is a stacking window manager for the X Window System.
+It describes itself as a ``window manager which contains many features that concentrate on the efficiency
+and transparency of window management while maintaining the simplest and most pleasant aesthetic''~\cite[cwm].
+It is the default window manager on OpenBSD.
+
+Cwm is oriented towards heavy keyboard usage -- resizing, moving, hiding, raising, or lowering windows, all can be done using
+keyboard shortcuts~\cite[cwm2].
+It could be even configured to move the mouse cursor using the keyboard so that one could use the computer without any pointing device.
+The user can either define custom shortcuts using cwm's configuration file or use the defaults.
+
+Interface of cwm is very minimal -- it only draws a one-pixel border around windows by default,
+the width of the border and its color can be configured though.
+Cwm offers several menus, which can be used to launch applications or switch between running applications.
+The principle of these menus is that cwm shows a list of relevant content and user can search in it and finally pick one of the filtered options~\cite[cwm3].
+Windows are searched by their current title, old titles and by their label, which is a custom string user can assign to every window.
+
+Instead of the traditional virtual desktop concept, cwm is using groups.
+There are nine groups with IDs 1--9 and a special ``sticky'' group with ID 0.
+Each window is assigned to one of those groups, the user can then change its group with a keyboard shortcut.
+While the sticky group is always visible on the screen, the normal group can be either visible or hidden.
+This means that unlike virtual desktops, multiple groups could be visible at the same time.
+The visibility of the group can be controlled by keyboard shortcuts as well.
+
+Figure~\ref[fig:cwmmenu] shows a cwm desktop with two windows and one of those menus.
+This menu lists all the managed top-level windows, there are various information included:
+\begitems
+* the group ID on the left,
+* ``!'' indicates active (focused) window,
+* ``\&'' indicates hidden windows,
+* the label of the window in square brackets,
+* and finally the title of the window.
+\enditems
+
+All the cwm's configuration is done using configuration file ".cwmrc".
+The user may add, modify or remove shortcuts, change colors and other aspects of window management behavior~\cite[cwm3].
+One of the drawbacks of cwm is that it does not support most of the EWMH protocol.
+
+\midinsert
+\picw=12cm \cinspic img/cwm.png
+\clabel[fig:cwmmenu]{Cwm desktop}
+\caption/f Cwm desktop with two windows and a menu showing all managed windows
+\endinsert
+
+\secc Openbox
+
+Openbox is a stacking window manager.
+It describes itself as a ``minimalistic, highly configurable, next generation window manager with extensive standards support''~\cite[openbox].
+It is designed to be fully compliant with ICCCM and EWMH protocols.
+It is the default window manager of desktop environments LXDE~\cite[lxde] and its successor LXQt~\cite[lxqt],
+and it is also offered as one of the options for default window manager in many Linux distributions,
+for example Lubuntu~\cite[lubuntu] and Manjaro~\cite[manjaro].
+
+Although Openbox claims to be minimalistic, it is much more advanced than cwm.
+Its default UI could be seen in Figure~\ref[fig:openbox].
+It comes with full-featured window decorations that include a border around the window and title bar with window title
+and buttons to minimize, maximize, and close the window.
+It also includes a {\em root menu} on the desktop.
+Using this menu, one can launch applications, bring minimized windows up again, or start various Openbox configuration tools.
+Openbox does not come with a bundled taskbar, though, and advices its users to use one of many stand-alone EWMH compatible taskbars.
+
+Openbox is configured by two configuration files, "rc.xml" and "menu.xml".
+The first one ("rc.xml") is the main configuration file, responsible for determining the behavior and settings
+of the overall session, including keyboard shortcuts, theming, virtual desktops settings etc.~\cite[openboxarch]
+The second one ("menu.xml") defines the type, behavior, and items of aforementioned desktop menu.
+Although the default provided is a static menu (it will not automatically update when new applications are installed),
+it is possible to employ the use of dynamic menus that will automatically update as well~\cite[openboxarch].
+
+Configuration files are not meant to be easily readable or editable -- Openbox comes with applications to edit them,
+one for "rc.xml", called {\em obconf} and one for "menu.xml", called {\em obmenu}.
+Using obconf, user can, for example, easily switch Openbox theme, that controls the looks of window decorations and menus.
+Obconf itself includes many themes to choose from, more themes are available online and one can also
+easily create new or modify existing theme using provided GUI application~\cite[openboxarch].
+
+\midinsert
+\picw=12cm \cinspic img/openbox.png
+\clabel[fig:openbox]{Openbox windows and menu}
+\caption/f Openbox with two opened window and a menu
+\endinsert
+
+\secc Dwm
+
+Dwm (Dynamic Window Manager) is a dynamic tiling window manager.
+It manages windows in tiled, monocle and floating layouts.
+All of the layouts can be applied dynamically, optimising the environment for the application in use and the task performed.~\cite[dwm]
+
+Dwm follows the philosophy of its authors, {\em suckless.org}, that is about keeping things simple, minimal and usable~\cite[suckless].
+All their projects focus on advanced and experienced computer users.
+They believe that ingenious software is simple and that as the number of lines of code in software shrinks,
+the less the software sucks~\cite[suckless].
+Following this philosophy, dwm's source code is intended to never exceed 2\,000 source lines of code
+and it has no configuration file, it can only be configured by editing its C source code~\cite[dwm].
+
+Dwm is extremely lightweight and fast and its interface is very minimal.
+It only draws a small customizable border around windows to indicate the focus state.
+Windows could be spread across nine desktops called tags and it is possible to show windows from multiple tags at once.
+It comes with its own status bar which displays all available tags,
+the layout, the number of visible windows, the title of the focused window, and the text read from the root window name property~\cite[dwm].
+It is not really possible to use third party taskbars, because dwm does not support EWMH.
+
+As stated before, dwm comes with three layouts by default.
+In tiled layout, windows are managed in a master and stacking area.
+The master area contains the window which currently needs most attention, whereas the stacking area contains all other windows.
+In monocle layout, all windows are maximized to the screen size and in floating layout, windows can be resized and moved freely.
+
+Interesting concept of dwm are {\em patches}.
+Since the core dwm source code is very minimal and is kept under 2\,000 lines of code,
+a lot of functionality is missing, and so users started to create patches to add functionality they wanted.
+Those patches are in a form of simple git diff files\urlnote{https://git-scm.com/docs/git-diff},
+and could be found on dwm's project website~\cite[dwmpatch].
+Most of those plugins implement new types of layout (e.g., deck, fibonacci, grid), or modifies behavior or style of the status bar.
+
+\midinsert
+\picw=12cm \cinspic img/dwm.png
+\clabel[fig:dwmdesktop]{Dwm desktop}
+\caption/f Dwm desktop with the status bar and four open windows in its default layout
+\endinsert
+
+\secc Bspwm
+
+Bspwm (binary space partitioning window manager) is a manual tiling window manager.
+It represents windows as the leaves of a full binary tree, supports multiple monitors and is configured and controlled through messages~\cite[bspwm, bspwmarch].
+It supports a subset of ICCCM and EWMH protocols, it does not state what is supported and what is not, though~\cite[bspwm].
+
+Bspwm is very minimalistic in terms of UI -- it only draws a simple solid color border around its windows and has no build-in taskbar or menus.
+Bspwm only responds to X events, and messages it receives on a dedicated socket.
+It comes with a standalone command-line application called {\em bspc}, that writes messages on the bspwm's socket~\cite[bspwm].
+It also does not handle any keyboard or pointer inputs.
+For this it relies on a third party program that translates keyboard and pointer events to bspc invocations~\cite[bspwm].
+It recommends sxhkd~\cite[sxhkd] (developed by the same author).
+Upon startup, bspwm runs its configuration file, {\em bspwmrc}, which is simply a shell script that calls bspc (and, possibly, other utilities)~\cite[bspwm].
+
+Since bspwm represents windows as the leaves of a full binary tree,
+each inner node has exactly two children and each leaf node holds exactly one window.
+Each inner node is responsible for splitting its screen space in two parts and this split is defined by two
+parameters: the type (horizontal or vertical) and the ratio (a real number from interval $(0,1)$)~\cite[bspwm].
+New windows are inserted into a window tree at the specified insertion point using specified insertion mode, which
+is configurable~\cite[bspwm].
+
+\midinsert
+\picw=12cm \cinspic img/bspwm.png
+\clabel[fig:bspwmdesktop]{Bspwm desktop}
+\caption/f Bspwm desktop with four open windows in its default layout
+\endinsert
+
+\secc i3
+
+i3 is a dynamic tiling window manager that is primarily targeted at developers and advanced users~\cite[i3].
+It uses a tree as a data structure for windows, which, according to its authors, allows for more flexible layouts
+than the column-based approach used by other window managers~\cite[i3].
+
+Unlike dwm, i3 does not try to be as minimal as possible, but it does not want to be bloated either.
+This is described in one of its initial goals~\cite[i3] like this: ``Don’t be bloated, don’t be fancy
+(simple borders are the most decoration we want to have).
+However, we do not enforce unnecessary limits such as a maximum amount of source lines of code.
+If it needs to be a bit bigger, it will be.''
+
+The default UI of i3wm is depicted in Figure~\ref[fig:i3desktop].
+It is not that simple as UI of dwm or bspwm, but it is not very complex either.
+Windows have a simple border and also a title bar, that only shows the name of the window.
+It also comes with its panel called {\em i3bar}, which is used by default (see screenshot).
+Since i3 supports EWMH, any other standalone panel could be used as well, though.
+
+i3 offers three layouts for windows:
+\begitems
+* split vertically/horizontally -- windows are sized so that every window gets an equal amount of space.
+This can be done either vertically or horizontally.
+* stacking -- only focused window is displayed.
+On top of it is a list of the rest of the windows.
+* tabbed -- only focused window is displayed.
+On top of it are tabs representing the rest of the windows.
+\enditems
+All those layouts can be combined on the screen using so-called containers.
+This means that inside a container that is tabbed can be another container that is using a split layout, for example.
+An example is depicted in Figure~\ref[fig:i3desktop].
+The leftmost window is in fact a container that is using a tabbed layout and has two windows.
+Similarly, the container right next to it has two windows in a stacking layout.
+A window can be also completely removed from the tiling layout and managed as a floating window.
+
+i3 is highly configurable using its configuration file.
+User can configure the UI (border width and color for multiple window states, fonts, etc.),
+keyboard shortcuts, i3bar, and the behavior of the window manager overall.
+For example, the user can choose that windows will not be focused upon opening, or that
+specific window will be in a floating state by default.
+
+\midinsert
+\picw=12cm \cinspic img/i3wm.png
+\clabel[fig:i3desktop]{i3 desktop}
+\caption/f Desktop of i3 with four containers and six open windows
+\endinsert
+
+\secc Summary
+
+In this section, we discussed five window managers.
+We picked some from each category -- cwm and Openbox represented stacking window managers,
+dwm, bspwm, and i3 represented tiling window managers.
+In each category, we also showed different approaches.
+Cwm and dwm represent minimal window managers with very minimal UI, configuration, and no EWMH support.
+Bspwm stands somewhere in the middle, with its minimal UI, but quite advanced functionality and EWMH support.
+Finally, Openbox and i3 represent window managers with advanced UI (full-fledged themeable window decorations in Openbox,
+title bars and tabs in i3) and advanced configuration.
+
+There are many more window managers out there, both stacking and tiling, their functionalities are not much different from
+those presented here, though.
+To mention a few more window managers, we can name Xfwm~\cite[xfce] or Kwin~\cite[kde], which are both stacking window managers
+and both are developed as a part of a desktop environment, Xfce and KDE, respectively.
+For tiling window managers, we can mention awesome~\cite[awesome] or xmonad~\cite[xmonad], which were both inspired by dwm and they build upon it.
+Another popular tiling window managers are herbstluftwm~\cite[herbst] or Qtile~\cite[qtile].
+For an extensive list of both stacking and tiling window managers, we can recommend Arch Linux Wiki~\cite[arch_wm].
+
+\input xsystem
+\input icccm
+\input ewmh

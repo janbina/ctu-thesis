@@ -1,0 +1,227 @@
+\label[chap:design]
+\chap Design
+
+% ######################################################################################################################
+%\sec Design % ##########################################################################################################
+% ######################################################################################################################
+
+The primary design goal for swm was to be small, easy to use yet hackable stacking window manager.
+To design such window manager, we based it on one of the core principles of Unix philosophy, that programs should do one thing well,
+as stated by Doug McIlroy, one of the founders of the Unix tradition, in the Bell System Technical Journal~\cite[mcilroy]:
+``Make each program do one thing well.
+To do a new job, build afresh rather than complicate old programs by adding new features.''
+
+To honor this principle, swm does not come with its own panel or application launcher, as some window managers do.
+Instead, it focuses on that one thing, window management, and the rest is left for third party applications.
+Thanks to ICCCM and EWMH specifications, third party applications can interact with swm seamlessly
+and the user can choose any application that fits his needs instead of using the one bundled with the window manager.
+
+For example, there are many open source panel implementations,
+like polybar~\cite[polybar], lemonbar~\cite[lemonbar], or pypanel~\cite[pypanel], just to name a few.
+To mention some application launchers that could be used with swm, we can name dmenu~\cite[dmenu] or rofi~\cite[rofi].
+
+In this chapter, we will discuss some of the design choices made during the development of swm into detail.
+
+%% ######################################################################################################################
+%\sec Requirements % ##################################################################################
+%% ######################################################################################################################
+
+
+% ######################################################################################################################
+\sec Tools % ##########################################################################################################
+% ######################################################################################################################
+
+In this section, we will describe some tools that can be used to control swm.
+
+% ######################################################################################################################
+\label[sec:xdotool]
+\secc Xdotool % ########################################################################################################
+% ######################################################################################################################
+
+Xdotool is a simple command-line tool for communication with the X server.
+While its main use case is to fake input from the mouse and keyboard, it also supports some parts of EWMH protocol,
+and thus lets you perform various window manager actions~\cite[xdotool].
+Actions important for our use-case are:
+\begitems
+* "(get|set)_desktop" -- get and set the current desktop.
+* "(get|set)_num_desktops" -- get and set number of desktops.
+* "(get|set)_desktop_for_window" -- get and set the desktop for window.
+* "windowactivate" -- activate a window.
+Sends "_NET_ACTIVE_WINDOW", window manager should do necessary changes so that specified window could be shown,
+for example, switch to the desktop the window is on, and then activate it (give it input focus).
+* "windowminimize" -- minimize a window.
+\enditems
+
+To specify a window on which the action should be performed, one can either directly provide its ID, or
+use one of those three commands to obtain it:
+
+\begitems
+* "getactivewindow" -- get an ID of active window.
+* "selectwindow" -- get an ID of a window by clicking on it.
+* "search" -- get IDs of windows whose name or class is matching the search term.
+Various filters are available, one can, for example, limit the search only to windows located on the specified desktop.
+\enditems
+
+Xdotool can chain commands, so you can use one command to get a window ID first and then perform an action on it.
+See Listing~\ref[code:xdotool] for some examples of xdotool commands.
+
+\codeblock{code:xdotool}{Xdotool commands}{xdotool.txt}
+
+% ######################################################################################################################
+\label[sec:wmctrl]
+\secc Wmctrl % #########################################################################################################
+% ######################################################################################################################
+
+Wmctrl is a command-line tool for communication with the X server, similar to xdotool.
+Unlike xdotool, wmctrl is specialized directly on interaction with EWMH compatible window manager, though.
+It is a bit more complex than xdotool, because, as stated in its documentation, it provides access to almost all the features defined in the EWMH specification~\cite[wmctrl].
+This means that it can do all the window manager related tasks xdotool can do and much more, but the commands are usually not as straightforward.
+That is also caused by arguments being named by a single letter, which mostly seems to be chosen by random.
+We will show two commands which will be important for our use case, the rest could be seen in the documentation~\cite[wmctrl].
+
+\begitems
+* "wmctrl -c <WIN>" -- gracefully close specified window.
+* "wmctrl -r <WIN> -b <STATE>" -- change the state of the specified window.
+This command could be used, for example, to make the window maximized, minimized, or fullscreen.
+It sends the "_NET_WM_STATE" client message as specified in EWMH.
+The format of the state argument is: "(remove|add|toggle),<PROP1>[,<PROP2>]", and the following properties are supported:
+\begitems \style x
+* "modal",
+* "sticky",
+* "maximized_vert", "maximized_horz",
+* "shaded",
+* "skip_taskbar", "skip_pager",
+* "hidden",
+* "fullscreen",
+* "above", "below".
+\enditems
+\enditems
+
+The window, on which the action should be performed, could be specified in one of these ways:
+
+\begitems
+* By default, window argument is interpreted as a string matched against the window title and the first matching window is used.
+* Using the "-i" option, the argument will be interpreted as a numerical window ID represented as a decimal or hexadecimal (prefix "0x") number.
+* Special strings ":ACTIVE:" and ":SELECT:" may be used to use the currently active window or to let the user select the window by clicking on it, respectively.
+\enditems
+
+Wmctrl can be used to, for example, close the window or toggle its maximized state.
+See Listing~\ref[code:wmctrl] for some examples of wmctrl commands.
+
+\codeblock{code:wmctrl}{Wmctrl commands}{wmctrl.txt}
+
+% ######################################################################################################################
+\label[sec:sxhkd]
+\secc Sxhkd % ##########################################################################################################
+% ######################################################################################################################
+
+Sxhkd, standing for {\em Simple X hotkey daemon}, is an X daemon that reacts to input events by executing commands~\cite[sxhkd].
+You provide it with one or more configuration files, which define the associations between the input events and the commands.
+
+Example configuration file can be seen in Listing~\ref[code:sxhkd].
+It demonstrates how sxhkd makes it very easy to map multiple shortcuts to multiple commands at once.
+It is done using syntax "{_,A,B} + X", which will define three shortcuts -- "X", "A + X", and "B + X".
+Underscore is representing an empty sequence element -- this is useful if we want to have different variants of command
+based on modifiers used (as in the example, line 7).
+
+\codeblock{code:sxhkd}{Example configuration file for sxhkd}{sxhkd.txt}
+
+Sxhkd can execute defined commands both on key press (default behavior) and on key release (using modifier ``"@"'').
+It has also very interesting feature called {\em chord chain} -- one can specify multiple chords separated by semicolons,
+the command will then only be executed after receiving each chord of the chain in consecutive order.
+One can also use colon instead of semicolon to indicate that the chord chain shall not be aborted when the chain tail is
+reached -- see the example, line 4.
+That means that if we take our example, upon pressing "super + alt + m", {\em moving mode} will be activated and we can
+then move the window just by pressing keys "h, j, k, l".
+
+% ######################################################################################################################
+\sec Configuration and Controlling % ##################################################################################
+% ######################################################################################################################
+
+Most of the window managers are using configuration files with lots and lots of options you can configure.
+With swm, we decided to take a different approach:
+\begitems
+* There is no need for swm to have commands for actions like maximizing or minimizing the window -- since it supports EWMH
+and there are tools for sending EWMH messages (xdotool, wmctrl), we can just make use of them.
+* There is no need to handle keyboard shortcuts -- users can use sxhkd that does it better than we could ever do.
+\enditems
+This means that to maximize and minimize the window, as well as to do many more actions, the user can use sxhkd in combination
+with xdotool or wmctrl and swm does not have to be involved at all (apart from implementing the EWMH protocol).
+
+Not everything could be done through the EWMH and third party tools, though.
+To address those cases, swm comes with two tools -- swmctl and swmrc -- that will be discussed in the next section.
+
+% ######################################################################################################################
+\sec Swmctl and Swmrc % ###############################################################################################
+% ######################################################################################################################
+
+Swmctl is a simple command-line utility that can be used to send commands to swm.
+It is primarily meant to be used in combination with sxhkd to invoke the commands with keyboard shortcuts,
+but it can also be used directly from the command-line.
+This makes it easy to test the command first and edit the configuration file only after it works exactly how one wants it to.
+
+All the swmctl's commands will be discussed one by one in Chapter~\ref[chap:impl] later,
+but to get an idea of how swmctl works and why it is better than simple configuration file, lets have a look at
+following example.
+
+To move a window using keyboard in cwm, one has to bind keyboard shortcuts in its configuration file like this:
+\begtt
+moveamount 1
+bind CM-k  window-move-up
+bind CMS-k window-move-up-big
+\endtt
+As you can see, there is an option "moveamount", which defines how many pixels the window will move.
+Then, there are two commands for each direction "window-move-X" and "window-move-X-big".
+The first one moves the window by "moveamount" pixels, the second one moves it by ten times the "moveamount" pixels.
+
+In swmctl, on the other hand, there is a "move" command, that takes arguments for all the directions and amount of pixels to move the window by.
+User can then bind this command to keyboard shortcut using sxhkd like this:
+\begtt
+ctrl + alt + {h,j,k,l}
+    swmctl move -{w,s,n,e} 20
+\endtt
+
+This approach is both much more simple and versatile than cwm's:
+\begitems
+* while cwm is limited to two move amounts (and one is even dependant on the other), swm can handle arbitrary move amount,
+* swm can move the window in multiple directions in one command, and it can even be moved by different amount of pixels in each direction.
+\enditems
+
+Swmrc is just a shell script that is executed upon startup of swm.
+It is executed after all the initialization has been done, so the window manager is running and
+can accept any command (swmctl's one, EWMH message sent using xdotool), but right before all the existing windows
+are adopted by swm.
+This makes it ideal for all the configuration commands -- one can, for example, set the names of the groups, color of borders, etc.
+
+% ######################################################################################################################
+\sec Desktops -- Groups % #############################################################################################
+% ######################################################################################################################
+
+Virtual desktops, sometimes called workspaces or window groups, offer a way of organizing applications.
+Switching to different desktop hides all the applications from the previous desktop and shows applications from a new desktop.
+This way, the user can group applications that are used together and switch between different tasks easily.
+
+Many slightly different models of virtual desktops exist among window managers.
+The most standard model is using multiple desktops, one of them being visible at any given time
+and window always belonging to exactly one of them.
+In other models, more than one desktop could be visible at a time and a window can belong to more than one group.
+
+Firstly, lets briefly summarize what EWMH tells us about virtual desktops~\cite[ewmh]:
+\begitems
+* only one desktop can be shown on the screen at a time,
+* there may be a fixed number of desktops, or new ones may be created dynamically,
+* window manager offers a way for the user to move clients between desktops,
+* clients may be allowed to occupy more than one desktop simultaneously.
+\enditems
+For more detailed description, see Section~\ref[sec:ewmhdesktops].
+
+For swm, we decided to build on cwm's group model and design it in a similar way.
+There is an unlimited amount of standard groups (cwm has a fixed amount of nine groups),
+and one special group (called sticky), that is always visible.
+Every standard group could be either visible or hidden and each window can belong to an arbitrary number of groups.
+A window is visible if any of its group is visible, otherwise hidden.
+
+Although this group model violates EWMH specification (``only one desktop can be shown on the screen at a time''),
+it is the most versatile solution and, in a way, a superset of all others.
+Depending on the implementation (which will be discussed in Section~\ref[sec:groupimpl]),
+the user can always opt to have only one group visible at a time and each window assigned to exactly one group.

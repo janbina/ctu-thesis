@@ -1,27 +1,36 @@
 %! Suppress = PrimitiveStyle
 %! Suppress = PrimitiveEquation
 \label[chap:icccmewmh]
-\chap ICCCM and EWMH
-It was an explicit design goal of X Version 11 to specify mechanism, not policy.
-Because of that, a client that communicates with the server using the protocol defined by
-the X Window System Protocol (discussed in chapter~\ref[chap:xsystem])
-may operate correctly in isolation but may not coexist properly with others sharing the same server.~\cite[icccm]
 
-Standardized communication is important especially for window managers and other special clients like docks, toolbars or pagers,
-because they need to communicate with the rest of the clients as well as with each other.
-In this chapter, we will discuss two such standard protocols defined on top of the X protocol:
-\begitems
-* ICCCM -- Inter-Client Communication Conventions Manual
-* EWMH -- Extended Window Manager Hints
-\enditems
+% TODO: what about this???
+%\chap ICCCM and EWMH
+%It was an explicit design goal of X Version 11 to specify mechanism, not policy.
+%Because of that, a client that communicates with the server using the protocol defined by
+%the X Window System Protocol (discussed in Chapter~\ref[chap:xsystem])
+%may operate correctly in isolation but may not coexist properly with others sharing the same server.~\cite[icccm]
+%
+%Standardized communication is important especially for window managers and other special clients like docks, toolbars or pagers,
+%because they need to communicate with the rest of the clients as well as with each other.
+%In this chapter, we will discuss two such standard protocols defined on top of the X protocol:
+%\begitems
+%* ICCCM -- Inter-Client Communication Conventions Manual
+%* EWMH -- Extended Window Manager Hints
+%\enditems
 
 \label[sec:icccm]
 \sec ICCCM
-Inter-Client Communication Conventions Manual is a standard that defines how X Window System clients should interact with one another.
-It was designed at the X Consortium in 1988.
-Its latest version 2.0 was released in 1994.~\cite[icccm]
+It was an explicit design goal of X Version 11 to specify a mechanism, not a policy.
+Because of that, a client that communicates with an X11 server using the protocol defined by
+the X Window System Protocol (discussed in Section~\ref[sec:xsystem])
+may operate correctly in isolation but may not coexist properly with others sharing the same server~\cite[icccm].
 
-In this section, we will cover parts of ICCCM which are related to window managers and therefore important for us.
+Standardized communication is important especially for window managers and other special clients like docks, toolbars or pagers,
+because they need to communicate with the rest of the clients as well as with each other.
+Inter-Client Communication Conventions Manual is one of two standards that define how X Window System clients should interact with one another.
+It was designed at the X Consortium in 1988.
+Its latest version 2.0 was released in 1994~\cite[icccm].
+
+In this section, we will cover parts of ICCCM that are related to window managers and therefore important for us.
 ICCCM manual~\cite[icccm] will be constantly referenced here, so we will explicitly refer only other sources if they are used.
 
 %The ICCCM is known for being difficult to correctly implement.
@@ -40,39 +49,75 @@ ICCCM manual~\cite[icccm] will be constantly referenced here, so we will explici
 
 \label[sec:icccmselection]
 \secc Selection
-Selections are the primary mechanism that X Version 11 defines for the exchange of information between clients, for example, by cutting and pasting between windows.
-There can be an arbitrary number of selections (each named by an atom) and that they are global to the server.
-Each selection is owned by a client and is attached to a window.
+Selections are the primary mechanism that X11 defines for the exchange of information between clients.
+There can be an arbitrary number of selections, each of them is named by an atom, and they are global to the server.
+Each selection can be owned by some client and attached to a window created by that client.
 
-As stated by the ICCCM, window managers should acquire ownership of a selection named "WM_Sn", where "n" is the screen number, for every screen they manage.
-Selection ownership is acquired by calling "SetSelectionOwner" request, specifying the atom that represents the selection, some window that the client created
-and timestamp of the event that triggers the acquisition of the selection.
-If the time in the "SetSelectionOwner" request is in the future relative to the server's current time or is in the past relative
-to the last time the specified selection changed hands, the "SetSelectionOwner" request appears to the client to succeed, but ownership is not actually transferred.
-Client can get the owner of a particular selection by invoking "GetSelectionOwner" request.
+For our window manager use case, we will be concerned about ownership of a selection named "WM_Sn", where "n" is the screen number.
+To do its job, the window manager needs to register for "SubstructureRedirect" events on the root window of the screen it wants to manage
+(we will discuss this in more detail in Section~\ref[sec:becomingwm]).
+Since only one client can be registered for substructure redirection on any given window at any given time,
+we need some mechanism to inform the client that is currently registered for it that we (on behalf of the user)
+want to replace it.
+Selection provides this mechanism.
 
-Clients may either give up selection ownership voluntarily or lose it forcibly as the result of some other client's actions.
-To relinquish ownership of a selection voluntarily, a client should execute a "SetSelectionOwner" request for that selection atom,
-with owner specified as "None" and the time specified as the timestamp that was used to acquire the selection.
-Alternatively, the client may destroy the window used as the owner value of the "SetSelectionOwner" request, or the client may terminate.
-In both cases, the ownership of the selection involved will revert to "None".
-If a client gives up ownership of a selection or if some other client executes a "SetSelectionOwner" for it and thus reassigns it forcibly,
-the previous owner will receive a "SelectionClear" event.
+To see this in practice, look at Listing~\ref[code:selection]
+(code is in Go, some of its constructs are explained in a comment where needed).
+Firstly, on line 2, we retrieve the owner of the selection we want to manage ("WM_S2").
+We then check if another client owns this selection, in which case we should get confirmation
+from the user that our application could replace it.
+If there is no owner or we have the user's permission to replace it,
+we send the "SetSelectionOwner" request, specifying the selection atom ("WM_S2") and the window to which the selection
+would be attached ("X.Dummy()" in this case).
+If the selection was owned by another client, we then have to wait for its termination, that is, wait for
+the "DestroyNotifyEvent" of the window that owned the selection.
+After that, we can finally register for "SubstructureRedirect" events on the root window of screen 2, since
+we now own the selection "WM_S2".
+The last thing we have to do to comply with ICCCM is to listen for the "SelectionClearEvent".
+We will receive this event when another client sends the "SetSelectionOwner" request (just like we did earlier)
+and we have to release managed resources (substructure redirection on root window) and destroy the window that owns
+the selection.
+In our case, we simply quit, as there is no point for the window manager to run without the substructure redirection.
 
-If a manager loses ownership of a manager selection, a new manager is taking over its responsibilities.
-The old manager must release all resources it has managed and must then destroy the window that owned the selection.
-For example, a window manager losing ownership of "WM_S2" must deselect from "SubstructureRedirect" on the root window of screen 2 before destroying the window that owned "WM_S2".
-When the new manager notices that the window owning the selection has been destroyed,
-it knows that it can successfully proceed to control the resource it is planning to manage.
-If the old manager does not destroy the window within a reasonable time, the new manager should check with the user before destroying the window itself or killing the old manager.
+\midinsert
+\hisyntax{GO}
+\verbinput (-) listings/selection.go
+\clabel[code:selection]{Selection acquiring mechanism}
+\caption/l {
+    Selection acquiring mechanism (code is simplified and would not compile as is)
+}
+\endinsert
+
+
+
+%As stated by the ICCCM, window managers should acquire ownership of a selection named "WM_Sn", where "n" is the screen number, for every screen they manage.
+%Selection ownership is acquired by calling "SetSelectionOwner" request, specifying the atom that represents the selection, some window that the client created
+%and timestamp of the event that triggers the acquisition of the selection.
+%If the time in the "SetSelectionOwner" request is in the future relative to the server's current time or is in the past relative
+%to the last time the specified selection changed hands, the "SetSelectionOwner" request appears to the client to succeed, but ownership is not actually transferred.
+%Client can get the owner of a particular selection by invoking "GetSelectionOwner" request.
+%
+%Clients may either give up selection ownership voluntarily or lose it forcibly as the result of some other client's actions.
+%To relinquish ownership of a selection voluntarily, a client should execute a "SetSelectionOwner" request for that selection atom,
+%with owner specified as "None" and the time specified as the timestamp that was used to acquire the selection.
+%Alternatively, the client may destroy the window used as the owner value of the "SetSelectionOwner" request, or the client may terminate.
+%In both cases, the ownership of the selection involved will revert to "None".
+%If a client gives up ownership of a selection or if some other client executes a "SetSelectionOwner" for it and thus reassigns it forcibly,
+%the previous owner will receive a "SelectionClear" event.
+%
+%If a manager loses ownership of a manager selection, a new manager is taking over its responsibilities.
+%The old manager must release all resources it has managed and must then destroy the window that owned the selection.
+%For example, a window manager losing ownership of "WM_S2" must deselect from "SubstructureRedirect" on the root window of screen 2 before destroying the window that owned "WM_S2".
+%When the new manager notices that the window owning the selection has been destroyed,
+%it knows that it can successfully proceed to control the resource it is planning to manage.
+%If the old manager does not destroy the window within a reasonable time, the new manager should check with the user before destroying the window itself or killing the old manager.
 
 \secc Clients Actions
-Clients should, as far as possible, do exactly what they would do in the absence of a window manager,
-except for the following:
+Clients should do exactly what they would do in the absence of a window manager, with following exceptions:
 \begitems
-* Hinting to the window manager about the resources they would like to obtain.
-* Cooperating with the window manager by accepting the resources they are allocated even if they are not those requested.
-* Being prepared for resource allocations to change at any time.
+* They should hint to the window manager what resources they would like to obtain.
+* They should accept the resources they are allocated, even if they are not those requested.
+* They should be prepared for resource allocations to change at any time.
 \enditems
 
 \label[sec:toplevelwindow]
@@ -86,31 +131,22 @@ From the client's point of view, the window manager will regard its top-level wi
 * Withdrawn
 \enditems
 Newly created windows start in the Withdrawn state.
-Transitions between states happen when the top-level window is mapped and unmapped and when the window manager receives certain messages.
-We will talk about that more later on.
+Transitions between states happen when the top-level window is {\em mapped} and {\em unmapped} and when the window manager receives certain messages.
+For historical reasons related to some initial implementations, showing a window in the X11 protocol is called mapping a window,
+and hiding a window is called unmapping~\cite[xBasics].
+Transitions between those states will be described in Section~\ref[sec:changingstate].
 
 \label[sec:clientproperties]
 \secc Client Properties
-Once the client has one or more top-level windows, it should place properties on those windows to inform the window manager of the behavior that the client desires.
-If any of these properties are not supplied, window managers can assume values they find convenient -- clients that depend on particular values must explicitly supply them.
+Client can inform the window manager of the behavior that it desires by placing properties on its top-level windows.
+Window manager is free to assume values it finds convenient for any properties that are not supplied.
 The window manager will not change properties written by the client.
+Contents of these properties are examined by the window manager upon transition from the "Withdrawn" state,
+some properties are also monitored for changes while the window is in the "Iconic" or "Normal" state.
+For example, a file manager usually changes "WM_NAME" property when the user navigates to different directories,
+and the window manager is expected to observe these changes and reflect them in its UI.
 
-The window manager will examine the contents of these properties when the window makes the transition from the "Withdrawn" state and will monitor
-some properties for changes while the window is in the "Iconic" or "Normal" state.
-Window manager don't have to retain memory of the old value of the property.
-All fields of the property must be set to suitable values in a single "ChangeProperty" request.
-This ensures that the full contents of the property will be available to a new window manager if the existing one crashes or shuts down.
-
-By convention, clients writing or rewriting window manager properties must ensure that the entire content of each property remains valid at all times.
-
-Some of these properties may contain the IDs of resources, such as windows or pixmaps.
-Clients should ensure that these resources exist for at least as long as the window on which the property resides.
-
-Extending these properties is reserved to the X Consortium; private extensions to them are forbidden.
-Private additional communication between clients and window managers should take place using separate properties.
-The only exception to this rule is the "WM_PROTOCOLS" property, which may be of arbitrary length and which may contain atoms representing private protocols.
-
-In the table~\ref[tab:propsummary], you can see summary of all client properties defined by ICCCM.
+In Table~\ref[tab:propsummary], we can see a summary of all client properties defined by ICCCM.
 Some of them will be covered in detail.
 
 \midinsert \clabel[tab:propsummary]{Summary of Window Manager Property Types}
@@ -128,155 +164,34 @@ Some of them will be covered in detail.
     "WM\_STATE" & "WM\_STATE" \cr
     "WM\_TRANSIENT\_FOR" & "WINDOW" \cr
 }
-\caption/t Summary of Window Manager Property Types.
+\caption/t Summary of window manager property types
 \endinsert
 
 \heading WM\uns CLASS
 The "WM_CLASS" property contains two consecutive null-terminated strings.
-These specify the Instance and Class names to be used by both the client and the window manager for looking up resources for the application or as identifying information.
-This property must be present when the window leaves the "Withdrawn" state and may be changed only while the window is in the "Withdrawn" state.
-Window managers may examine the property only when they start up and when the window leaves the "Withdrawn" state, but there should be no need for a client to change its state dynamically.
+These specify the Instance and Class names to be used by both the client and the window manager for looking up resources for the application or as an identifying information.
+For example, in Table~\ref[tab:properties], we have seen a window with "WM_CLASS" set to {\em ``jetbrains-goland, jetbrains-goland''}.
 
-%{\sbf WM\_CLIENT\_MACHINE} property should be set by the client to a string that forms the name of the machine running the client as seen from the machine running the server.
-%It is not really useful for window managers.
-%
-%{\sbf WM\_COLORMAP\_WINDOWS} property on a top-level window is a list of the IDs of windows that may need colormaps installed that differ from the colormap of the top-level window.
-%The window manager will watch this list of windows for changes in their colormap attributes.
-%The top-level window is always (implicitly or explicitly) on the watch list.
-
-\heading WM\uns HINTS
-The "WM_HINTS" property is used to communicate to the window manager.
-It conveys the information the window manager needs other than the window geometry, which is available from the window itself;
-the constraints on that geometry, which is available from the "WM_NORMAL_HINTS" structure;
-and various strings, which need separate properties, such as "WM_NAME".
-The contents of the properties can be seen in the table~\ref[tab:hints].
-
-\midinsert \clabel[tab:hints]{Contents of hints property}
-\ctable{ll}{
-    Field & Type \crl
-    "flags" & "CARD32" \cr
-    "input" & "CARD32" \cr
-    "initial\_state" & "CARD32" \cr
-    "icon\_pixmap" & "PIXMAP" \cr
-    "icon\_window" & "WINDOW" \cr
-    "icon\_x" & "INT32" \cr
-    "icon\_y" & "INT32" \cr
-    "icon\_mask" & "PIXMAP" \cr
-    "window\_group" & "WINDOW" \cr
-}
-\caption/t Contents of {"WM_HINTS"}.
-\endinsert
-
-Window managers are free to assume convenient values for all fields of the "WM_HINTS" property if a window is mapped without one.
-Field "flags" contains information about presence of all the other properties and one more boolean value for "UrgencyHint".
-The input field is used to communicate to the window manager the input focus model used by the client.
-The value of the "initial_state" field determines the state the client wishes to be in at the time the top-level window is mapped from the "Withdrawn" state,
-that could be either "NormalState" (window is visible) or "IconicState" (icon is visible) -- see section~\ref[sec:toplevelwindow].
-The "window_group" field lets the client specify that this window belongs to a group of windows.
-An example is a single client manipulating multiple children of the root window.
-By convention, the "window_group" field should be set to the ID of the group leader.
-Window managers may provide facilities for manipulating the group as a whole.
-Clients, at present, have no way to operate on the group as a whole.
-The "UrgencyHint" flag, if set in the flags field, indicates that the client deems the window contents to be urgent, requiring the timely response of the user.
-The window manager must make some effort to draw the user's attention to this window while this flag is set.
-
-\heading WM\uns NAME
+\heading{WM\uns NAME, WM\uns ICON\uns NAME}
 The "WM_NAME" property is an uninterpreted string that the client wants the window manager
-to display in association with the window (for example, in a window headline bar).
-Window managers are expected to make an effort to display this information, ignoring "WM_NAME" is not acceptable behavior.
-Clients can assume that at least the first part of this string is visible to the user and that if the information is not visible to the user, it is because the user has taken an explicit action to make it invisible.
-On the other hand, there is no guarantee that the user can see the "WM_NAME" string even if the window manager supports window headlines,
-"WM_NAME" should not be therefore used for application-critical information or to announce asynchronous changes of an application's state that require timely user response.
-The expected uses are to permit the user to identify one of a number of instances of the same client and to provide the user with noncritical state information.
-
-\heading WM\uns ICON\uns NAME
-The "WM_ICON_NAME" property is an uninterpreted string that the client wants to be displayed in association with the window when it is iconified (for example, in an icon label).
-In other respects, including the type, it is similar to "WM_NAME".
-For obvious geometric reasons, fewer characters will normally be visible in "WM_ICON_NAME" than "WM_NAME".
-
-%\heading WM\uns ICON\uns SIZE
-%property is set by by window manager that wishes to place constraints on the sizes of icon pixmaps and/or windows.
-%The contents of this property are listed in the following table.
-%
-%\midinsert \clabel[tab:iconsize]{Contents of icon size property}
-%\ctable{ll}{
-%    Field & Type \crl
-%    "min\_width" & "CARD32" \cr
-%    "min\_height" & "CARD32" \cr
-%    "max\_width" & "CARD32" \cr
-%    "max\_height" & "CARD32" \cr
-%    "width\_inc" & "CARD32" \cr
-%    "height\_inc" & "CARD32" \cr
-%}
-%\caption/t Contents of {"ICON_SIZE"}.
-%\endinsert
+to display in association with the window (for example, in a window title bar).
+Window managers are expected to make an effort to display this information, ignoring "WM_NAME" is not acceptable behavior,
+unless the user has taken an explicit action to make it invisible.
+The "WM_ICON_NAME" property is similar, but it is used when the window is in "Iconic" state.
 
 \heading WM\uns NORMAL\uns HINTS
-The "WM_NORMAL_HINTS" property is of type "WM_SIZE_HINTS", its contents are displayed in the table~\ref[tab:normalhints],
-definitions of the "flags" field in the table~\ref[tab:sizeflags].
-To indicate that the size and position of the window (when a transition from the "Withdrawn" state occurs) was specified by the user,
-the client should set the "USPosition" and "USSize" flags, which allow a window manager to know that the user specifically asked where
-the window should be placed or how the window should be sized and that further interaction is superfluous.
-To indicate that it was specified by the client without any user involvement, the client should set "PPosition" and "PSize".
-
-The size specifiers refer to the width and height of the client's window excluding borders.
-The "win_gravity" specifies how and whether the client window wants to be shifted to make room for the window manager frame.
-
-The "min_width" and "min_height" elements specify the minimum size that the window can be for the client to be useful,
-the "max_width" and "max_height" elements specify the maximum size.
-The "base_width" and "base_height" elements in conjunction with "width_inc" and "height_inc" define an arithmetic
-progression of preferred window widths and heights for non-negative integers $i$ and $j$:
-$$width = base\_width + ( i \times width\_inc )$$
-$$height = base\_height + ( j \times height\_inc )$$
-Window managers are encouraged to use $i$ and $j$ instead of width and height in reporting window sizes to users.
-If a base size is not provided, the minimum size is to be used in its place and vice versa.
-
-The "min_aspect" and "max_aspect" fields are fractions with the numerator first and the denominator second, and they allow a client to specify the range of aspect ratios it prefers.
-Window managers that honor aspect ratios should take into account the base size in determining the preferred window size.
-
-\midinsert \clabel[tab:normalhints]{Contents of normal hints property}
-\ctable{lll}{
-    Field & Type & Fallback\crl \tskip4pt
-    "flags" & "CARD32" & \cr
-    "pad" & "4 * CARD32" & \cr
-    "min\_width" & "INT32" & "base\_width" \cr
-    "min\_height" & "INT32" & "base\_height" \cr
-    "max\_width" & "INT32" & \cr
-    "max\_height" & "INT32" & \cr
-    "width\_inc" & "INT32" & \cr
-    "height\_inc" & "INT32" & \cr
-    "min\_aspect" & "(INT32,INT32)" & \cr
-    "max\_aspect" & "(INT32,INT32)" & \cr
-    "base\_width" & "INT32" & "min\_width" \cr
-    "base\_height" & "INT32" & "min\_height" \cr
-    "win\_gravity" & "INT32" & "NorthWest" \cr
-}
-\caption/t Contents of {"WM_NORMAL_HINTS"}.
-\endinsert
-
-\midinsert \clabel[tab:sizeflags]{Size hints flags definitions}
-\ctable{lrl}{
-    Name & Value & Field \crl \tskip4pt
-    "USPosition" & 1 & User-specified x, y \cr
-    "USSize" & 2 & User-specified width, height \cr
-    "PPosition" & 4 & Program-specified position \cr
-    "PSize" & 8 & Program-specified size \cr
-    "PMinSize" & 16 & Program-specified minimum size \cr
-    "PMaxSize" & 32 & Program-specified maximum size \cr
-    "PResizeInc" & 64 & Program-specified resize increments \cr
-    "PAspect" & 128 & Program-specified min and max aspect ratios \cr
-    "PBaseSize" & 256 & Program-specified base size \cr
-    "PWinGravity" & 512 & Program-specified window gravity \cr
-}
-\caption/t Size hints flags definitions.
-\endinsert
+The "WM_NORMAL_HINTS" property is used by clients to specify the minimum size that the window can be for the client to be useful,
+as well as the maximum size.
+Window managers should honor them, even though they do not have to.
+Clients can also specify base size and size increments.
+If they are specified, the window manager should not just resize the window to an arbitrary size,
+but the size should reflect those values in this way: $size = base\_size + i * size\_increment$.
+This is used, for example, by terminal emulators that want to fit an exact number of characters into the window.
 
 \heading WM\uns PROTOCOLS
 The "WM_PROTOCOLS" property is a list of atoms.
 Each atom identifies a communication protocol between the client and the window manager in which the client is willing to participate.
 Atoms can identify both standard protocols and private protocols specific to individual window managers.
-The "WM_PROTOCOLS" property is not required.
-If it is not present, the client does not want to participate in any window manager protocols.
 There are three protocols defined by the ICCCM at the moment:
 \begitems
 * "WM_TAKE_FOCUS" -- assignment of input focus.
@@ -286,25 +201,13 @@ There are three protocols defined by the ICCCM at the moment:
 
 \heading WM\uns STATE
 The "WM_STATE" property is placed on each top-level client window that is not in the "Withdrawn" state by the window manager.
-Top-level windows in the "Withdrawn" state may or may not have the "WM_STATE" property.
-Once the top-level window has been withdrawn, the client may re-use it for another purpose.
-Clients that do so should remove the "WM_STATE" property if it is still present.
+It specifies the state of the window ("Withdrawn", "Normal", or "Iconic"),
+and ID of icon window (if the window is in "Iconic" state and the window manager is displaying some).
 
-The "WM_STATE" property is often used an an indicator of top-level window.
-For example, some clients (such as xprop\urlnote{https://www.x.org/releases/X11R7.5/doc/man/man1/xprop.1.html})
-need to find a top-level window by pointer location (user clicking on window).
+The "WM_STATE" property is often used as an indicator of a top-level window.
+For example, some clients (such as xprop~\cite[xprop])
+need to find a top-level window under the pointer (user clicking on a window).
 They can do it by searching the window hierarchy beneath the selected location for a window with the "WM_STATE" property.
-This search must be recursive in order to cover all window manager reparenting possibilities.
-
-The contents of the "WM_STATE" property are displayed in the table~\ref[tab:wmstate]
-\midinsert \clabel[tab:wmstate]{Contents of window state property}
-\ctable{ll}{
-    Field & Value \crl\tskip4pt
-    "state" & one of {"WithdrawnState", "NormalState", "IconicState"}\cr
-    "icon" & ID of icon window \cr
-}
-\caption/t Contents of {\tt WM\uns STATE} property.
-\endinsert
 
 \heading WM\uns TRANSIENT\uns FOR
 The "WM_TRANSIENT_FOR" property might contain ID of another top-level window.
@@ -312,15 +215,26 @@ The implication is that this window is a pop-up on behalf of the named window, a
 not to decorate transient windows or may treat them differently in other ways.
 In particular, window managers should present newly mapped "WM_TRANSIENT_FOR" windows without requiring any user interaction,
 even if mapping top-level windows normally does require interaction.
-Dialogue boxes, for example, are an example of windows that should have "WM_TRANSIENT_FOR" set.
+Dialogs, for example, are an example of windows that should have "WM_TRANSIENT_FOR" set.
 
+\heading WM\uns HINTS
+The "WM_HINTS" property is used to communicate information that does not need separate properties to the window manager.
+For our use case, particularly useful fields would be "flags", "initial_state", and "window_group".
+Field "flags" contains boolean value for "UrgencyHint", which is set to "true" when the window needs user attention.
+Window manager should communicate this to the user -- for example, change color of window's border.
+The value of the "initial_state" field determines the state the client wishes to be in when the top-level window is firstly mapped.
+It could be either "NormalState" (window is visible) or "IconicState" (icon is visible) -- see Section~\ref[sec:toplevelwindow].
+The "window_group" field lets the client specify that this window belongs to a group of windows.
+Window manager can use this hint to manipulate the group as a whole.
+
+\label[sec:changingstate]
 \secc Changing Window State
-As already mentioned in section~\ref[sec:toplevelwindow], window manager will assign each top-level window one of three states:
+As already mentioned in Section~\ref[sec:toplevelwindow], window manager will assign each top-level window one of three states:
 \begitems
-* "NormalState" -- top-level window is visible.
-* "IconicState" -- top-level window is iconic.
+* "Normal" -- top-level window is visible.
+* "Iconic" -- top-level window is iconic.
 That usually means that top-level window is not visible, but its "icon_window", "icon_pixmap" or "WM_ICON_NAME" is.
-* "WithdrawnState" -- neither top-level window nor icon is visible.
+* "Withdrawn" -- neither top-level window nor icon is visible.
 \enditems
 Newly created top-level windows are in the "Withdrawn" state.
 Once the window has been provided with suitable properties, the client is free to change its state as follows:
@@ -332,10 +246,6 @@ Once the window has been provided with suitable properties, the client is free t
 * "Iconic"\,\to\,"Normal" -- client maps the window, content of "WM_HINTS.initial_state" is irrelevant in this case.
 * "Iconic"\,\to\,"Withdrawn" -- client unmaps window and sends a synthetic "UnmapNotify" event.
 \enditems
-Only the client can effect a transition into or out of the "Withdrawn" state.
-Once a client's window has left the "Withdrawn" state, the window will be mapped if it is in the "Normal" state and the window will be unmapped if it is in the "Iconic" state.
-Reparenting window managers must unmap the client's window when it is in the "Iconic" state, even if an ancestor window being unmapped renders the client's window unviewable.
-Conversely, if a reparenting window manager renders the client's window unviewable by unmapping an ancestor, the client's window is by definition in the "Iconic" state and must also be unmapped.
 
 \secc Configuring the Window
 Clients can resize and reposition their top-level windows by using the "ConfigureWindow" request.
@@ -347,9 +257,7 @@ The attributes of the window that can be altered with this request are as follow
 * The window's position in the stack.
 \enditems
 The coordinate system in which the location is expressed is that of the root (irrespective of any reparenting that may have occurred).
-The border width to be used and "win_gravity" position hint to be used are those most recently requested by the client.
-Client configure requests are interpreted by the window manager in the same manner as the initial window geometry mapped from the "Withdrawn" state,
-as described in the description of "WM_NORMAL_HINTS" property.
+Client configure requests are interpreted by the window manager in the same manner as the initial window geometry specified by the "WM_NORMAL_HINTS" property.
 Clients must be aware that there is no guarantee that the window manager will allocate them the requested size or location
 and must be prepared to deal with any size and location.
 Window manager can respond to a "ConfigureRequest" request in three different ways:
@@ -359,18 +267,6 @@ A~client will receive a synthetic "ConfigureNotify" event that describes the (un
 The client will not receive a real "ConfigureNotify" event because no change has actually taken place.
 * Move or restack the window without resizing it or changing its border width.\nl
 A~client will receive a synthetic "ConfigureNotify" event following the change that describes the new geometry of the window.
-The client may not receive a real "ConfigureNotify" event that describes this change because the window manager may have reparented the top-level window.
-If the client does receive a real event, the synthetic event will follow the real one.
 * Resize the window or change its border width.\nl
 A~client will receive a real "ConfigureNotify" event, provided that it has selected for "StructureNotify" events.
-The coordinates in this event are relative to the parent, which may not be the root if the window has been reparented.
 \enditems
-The general rule is that coordinates in real "ConfigureNotify" events are in the parent's space;
-in synthetic events, they are in the root space.
-
-Clients should be aware that their borders may not be visible.
-Window managers are free to use reparenting techniques to decorate client's top-level windows with borders containing titles,
-controls, and other details to maintain a consistent look-and-feel.
-If they do, they are likely to override the client's attempts to set the border width and set it to zero.
-Clients, therefore, should not depend on the top-level window's border being visible or use it to display any critical information.
-Other window managers will allow the top-level windows border to be visible.
