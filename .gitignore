@@ -1,6 +1,7 @@
 # Resulting pdf document
 out/thesis.pdf
 out/cover.pdf
+slides/slides.pdf
 # OPmac ref files
 *.ref
 #idea

@@ -1,0 +1,108 @@
+\documentclass[aspectratio=43]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage[czech]{babel}
+\usepackage{minted}
+\usepackage[font={small,it}]{caption}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{bchart}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\usetheme{Boadilla}
+\useinnertheme{rectangles}
+\usenavigationsymbolstemplate{}
+
+\definecolor{ctu}{HTML}{007AC2}
+\definecolor{ctulight}{HTML}{1980C2}
+\definecolor{ctuxlight}{HTML}{66ABD7}
+\definecolor{ctuxxlight}{HTML}{C6DAF0}
+\definecolor{complementary}{HTML}{FF9571}
+
+\usemintedstyle{manni}
+
+\setminted{
+    bgcolor=ctuxxlight,
+    breaklines,
+    fontsize=\scriptsize
+}
+
+\newcommand{\backupbegin}{
+   \newcounter{finalframe}
+   \setcounter{finalframe}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+   \setcounter{framenumber}{\value{finalframe}}
+}
+
+\setbeamercolor{structure}{fg=ctu}
+\setbeamercolor{headlinecolor}{fg=white,bg=ctu}
+\setbeamercolor{subtitle}{fg=ctulight}
+\setbeamerfont{frametitle}{series=\bfseries}
+\setbeamerfont{title}{series=\bfseries}
+\setbeamerfont{subtitle}{series=\mdseries}
+
+\makeatother
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,right]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle\hspace*{6em}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\setbeamertemplate{headline}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=1.125ex]{headlinecolor}%
+    \end{beamercolorbox}%
+  }
+}
+\makeatletter
+
+\setbeamercovered{transparent}
+
+% ============ Frontpage ============
+\subtitle{XXX???} % TODO
+\title[Simple Window Manager]{SWM -- Simple Window Manager}
+\author[Jan Bína]{
+    Jan Bína\\
+    \scriptsize binajan2@fit.cvut.cz
+}
+\institute[]{
+    \scriptsize
+    Department of Theoretical Computer Science\\
+    Faculty of Information Technology\\
+    Czech Technical University in Prague
+}
+\date[June 2020]{\scriptsize June 2020}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+    \begin{center}
+        \includegraphics[scale=0.18]{img/ctulogo.pdf}
+    \end{center}
+\end{frame}
+
+\appendix
+\backupbegin
+
+\begin{frame}
+    \centering
+    \Huge \textbf{Thanks for your attention} \\
+    \vspace{30pt}
+    \Huge \textbf{\textcolor{ctu}{Questions?}}
+\end{frame}
+
+\backupend
+ 
+\end{document}
