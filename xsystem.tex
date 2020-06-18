@@ -1,7 +1,10 @@
-\label[chap:xsystem]
+% ######################################################################################################################
 \label[sec:xsystem]
 \sec The X Window System
-The X Window System is a network transparent window system that runs on a wide range of computing and graphics machines~\cite[xman].
+% ######################################################################################################################
+
+The X Window System is a network transparent window system that runs on a wide range of computing
+and graphics machines~\cite[xman].
 
 In this section, we will cover how the X server works, with a focus on communication with its clients.
 We will not cover how the X server handles resources, color, graphics, text, or input as it is not
@@ -12,7 +15,8 @@ The X Window System was created in the mid-1980s at the Massachusetts Institute 
 To support further development, a member-funded consortium was formed in 1988,
 which was later moved out of MIT, creating an independent, stand-alone organization -- the X Consortium.
 All rights to the X Window System were assigned to the X Consortium in 1994.
-When the X Consortium closed its doors in 1996, all rights to the X Window System were transferred to The Open Group (known as the Open Software Foundation).
+When the X Consortium closed its doors in 1996, all rights to the X Window System were transferred
+to The Open Group (known as the Open Software Foundation).
 The X.Org Foundation was formed in 2004 as the successor to the X.Org Group at The Open Group.
 The purpose of the X.Org Foundation is to foster the development, evolution, and maintenance of the X Window System.
 Membership in the X.Org Foundation is free and open to anyone.
@@ -53,7 +57,8 @@ This request is processed by the window manager, which sends the "ConfigureNotif
 how the size and location of the window was (or was not) changed.
 
 To receive events, the client must register for them.
-When doing so, the client must specify event types that it is interested in, only those will be sent to him by the X Server.
+When doing so, the client must specify event types that it is interested in, only those will be sent to him by the
+X Server.
 After initialization, typical X Server client runs an event loop -- an infinite loop that waits for events coming from
 the X Server and responds to them.
 
@@ -76,7 +81,8 @@ Atom is just a nickname for a property, so that arbitrary-length property name s
 do not have to be transferred back and forth between the client and the server~\cite[xguide1].
 A~property is uniquely identified by an atom and a window~\cite[xguide1].
 
-One of the most important uses of properties is to communicate information from applications to the window manager and vice versa~\cite[xguide1].
+One of the most important uses of properties is to communicate information from applications to the window manager
+and vice versa~\cite[xguide1].
 The application sets properties on its top-level window, window manager retrieves them and use them in some way.
 For example, application sets the "WM_NAME" property (see Table~\ref[tab:properties])
 and window manager will display this name in the title bar of the window.
@@ -111,18 +117,8 @@ The root window fills the entire screen and is created by the X Server on startu
 When a client of the X Server creates its first window, it is created as a child of the root window.
 The children of the root window are called top-level windows and those are managed by the window manager.
 Each top-level window can also have its own children, but those are managed by the client itself.
-Typically, a client creates many windows inside its top-level window to create application features such as buttons and text boxes.~\cite[xlibMan]
-
-%\secc The Window Manager
-%
-%The window manager is just a regular X server client.
-%, but by convention, it is given special responsibilities.
-%Much of the communication between clients and the window manager and vice versa occurs through properties, the rest is
-%occurring through events.
-%Many of the properties are known as hints because they may not necessarily be honored by the
-%window manager, even if one is running.
-%An application must be prepared for the window manager to ignore, modify, or
-%honor the preferences it indicates through the window manager hints.~\cite[xguide1]
+Typically, a client creates many windows inside its top-level window to create application features such as buttons
+and text boxes.~\cite[xlibMan]
 
 \secc X Client Libraries
 
@@ -168,7 +164,8 @@ They share the same X server connection and pass control of it back and forth.
 That option was introduced in libX11 version 1.2, and since version 1.4, released in 2010, it is always present
 (not only optional).\cite[XlibXCB]
 
-Most applications should call Xlib and XCB sparingly, and rather utilize higher-level toolkits that provide more efficient programming models~\cite[XlibXCB].
+Most applications should call Xlib and XCB sparingly, and rather utilize higher-level toolkits that provide
+more efficient programming models~\cite[XlibXCB].
 Window managers have to usually call XCB or Xlib directly, though.
 For the implementation of swm, we used the X Go Binding library~\cite[xgb], which is Go wrapper of XCB.
 We will talk about it in more detail in Chapter~\ref[chap:impl].
