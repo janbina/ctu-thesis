@@ -1,0 +1,5 @@
+xdotool windowactivate 56623105
+xdotool getactivewindow windowminimize
+xdotool set_desktop 3
+
+wmctrl -r :ACTIVE: -b toggle,fullscreen

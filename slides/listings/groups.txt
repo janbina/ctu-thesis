@@ -1,0 +1,2 @@
+swmctl group (toggle|show|hide|only) <G-ID>
+swmctl group (set|add|remove) [-id <WIN-ID>] [-g <G-ID>]

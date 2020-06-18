@@ -1,0 +1,2 @@
+ctrl + super + {Left,Right}
+    swmctl moveresize -o {nw,ne} -wr .5 -hr 1

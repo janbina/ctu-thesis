@@ -1,0 +1,5 @@
+swmctl move -n 20 -e 10
+swmctl resize -n 10 -e 10 -s 10 -w 10
+
+swmctl config border 2 B0BEC5 007AC2 F44336
+swmctl config border-top 5 B0BEC5 007AC2 F44336
