@@ -1,15 +1,15 @@
 # Master's thesis
 
-My master's thesis **SWM - Simple Window Manager**
+PlainTeX source codes of my master's thesis on [CTU in Prague](https://fit.cvut.cz).
+The thesis deals with the design and implementation of window manager for the X11 Window System on Linux - the source code could be found [here](https://github.com/janbina/swm).
 
-## Contents of enclosed SD card
+I used [CTUstyle](http://petr.olsak.net/ctustyle-e.html) theme for the thesis text.
+I made some changes to it which you might find useful if you want to use this theme:
+* switched positions of English and Czech abstract
+* introduced separate counter for listings and created list of listings right after list of tables and figures
+* created some macros (see `macros.tex`) - for one-line source code insertion from a file, subtle syntax highlighting of source code (modified [OPmac trick](http://petr.olsak.net/opmac-tricks-e.html)), non-numbered headline, and more
+There are also slides used to present the thesis. I used a modified beamer template for those.
 
-* swm - Go source code of the implementation 
-  > [github.com/janbina/swm @1.0.0](https://github.com/janbina/swm/tree/1.0.0)
-* thesis - plainTex source code of the thesis
-  > this repo [@1.0.0](https://github.com/janbina/ctu-thesis/tree/1.0.0)
-* DP_Bina_Jan_2020.pdf - thesis text in PDF
-  > available from [releases](https://github.com/janbina/ctu-thesis/releases/tag/1.0.0)
-* showcase.mp4 - video with swm showcase
-  > shared on [youtube](https://www.youtube.com/watch?v=C-4S8lDN9vM)
-  
+The thesis and slides in pdf format could be found in releases.
+The source code could be found on GitHub, the version at the time of submitting the thesis was [1.0.0](https://github.com/janbina/swm/tree/1.0.0).
+There is also a short video showcase on [youtube](https://www.youtube.com/watch?v=C-4S8lDN9vM).
