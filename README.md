@@ -1,6 +1,6 @@
 # Master's thesis
 
-PlainTeX source codes of my master's thesis on [CTU in Prague](https://fit.cvut.cz).
+PlainTeX source codes of my master's thesis at the [CTU in Prague](https://fit.cvut.cz).
 The thesis deals with the design and implementation of window manager for the X11 Window System on Linux - the source code could be found [here](https://github.com/janbina/swm).
 
 I used [CTUstyle](http://petr.olsak.net/ctustyle-e.html) theme for the thesis text.
